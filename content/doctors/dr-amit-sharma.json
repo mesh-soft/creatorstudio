@@ -1,0 +1,203 @@
+{
+  "tenantId": "dr-nitesh-garwa",
+  "tenantType": "doctor",
+  "status": "active",
+  "subscription": {
+    "plan": "doctor_starter",
+    "billingCycle": "yearly",
+    "validFrom": "2026-05-10",
+    "validUntil": "2027-05-09",
+    "graceUntil": "2027-05-24",
+    "paymentStatus": "paid"
+  },
+  "domains": {
+    "primary": "dramitsharma.com",
+    "aliases": [
+      "amit.yourbrand.in"
+    ]
+  },
+  "profile": {
+    "displayName": "Dr. Amit Sharma ji",
+    "specialty": "Cardiologist",
+    "degrees": [
+      "MBBS",
+      "MD",
+      "DM Cardiology"
+    ],
+    "registrationNumber": "DMC-12345",
+    "experienceYears": 18,
+    "bio": "Consultant cardiologist focused on preventive care, ECG, Echo, and cardiac risk assessment.",
+    "photo": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=900&q=80"
+  },
+  "business": {
+    "clinicName": "Amit Heart Clinic",
+    "phone": "+91 99999 99999",
+    "whatsapp": "+919999999999",
+    "email": "clinic@example.com",
+    "address": "123 Main Road, Near City Hospital, Delhi",
+    "mapUrl": "https://maps.google.com"
+  },
+  "presentation": {
+    "themeId": "doctor-standard",
+    "variantPresetId": "doctor-classic",
+    "styleId": "doctor-teal-clean",
+    "style": {
+      "colors": {
+        "primary": "#0f766e",
+        "secondary": "#2563eb",
+        "accent": "#f59e0b",
+        "background": "#ffffff",
+        "surface": "#f8fafc",
+        "text": "#111827"
+      },
+      "shape": {
+        "radius": "8px"
+      },
+      "typography": {
+        "heading": "Inter, Arial, sans-serif",
+        "body": "Inter, Arial, sans-serif"
+      }
+    }
+  },
+  "seo": {
+    "title": "Dr. Amit Sharma | Cardiologist in Delhi",
+    "description": "Book appointments with Dr. Amit Sharma, cardiologist in Delhi.",
+    "keywords": [
+      "cardiologist in Delhi",
+      "heart doctor",
+      "ECG",
+      "Echo"
+    ],
+    "ogImage": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=1200&q=80"
+  },
+  "content": {
+    "headline": "Heart care you can trust",
+    "subheadline": "Preventive cardiology, diagnostics, and practical care plans for long-term heart health.",
+    "copy": {
+      "servicesKicker": "Services",
+      "servicesTitle": "What patients can book",
+      "timingsKicker": "Timings",
+      "timingsTitle": "Clinic availability",
+      "galleryKicker": "Gallery",
+      "galleryTitle": "Clinic and facility photos",
+      "faqKicker": "FAQ",
+      "faqTitle": "Common patient questions",
+      "ctaTitle": "Ready to book?",
+      "ctaBody": "Call or WhatsApp the clinic.",
+      "whatsappLabel": "WhatsApp",
+      "callLabel": "Call"
+    },
+    "services": [
+      {
+        "title": "Cardiology Consultation",
+        "description": "Diagnosis and treatment planning for heart-related concerns.",
+        "icon": "heart"
+      },
+      {
+        "title": "Echo Review",
+        "description": "Echocardiography review and follow-up guidance.",
+        "icon": "scan"
+      },
+      {
+        "title": "ECG",
+        "description": "Quick in-clinic ECG testing and interpretation.",
+        "icon": "activity"
+      }
+    ],
+    "timings": [
+      {
+        "day": "Monday",
+        "primary": "10 AM - 2 PM",
+        "secondary": "5 PM - 8 PM"
+      },
+      {
+        "day": "Tuesday",
+        "primary": "10 AM - 2 PM",
+        "secondary": "Closed"
+      },
+      {
+        "day": "Saturday",
+        "primary": "10 AM - 1 PM",
+        "secondary": "By appointment"
+      }
+    ],
+    "gallery": [
+      {
+        "src": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=900&q=80",
+        "alt": "Clinic reception"
+      },
+      {
+        "src": "https://images.unsplash.com/photo-1512678080530-7760d81faba6?auto=format&fit=crop&w=900&q=80",
+        "alt": "Consultation room"
+      },
+      {
+        "src": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=900&q=80",
+        "alt": "Diagnostic equipment"
+      }
+    ],
+    "faqs": [
+      {
+        "question": "Do I need an appointment?",
+        "answer": "Appointments are recommended. Urgent cases can call the clinic."
+      },
+      {
+        "question": "Is ECG available?",
+        "answer": "Yes, ECG testing is available during clinic hours."
+      }
+    ],
+    "testimonials": [
+      {
+        "quote": "Clear explanation and very calm consultation.",
+        "author": "Patient from Delhi"
+      },
+      {
+        "quote": "The clinic team helped us quickly schedule tests.",
+        "author": "Family member"
+      }
+    ],
+    "stats": [
+      {
+        "value": "18+",
+        "label": "Years experience"
+      },
+      {
+        "value": "20k+",
+        "label": "Consultations"
+      },
+      {
+        "value": "4.8",
+        "label": "Patient rating"
+      }
+    ],
+    "blocks": [
+      {
+        "enabled": true,
+        "_template": "hero"
+      },
+      {
+        "enabled": true,
+        "_template": "profile"
+      },
+      {
+        "enabled": true,
+        "_template": "services"
+      },
+      {
+        "enabled": true,
+        "_template": "timings"
+      },
+      {
+        "enabled": true,
+        "_template": "gallery"
+      },
+      {
+        "enabled": true,
+        "_template": "faq"
+      },
+      {
+        "enabled": true,
+        "_template": "cta"
+      }
+    ]
+  }
+}
