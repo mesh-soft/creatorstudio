@@ -31,7 +31,7 @@ export function SitePageClient({ query, variables, data }: SitePageClientProps) 
   const { data: liveData } = useTina({
     query,
     variables,
-    data,
+    data: (data ?? {}) as Record<string, unknown>,
   });
 
   const document = ((liveData as { doctor?: TinaDocument; hospital?: TinaDocument }).doctor ??
@@ -46,6 +46,10 @@ function normalizeTenant(document: TinaDocument): Tenant {
   return {
     tenantId: document.tenantId ?? "",
     tenantType: document.tenantType ?? "doctor",
+    slug: "home",
+    title: "Home",
+    path: "/",
+    isHome: true,
     status: document.status ?? "trial",
     subscription: document.subscription ?? {
       plan: "",

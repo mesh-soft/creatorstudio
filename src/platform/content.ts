@@ -1,17 +1,22 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Tenant, TenantType } from "./types";
+import type { PageContent, Tenant, TenantFolderEntry, TenantPage, TenantSite, TenantType } from "./types";
 
 const contentRoot = path.join(process.cwd(), "content");
 
 export function getTenant(tenantType: TenantType, tenantId: string): Tenant {
-  const folder = tenantType === "doctor" ? "doctors" : "hospitals";
-  const file = path.join(contentRoot, folder, `${tenantId}.json`);
-  return JSON.parse(fs.readFileSync(file, "utf8")) as Tenant;
+  const entries = readTenantFolders(tenantType);
+  const entry = entries.find((item) => item.tenantSlug === tenantId);
+  if (!entry) {
+    throw new Error(`Tenant not found: ${tenantType}/${tenantId}`);
+  }
+  return composeTenant(entry.tenantSlug, entry.site, getHomePage(entry.pages));
 }
 
 export function getAllTenants(): Tenant[] {
-  return [...readTenantFolder("doctors"), ...readTenantFolder("hospitals")];
+  return [...readTenantFolders("doctor"), ...readTenantFolders("hospital")].map((entry) =>
+    composeTenant(entry.tenantSlug, entry.site, getHomePage(entry.pages))
+  );
 }
 
 export function findTenantById(tenantId: string): Tenant | undefined {
@@ -19,43 +24,201 @@ export function findTenantById(tenantId: string): Tenant | undefined {
 }
 
 export function findTenantBySlug(tenantSlug: string): Tenant | undefined {
-  return getAllTenantsWithSlug().find((entry) => entry.slug === tenantSlug)?.tenant;
+  const allEntries = [...readTenantFolders("doctor"), ...readTenantFolders("hospital")];
+  const entry = allEntries.find((item) => item.tenantSlug === tenantSlug);
+  if (!entry) return undefined;
+  return composeTenant(entry.tenantSlug, entry.site, getHomePage(entry.pages));
 }
 
 export function getAllTenantSlugs(): string[] {
-  return getAllTenantsWithSlug().map((entry) => entry.slug);
+  return [...readTenantFolders("doctor"), ...readTenantFolders("hospital")].map((entry) => entry.tenantSlug);
 }
 
-function readTenantFolder(folder: "doctors" | "hospitals"): Tenant[] {
-  const directory = path.join(contentRoot, folder);
+export function getTenantSiteBySlug(tenantType: TenantType, tenantSlug: string): TenantSite | undefined {
+  return readTenantFolders(tenantType).find((entry) => entry.tenantSlug === tenantSlug)?.site;
+}
+
+export function listTenantPages(tenantType: TenantType, tenantSlug: string): TenantPage[] {
+  return readTenantFolders(tenantType).find((entry) => entry.tenantSlug === tenantSlug)?.pages ?? [];
+}
+
+export function getTenantPageBySlug(
+  tenantType: TenantType,
+  tenantSlug: string,
+  pageSlug: string
+): TenantPage | undefined {
+  return listTenantPages(tenantType, tenantSlug).find((page) => page.slug === pageSlug);
+}
+
+export function getTenantByPageSlug(tenantSlug: string, pageSlug: string): Tenant | undefined {
+  const allEntries = [...readTenantFolders("doctor"), ...readTenantFolders("hospital")];
+  const entry = allEntries.find((item) => item.tenantSlug === tenantSlug);
+  if (!entry) return undefined;
+
+  const page = entry.pages.find((item) => item.slug === pageSlug);
+  if (!page) return undefined;
+  return composeTenant(entry.tenantSlug, entry.site, page);
+}
+
+export function getAllTenantPageParams(): Array<{ tenantSlug: string; pageSlug: string }> {
+  return [...readTenantFolders("doctor"), ...readTenantFolders("hospital")].flatMap((entry) =>
+    entry.pages.map((page) => ({
+      tenantSlug: entry.tenantSlug,
+      pageSlug: page.slug,
+    }))
+  );
+}
+
+function readTenantFolders(tenantType: TenantType): TenantFolderEntry[] {
+  const directory = path.join(contentRoot, tenantType === "doctor" ? "doctors" : "hospitals");
   if (!fs.existsSync(directory)) {
     return [];
   }
 
   return fs
     .readdirSync(directory)
-    .filter((file) => file.endsWith(".json"))
-    .map((file) => JSON.parse(fs.readFileSync(path.join(directory, file), "utf8")) as Tenant);
+    .filter((entry) => fs.statSync(path.join(directory, entry)).isDirectory())
+    .map((tenantSlug) => readTenantFolderEntry(directory, tenantType, tenantSlug))
+    .filter((entry): entry is TenantFolderEntry => entry !== null);
 }
 
-function getAllTenantsWithSlug(): Array<{ slug: string; tenant: Tenant }> {
-  return [...readTenantFolderWithSlug("doctors"), ...readTenantFolderWithSlug("hospitals")];
-}
+function readTenantFolderEntry(
+  tenantTypeDirectory: string,
+  tenantType: TenantType,
+  tenantSlug: string
+): TenantFolderEntry | null {
+  const tenantDirectory = path.join(tenantTypeDirectory, tenantSlug);
+  const siteFile = path.join(tenantDirectory, "site.json");
+  const siteDirectory = path.join(tenantDirectory, "site");
+  const siteIndexFile = path.join(siteDirectory, "index.json");
 
-function readTenantFolderWithSlug(
-  folder: "doctors" | "hospitals"
-): Array<{ slug: string; tenant: Tenant }> {
-  const directory = path.join(contentRoot, folder);
-  if (!fs.existsSync(directory)) {
-    return [];
+  let siteFileToRead: string;
+  if (fs.existsSync(siteFile)) {
+    siteFileToRead = siteFile;
+  } else if (fs.existsSync(siteIndexFile)) {
+    siteFileToRead = siteIndexFile;
+  } else {
+    return null;
   }
 
-  return fs
-    .readdirSync(directory)
-    .filter((file) => file.endsWith(".json"))
-    .map((file) => {
-      const slug = file.replace(/\.json$/i, "");
-      const tenant = JSON.parse(fs.readFileSync(path.join(directory, file), "utf8")) as Tenant;
-      return { slug, tenant };
-    });
+  const storedSite = JSON.parse(fs.readFileSync(siteFileToRead, "utf8")) as TenantSite;
+  const pages = readTenantPages(tenantDirectory, storedSite);
+  const site = applyHomePageSiteOverrides(storedSite, pages);
+
+  return {
+    tenantSlug,
+    tenantType,
+    site,
+    pages,
+  };
+}
+
+function readTenantPages(tenantDirectory: string, site: TenantSite): TenantPage[] {
+  const pagesDirectory = path.join(tenantDirectory, "pages");
+  if (fs.existsSync(pagesDirectory)) {
+    return fs
+      .readdirSync(pagesDirectory)
+      .filter((entry) => entry.endsWith(".json"))
+      .map((entry) => JSON.parse(fs.readFileSync(path.join(pagesDirectory, entry), "utf8")) as TenantPage)
+      .sort((a, b) => Number(Boolean(b.isHome)) - Number(Boolean(a.isHome)) || a.slug.localeCompare(b.slug));
+  }
+
+  return site.pages ?? [];
+}
+
+function applyHomePageSiteOverrides(site: TenantSite, pages: TenantPage[]): TenantSite {
+  const homePage = pages.find((page) => page.slug === "home" || page.isHome) as Partial<TenantSite> | undefined;
+  if (!homePage) return site;
+
+  return {
+    ...site,
+    tenantId: homePage.tenantId ?? site.tenantId,
+    tenantType: homePage.tenantType ?? site.tenantType,
+    status: homePage.status ?? site.status,
+    subscription: homePage.subscription ?? site.subscription,
+    domains: homePage.domains ?? site.domains,
+    profile: homePage.profile ?? site.profile,
+    business: homePage.business ?? site.business,
+    presentation: homePage.presentation && "style" in homePage.presentation ? homePage.presentation : site.presentation,
+    seo: homePage.seo ?? site.seo,
+  };
+}
+
+function composeTenant(tenantSlug: string, site: TenantSite, page: TenantPage): Tenant {
+  // Merge site-level and page-level presentation (page overrides site)
+  const presentation: typeof site.presentation = {
+    themeId: page.presentation?.themeId ?? site.presentation.themeId,
+    variantPresetId: page.presentation?.variantPresetId ?? site.presentation.variantPresetId,
+    styleId: page.presentation?.styleId ?? site.presentation.styleId,
+    style: site.presentation.style, // Style overrides are always from site level
+  };
+
+  // Merge site-level and page-level SEO (page overrides site)
+  const seo = {
+    ...site.seo,
+    ...(page.seo ?? {}),
+  };
+
+  const { slug, title, isHome, content } = page;
+  const pagePath = typeof page.path === "string" && page.path.startsWith("/") ? page.path : `/${page.path ?? slug}`;
+
+  return {
+    ...site,
+    tenantId: tenantSlug,
+    presentation,
+    seo,
+    slug,
+    title,
+    path: pagePath,
+    isHome,
+    content: normalizePageContent(content),
+  };
+}
+
+function normalizePageContent(content: Partial<PageContent> | undefined): PageContent {
+  return {
+    headline: typeof content?.headline === "string" ? content.headline : "",
+    subheadline: typeof content?.subheadline === "string" ? content.subheadline : "",
+    copy: isRecord(content?.copy) ? content.copy : {},
+    services: Array.isArray(content?.services) ? content.services : [],
+    timings: Array.isArray(content?.timings) ? content.timings : [],
+    gallery: Array.isArray(content?.gallery) ? content.gallery : [],
+    faqs: Array.isArray(content?.faqs) ? content.faqs : [],
+    testimonials: Array.isArray(content?.testimonials) ? content.testimonials : [],
+    stats: Array.isArray(content?.stats) ? content.stats : [],
+    blocks: Array.isArray(content?.blocks) ? content.blocks : [],
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, string> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function getHomePage(pages: TenantPage[]): TenantPage {
+  const explicitHome = pages.find((page) => page.isHome);
+  if (explicitHome) return explicitHome;
+
+  const rootPath = pages.find((page) => page.path === "/");
+  if (rootPath) return rootPath;
+
+  if (pages[0]) return pages[0];
+
+  return {
+    slug: "home",
+    title: "Home",
+    path: "/",
+    isHome: true,
+    content: {
+      headline: "",
+      subheadline: "",
+      copy: {},
+      services: [],
+      timings: [],
+      gallery: [],
+      faqs: [],
+      testimonials: [],
+      stats: [],
+      blocks: [],
+    },
+  };
 }

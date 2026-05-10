@@ -1,0 +1,245 @@
+{
+  "specialties": {
+    "cardiology": {
+      "headlines": [
+        "Heart care you can trust",
+        "Your heart deserves the best care",
+        "Expert cardiology care for every heartbeat",
+        "Keeping your heart healthy, one beat at a time",
+        "Comprehensive cardiac care near you",
+        "Heart health is our priority"
+      ],
+      "subheadlines": [
+        "Preventive cardiology, diagnostics, and practical care plans for long-term heart health.",
+        "From routine check-ups to advanced cardiac procedures, we provide complete heart care.",
+        "Board-certified cardiologist with 15+ years of experience in heart health management.",
+        "Advanced echocardiography, ECG, and cardiac risk assessment under one roof."
+      ],
+      "services": [
+        { "title": "Echo Review", "description": "Echocardiography review and follow-up guidance.", "icon": "scan" },
+        { "title": "ECG", "description": "Quick in-clinic ECG testing and interpretation.", "icon": "activity" },
+        { "title": "Cardiology Consultation", "description": "Diagnosis and treatment planning for heart-related concerns.", "icon": "heart" },
+        { "title": "Holter Monitoring", "description": "24-hour heart rhythm monitoring and analysis.", "icon": "activity" },
+        { "title": "Cardiac Risk Assessment", "description": "Comprehensive evaluation of heart disease risk factors.", "icon": "heart" }
+      ],
+      "ctas": [
+        "Ready to take care of your heart?",
+        "Book your cardiac consultation today.",
+        "Your heart matters — schedule a check-up now."
+      ],
+      "faqs": [
+        { "question": "What should I bring to my cardiology appointment?", "answer": "Please bring any previous ECG reports, current medications list, and insurance details." },
+        { "question": "How often should I get a heart check-up?", "answer": "Adults over 40 should have annual cardiac screenings. Those with risk factors may need more frequent visits." }
+      ]
+    },
+    "dermatology": {
+      "headlines": [
+        "Healthy skin, confident you",
+        "Expert skin care for every age",
+        "Your skin deserves specialist care",
+        "Advanced dermatology solutions",
+        "Clear skin starts here"
+      ],
+      "subheadlines": [
+        "Comprehensive dermatology services from acne treatment to skin cancer screening.",
+        "Board-certified dermatologist offering medical, surgical, and cosmetic skin care.",
+        "Personalized treatment plans for all skin types and conditions."
+      ],
+      "services": [
+        { "title": "Acne Treatment", "description": "Personalized acne care plans for clear, healthy skin.", "icon": "cross" },
+        { "title": "Skin Cancer Screening", "description": "Early detection and treatment of skin cancers.", "icon": "scan" },
+        { "title": "Eczema Care", "description": "Management and treatment of eczema and dermatitis.", "icon": "heart" },
+        { "title": "Cosmetic Dermatology", "description": "Anti-aging treatments and skin rejuvenation.", "icon": "users" }
+      ],
+      "ctas": [
+        "Love your skin — book a consultation today.",
+        "Get the clear, healthy skin you deserve."
+      ],
+      "faqs": [
+        { "question": "How often should I get a skin check?", "answer": "Annual skin screenings are recommended. Those with high risk factors should visit every 6 months." }
+      ]
+    },
+    "pediatrics": {
+      "headlines": [
+        "Gentle care for your little ones",
+        "Your child's health is our joy",
+        "Trusted pediatric care for growing families",
+        "Compassionate care for children of all ages",
+        "Where children come first"
+      ],
+      "subheadlines": [
+        "Comprehensive pediatric care from newborn check-ups to adolescent health management.",
+        "Child-friendly clinic with experienced pediatricians who truly care.",
+        "Vaccinations, growth monitoring, and developmental assessments."
+      ],
+      "services": [
+        { "title": "Vaccinations", "description": "Complete immunization schedule for infants and children.", "icon": "cross" },
+        { "title": "Growth Monitoring", "description": "Regular tracking of height, weight, and developmental milestones.", "icon": "activity" },
+        { "title": "Newborn Care", "description": "Specialized care for infants in their first critical months.", "icon": "heart" },
+        { "title": "Nutrition Counseling", "description": "Expert dietary guidance for healthy child development.", "icon": "users" }
+      ],
+      "ctas": [
+        "Give your child the best start — book today.",
+        "Your child's health journey begins here."
+      ],
+      "faqs": [
+        { "question": "What vaccinations does my child need?", "answer": "We follow the national immunization schedule. A detailed chart will be provided at your first visit." }
+      ]
+    },
+    "orthopedics": {
+      "headlines": [
+        "Move better, live better",
+        "Expert bone and joint care",
+        "Your mobility matters",
+        "Comprehensive orthopedic solutions",
+        "Back to active living"
+      ],
+      "subheadlines": [
+        "Specialized care for bones, joints, and muscles — from diagnosis to rehabilitation.",
+        "Experienced orthopedic surgeon providing surgical and non-surgical treatments.",
+        "Sports injury management, joint replacement, and fracture care."
+      ],
+      "services": [
+        { "title": "Joint Replacement", "description": "Advanced knee and hip replacement surgery.", "icon": "cross" },
+        { "title": "Sports Injury Care", "description": "Treatment for sprains, fractures, and ligament injuries.", "icon": "activity" },
+        { "title": "Spine Care", "description": "Diagnosis and management of back and neck conditions.", "icon": "scan" },
+        { "title": "Fracture Management", "description": "Expert casting, splinting, and surgical repair.", "icon": "heart" }
+      ],
+      "ctas": [
+        "Get back in motion — schedule your consultation.",
+        "Don't let pain hold you back."
+      ],
+      "faqs": [
+        { "question": "Do I need surgery for my knee pain?", "answer": "Not always. Many knee conditions respond well to physiotherapy and medication. Surgery is considered after conservative options." }
+      ]
+    },
+    "general-physician": {
+      "headlines": [
+        "Your family's health partner",
+        "Comprehensive care for all ages",
+        "Trusted primary care near you",
+        "Healthcare that puts you first",
+        "Your wellness is our mission"
+      ],
+      "subheadlines": [
+        "Complete primary healthcare services for your entire family under one roof.",
+        "Experienced general physician offering preventive care, chronic disease management, and acute treatment.",
+        "Same-day appointments available for urgent health concerns."
+      ],
+      "services": [
+        { "title": "General Consultation", "description": "Comprehensive health check-ups and illness management.", "icon": "heart" },
+        { "title": "Chronic Care", "description": "Ongoing management of diabetes, hypertension, and thyroid disorders.", "icon": "activity" },
+        { "title": "Preventive Health", "description": "Health screenings and lifestyle counseling for disease prevention.", "icon": "scan" },
+        { "title": "Vaccinations", "description": "Adult and pediatric immunization services.", "icon": "cross" }
+      ],
+      "ctas": [
+        "Book your family's health check today.",
+        "Your health journey starts with a simple visit."
+      ],
+      "faqs": [
+        { "question": "How often should I have a general health check-up?", "answer": "Adults should have annual check-ups. Those with chronic conditions may need visits every 3-6 months." }
+      ]
+    },
+    "gynecology": {
+      "headlines": [
+        "Women's health, our priority",
+        "Compassionate care for women",
+        "Your health at every stage",
+        "Expert gynecology services",
+        "Caring for women, empowering lives"
+      ],
+      "subheadlines": [
+        "Comprehensive women's health services from routine exams to specialized treatments.",
+        "Experienced gynecologist providing personalized care in a comfortable environment.",
+        "Prenatal care, family planning, and menopause management."
+      ],
+      "services": [
+        { "title": "Prenatal Care", "description": "Complete pregnancy monitoring and delivery planning.", "icon": "heart" },
+        { "title": "Family Planning", "description": "Contraception counseling and fertility assessments.", "icon": "users" },
+        { "title": "Menopause Care", "description": "Symptom management and hormonal health support.", "icon": "activity" },
+        { "title": "Screening Tests", "description": "Pap smears, mammography referrals, and HPV testing.", "icon": "scan" }
+      ],
+      "ctas": [
+        "Take charge of your health — book today.",
+        "Your health matters at every stage of life."
+      ],
+      "faqs": [
+        { "question": "How often should I have a gynecological check-up?", "answer": "Annual well-woman visits are recommended, including Pap smears every 3 years for women 21-65." }
+      ]
+    }
+  },
+  "experienceLevels": {
+    "junior": {
+      "prefixes": [
+        "Dedicated",
+        "Committed",
+        "Enthusiastic",
+        "Passionate"
+      ],
+      "trustPhrases": [
+        "Building trust through quality care",
+        "Growing expertise with every patient",
+        "Modern techniques, compassionate approach"
+      ]
+    },
+    "mid": {
+      "prefixes": [
+        "Experienced",
+        "Skilled",
+        "Qualified",
+        "Certified"
+      ],
+      "trustPhrases": [
+        "Years of experience, countless success stories",
+        "Proven track record in patient care",
+        "Trusted by hundreds of patients"
+      ]
+    },
+    "senior": {
+      "prefixes": [
+        "Senior",
+        "Leading",
+        "Renowned",
+        "Distinguished"
+      ],
+      "trustPhrases": [
+        "Decades of expertise in specialized care",
+        "Recognized leader in the field",
+        "Thousands of successful treatments"
+      ]
+    }
+  },
+  "generic": {
+    "headlines": [
+      "Expert care you can trust",
+      "Your health is our mission",
+      "Quality healthcare near you",
+      "Compassionate care, proven results",
+      "Healthcare that puts patients first"
+    ],
+    "subheadlines": [
+      "Providing comprehensive medical services with a patient-centered approach.",
+      "State-of-the-art facilities with experienced medical professionals.",
+      "Committed to delivering the highest standards of medical care."
+    ],
+    "timings": [
+      { "day": "Monday", "primary": "10 AM - 2 PM", "secondary": "5 PM - 8 PM" },
+      { "day": "Tuesday", "primary": "10 AM - 2 PM", "secondary": "5 PM - 8 PM" },
+      { "day": "Wednesday", "primary": "10 AM - 2 PM", "secondary": "5 PM - 8 PM" },
+      { "day": "Thursday", "primary": "10 AM - 2 PM", "secondary": "5 PM - 8 PM" },
+      { "day": "Friday", "primary": "10 AM - 2 PM", "secondary": "5 PM - 8 PM" },
+      { "day": "Saturday", "primary": "10 AM - 2 PM", "secondary": "Closed" },
+      { "day": "Sunday", "primary": "Closed", "secondary": "Closed" }
+    ],
+    "testimonials": [
+      { "quote": "Very professional and caring doctor. Highly recommended!", "author": "Patient Review" },
+      { "quote": "The clinic is well-equipped and the staff is very supportive.", "author": "Patient Review" },
+      { "quote": "Best healthcare experience I've had. Thank you!", "author": "Patient Review" }
+    ],
+    "stats": [
+      { "value": "15+", "label": "Years Experience" },
+      { "value": "5000+", "label": "Patients Treated" },
+      { "value": "99%", "label": "Patient Satisfaction" }
+    ]
+  }
+}

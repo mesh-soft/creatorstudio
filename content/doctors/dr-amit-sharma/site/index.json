@@ -1,0 +1,74 @@
+{
+  "tenantId": "dr-nitesh-garwa",
+  "tenantType": "doctor",
+  "status": "active",
+  "subscription": {
+    "plan": "doctor_starter",
+    "billingCycle": "yearly",
+    "validFrom": "2026-05-10",
+    "validUntil": "2027-05-09",
+    "graceUntil": "2027-05-24",
+    "paymentStatus": "paid"
+  },
+  "domains": {
+    "primary": "dramitsharma.com",
+    "aliases": [
+      "amit.yourbrand.in"
+    ]
+  },
+  "profile": {
+    "displayName": "Dr. Amit Sharma ji",
+    "specialty": "Cardiologist",
+    "degrees": [
+      "MBBS",
+      "MD",
+      "DM Cardiology"
+    ],
+    "registrationNumber": "DMC-12345",
+    "experienceYears": 18,
+    "bio": "Consultant cardiologist focused on preventive care, ECG, Echo, and cardiac risk assessment.",
+    "photo": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=900&q=80"
+  },
+  "business": {
+    "clinicName": "Amit Heart Clinic",
+    "phone": "+91 99999 99999",
+    "whatsapp": "+919999999999",
+    "email": "clinic@example.com",
+    "address": "123 Main Road, Near City Hospital, Delhi",
+    "mapUrl": "https://maps.google.com"
+  },
+  "presentation": {
+    "themeId": "doctor-standard",
+    "variantPresetId": "doctor-classic",
+    "styleId": "doctor-teal-clean",
+    "style": {
+      "colors": {
+        "primary": "#0f766e",
+        "secondary": "#2563eb",
+        "accent": "#f59e0b",
+        "background": "#ffffff",
+        "surface": "#f8fafc",
+        "text": "#111827"
+      },
+      "shape": {
+        "radius": "8px"
+      },
+      "typography": {
+        "heading": "Inter, Arial, sans-serif",
+        "body": "Inter, Arial, sans-serif"
+      }
+    }
+  },
+  "seo": {
+    "title": "Dr. Amit Sharma | Cardiologist in Delhi",
+    "description": "Book appointments with Dr. Amit Sharma, cardiologist in Delhi.",
+    "keywords": [
+      "cardiologist in Delhi",
+      "heart doctor",
+      "ECG",
+      "Echo"
+    ],
+    "ogImage": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=1200&q=80"
+  },
+  "_template": "site"
+}

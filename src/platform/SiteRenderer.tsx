@@ -45,7 +45,7 @@ function renderBlocks(
   tinaDocument?: Record<string, unknown>,
   studioMode = false
 ) {
-  const blocks = tenant.content.blocks ?? defaultBlocks;
+  const blocks = Array.isArray(tenant.content.blocks) && tenant.content.blocks.length > 0 ? tenant.content.blocks : defaultBlocks;
   const tinaBlocks = Array.isArray((tinaDocument?.content as { blocks?: unknown[] } | undefined)?.blocks)
     ? ((tinaDocument?.content as { blocks?: unknown[] }).blocks ?? [])
     : [];
@@ -193,20 +193,20 @@ function Hero({
     <Section className={`hero hero-${variant}`} sectionField={sectionField}>
       <div>
         <Eyebrow
-          field={tinaDocument ? tinaField(tinaDocument as object, "profile.specialty") : undefined}
+          field={tinaDocument ? tinaField(tinaDocument as any, "profile.specialty" as any) : undefined}
           editPath={studioMode ? "profile.specialty" : undefined}
         >
           {tenant.profile.specialty}
         </Eyebrow>
         <Heading
           level={1}
-          field={tinaContent ? tinaField(tinaContent as object, "headline") : undefined}
+          field={tinaContent ? tinaField(tinaContent as any, "headline" as any) : undefined}
           editPath={studioMode ? "content.headline" : undefined}
         >
           {tenant.content.headline}
         </Heading>
         <Text
-          field={tinaContent ? tinaField(tinaContent as object, "subheadline") : undefined}
+          field={tinaContent ? tinaField(tinaContent as any, "subheadline" as any) : undefined}
           editPath={studioMode ? "content.subheadline" : undefined}
         >
           {tenant.content.subheadline}
@@ -240,8 +240,8 @@ function Profile({
         </Heading>
         <Text editPath={studioMode ? "profile.bio" : undefined}>{tenant.profile.bio}</Text>
         <div className="chip-row">
-          {tenant.profile.degrees.map((degree) => (
-            <span className="chip" key={degree}>
+          {(Array.isArray(tenant.profile.degrees) ? tenant.profile.degrees : []).map((degree, index) => (
+            <span className="chip" key={`${degree}-${index}`}>
               {degree}
             </span>
           ))}
@@ -277,8 +277,8 @@ function Services({
     <Section className="block" sectionField={sectionField}>
       <BlockTitle kicker={kicker ?? copy(tenant, "servicesKicker")} title={title ?? copy(tenant, "servicesTitle")} />
       <div className={`services services-${variant}`}>
-        {tenant.content.services.map((service, index) => (
-          <Card key={service.title}>
+        {safeArray(tenant.content.services).map((service, index) => (
+          <Card key={`${service?.title ?? "service"}-${index}`}>
             <span className="icon">{iconFor(service.icon)}</span>
             <h3 data-edit-path={studioMode ? `content.services.${index}.title` : undefined}>{service.title}</h3>
             <Text editPath={studioMode ? `content.services.${index}.description` : undefined}>{service.description}</Text>
@@ -310,8 +310,8 @@ function Timings({
     <Section className="block" sectionField={sectionField}>
       <BlockTitle kicker={kicker ?? copy(tenant, "timingsKicker")} title={title ?? copy(tenant, "timingsTitle")} />
       <div className={`timings timings-${variant}`}>
-        {tenant.content.timings.map((timing, index) => (
-          <Card key={timing.day}>
+        {safeArray(tenant.content.timings).map((timing, index) => (
+          <Card key={`${timing?.day ?? "timing"}-${index}`}>
             <strong data-edit-path={studioMode ? `content.timings.${index}.day` : undefined}>{timing.day}</strong>
             <span data-edit-path={studioMode ? `content.timings.${index}.primary` : undefined}>{timing.primary}</span>
             <small data-edit-path={studioMode ? `content.timings.${index}.secondary` : undefined}>{timing.secondary}</small>
@@ -329,6 +329,7 @@ function Gallery({
   title,
   sectionField,
   tinaDocument,
+  studioMode,
 }: {
   tenant: Tenant;
   variant: string;
@@ -336,13 +337,14 @@ function Gallery({
   title?: string;
   sectionField?: string;
   tinaDocument?: Record<string, unknown>;
+  studioMode?: boolean;
 }) {
   return (
     <Section className="block" sectionField={sectionField}>
       <BlockTitle kicker={kicker ?? copy(tenant, "galleryKicker")} title={title ?? copy(tenant, "galleryTitle")} />
       <div className={`gallery gallery-${variant}`}>
-        {tenant.content.gallery.map((image) => (
-          <ImagePrimitive key={image.src} src={image.src} alt={image.alt} />
+        {safeArray(tenant.content.gallery).map((image, index) => (
+          <ImagePrimitive key={`${image?.src ?? "image"}-${index}`} src={image.src} alt={image.alt} />
         ))}
       </div>
     </Section>
@@ -370,8 +372,8 @@ function FAQ({
     <Section className="block" sectionField={sectionField}>
       <BlockTitle kicker={kicker ?? copy(tenant, "faqKicker")} title={title ?? copy(tenant, "faqTitle")} />
       <div className={`faq faq-${variant}`}>
-        {tenant.content.faqs.map((faq, index) => (
-          <Card key={faq.question}>
+        {safeArray(tenant.content.faqs).map((faq, index) => (
+          <Card key={`${faq?.question ?? "faq"}-${index}`}>
             <h3 data-edit-path={studioMode ? `content.faqs.${index}.question` : undefined}>{faq.question}</h3>
             <Text editPath={studioMode ? `content.faqs.${index}.answer` : undefined}>{faq.answer}</Text>
           </Card>
@@ -506,7 +508,11 @@ function ButtonGroup({ tenant }: { tenant: Tenant }) {
 }
 
 function copy(tenant: Tenant, key: string) {
-  return tenant.content.copy[key] ?? key;
+  return tenant.content.copy?.[key] ?? key;
+}
+
+function safeArray<T>(value: T[] | undefined): T[] {
+  return Array.isArray(value) ? value : [];
 }
 
 function iconFor(icon?: string) {

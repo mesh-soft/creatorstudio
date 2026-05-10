@@ -1,0 +1,38 @@
+{
+  "slug": "service",
+  "title": "services",
+  "path": "/services",
+  "content": {
+    "headline": "Check the services we provide",
+    "subheadline": "Here are the services",
+    "copy": {
+      "servicesKicker": "Start with the service"
+    },
+    "services": [
+      {
+        "title": "new service",
+        "description": "new service"
+      }
+    ],
+    "timings": [],
+    "gallery": [],
+    "faqs": [],
+    "testimonials": [],
+    "stats": [],
+    "blocks": [
+      {
+        "enabled": true,
+        "_template": "hero"
+      },
+      {
+        "enabled": true,
+        "_template": "services"
+      },
+      {
+        "enabled": true,
+        "_template": "cta"
+      }
+    ]
+  },
+  "_template": "page"
+}

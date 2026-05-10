@@ -46,7 +46,63 @@ export type TenantBlock =
       body?: string;
     };
 
-export type Tenant = {
+export type PageContent = {
+  headline: string;
+  subheadline: string;
+  copy: Record<string, string>;
+  services: Array<{
+    title: string;
+    description: string;
+    icon?: string;
+  }>;
+  timings: Array<{
+    day: string;
+    primary: string;
+    secondary: string;
+  }>;
+  gallery: Array<{
+    src: string;
+    alt: string;
+  }>;
+  faqs: Array<{
+    question: string;
+    answer: string;
+  }>;
+  testimonials: Array<{
+    quote: string;
+    author: string;
+  }>;
+  stats: Array<{
+    value: string;
+    label: string;
+  }>;
+  blocks?: TenantBlock[];
+};
+
+export type Presentation = {
+  themeId: string;
+  variantPresetId: string;
+  styleId: string;
+};
+
+export type SEO = {
+  title: string;
+  description: string;
+  keywords?: string[];
+  ogImage?: string;
+};
+
+export type TenantPage = {
+  slug: string;
+  title: string;
+  path: string;
+  isHome?: boolean;
+  presentation?: Presentation;
+  seo?: SEO;
+  content: PageContent;
+};
+
+export type TenantSite = {
   tenantId: string;
   tenantType: TenantType;
   status: string;
@@ -79,10 +135,7 @@ export type Tenant = {
     address: string;
     mapUrl: string;
   };
-  presentation: {
-    themeId: string;
-    variantPresetId: string;
-    styleId: string;
+  presentation: Presentation & {
     style: {
       colors: {
         primary: string;
@@ -101,44 +154,17 @@ export type Tenant = {
       };
     };
   };
-  seo: {
-    title: string;
-    description: string;
-    keywords?: string[];
-    ogImage?: string;
-  };
-  content: {
-    headline: string;
-    subheadline: string;
-    copy: Record<string, string>;
-    services: Array<{
-      title: string;
-      description: string;
-      icon?: string;
-    }>;
-    timings: Array<{
-      day: string;
-      primary: string;
-      secondary: string;
-    }>;
-    gallery: Array<{
-      src: string;
-      alt: string;
-    }>;
-    faqs: Array<{
-      question: string;
-      answer: string;
-    }>;
-    testimonials: Array<{
-      quote: string;
-      author: string;
-    }>;
-    stats: Array<{
-      value: string;
-      label: string;
-    }>;
-    blocks?: TenantBlock[];
-  };
+  seo: SEO;
+  pages?: TenantPage[];
+};
+
+export type Tenant = TenantSite & TenantPage;
+
+export type TenantFolderEntry = {
+  tenantSlug: string;
+  tenantType: TenantType;
+  site: TenantSite;
+  pages: TenantPage[];
 };
 
 export type VariantPreset = {

@@ -1,11 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import type { CSSProperties } from "react";
+import { SuggestionPopup } from "../../../../components/SuggestionPopup";
+import type { SuggestionContext } from "../../../../lib/catchphrases";
 
 type CreatorStudioClientProps = {
   tenantType: "doctor" | "hospital";
   tenantId: string;
+  pageSlug: string;
+  pages: string[];
 };
 type InlineEditMessage = {
   type: "studio:inline-edit";
@@ -13,21 +18,28 @@ type InlineEditMessage = {
   value: string;
 };
 
-export function CreatorStudioClient({ tenantType, tenantId }: CreatorStudioClientProps) {
+export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: CreatorStudioClientProps) {
   const leftRef = useRef<HTMLIFrameElement>(null);
   const rightRef = useRef<HTMLIFrameElement>(null);
   const refreshTimer = useRef<number | null>(null);
   const snapshotInFlight = useRef(false);
   const observerRef = useRef<MutationObserver | null>(null);
+  const hashPollTimerRef = useRef<number | null>(null);
   const [uiEditingEnabled, setUiEditingEnabled] = useState(false);
+  const [selectedPageSlug, setSelectedPageSlug] = useState(pageSlug);
   const overlayRef = useRef<Record<string, string>>({});
   const fieldIndexRef = useRef<Map<string, HTMLInputElement | HTMLTextAreaElement>>(new Map());
   const indexTimerRef = useRef<number | null>(null);
+  const [suggestionPopup, setSuggestionPopup] = useState<{
+    anchorEl: HTMLElement;
+    context: SuggestionContext;
+  } | null>(null);
 
-  const adminEditUrl = `/admin/index.html#/collections/edit/${tenantType}/${tenantId}`;
+  const pageCollection = tenantType === "doctor" ? "doctorSite" : "hospitalSite";
+  const adminEditUrl = `/admin/index.html#/collections/edit/${pageCollection}/${tenantId}/pages/${selectedPageSlug}`;
   const previewUrl = useMemo(
-    () => `/site/${tenantId}?studio=1&ui=${uiEditingEnabled ? "1" : "0"}`,
-    [tenantId, uiEditingEnabled]
+    () => `/site/${tenantId}/${selectedPageSlug}?studio=1&ui=${uiEditingEnabled ? "1" : "0"}`,
+    [tenantId, selectedPageSlug, uiEditingEnabled]
   );
 
   useEffect(() => {
@@ -38,6 +50,7 @@ export function CreatorStudioClient({ tenantType, tenantId }: CreatorStudioClien
     const wireLeftEditor = () => {
       const leftDoc = leftFrame.contentDocument;
       if (!leftDoc) return;
+      suppressNestedTinaPreview(leftDoc);
 
       const scheduleDraftRefresh = () => {
         if (refreshTimer.current) {
@@ -72,13 +85,24 @@ export function CreatorStudioClient({ tenantType, tenantId }: CreatorStudioClien
 
         if (snapshotInFlight.current) return;
         snapshotInFlight.current = true;
-        await createVersionSnapshot(tenantType, tenantId);
+        await createVersionSnapshot(tenantType, tenantId, pageSlug);
         snapshotInFlight.current = false;
+      };
+
+      const onFocus = (event: Event) => {
+        const target = event.target as HTMLElement | null;
+        if (!target) return;
+        const name = (target as HTMLInputElement | HTMLTextAreaElement).name ?? "";
+        const specialty = extractSpecialtyFromEditor(leftDoc);
+        const context = getSuggestionContextFromFieldName(name, tenantType, specialty);
+        if (!context) return;
+        setSuggestionPopup({ anchorEl: target, context });
       };
 
       leftDoc.addEventListener("input", onInput, true);
       leftDoc.addEventListener("change", onInput, true);
       leftDoc.addEventListener("click", onClick, true);
+      leftDoc.addEventListener("focusin", onFocus, true);
 
       // Capture non-input UI actions like reorder/add/delete blocks in Tina.
       if (observerRef.current) {
@@ -86,19 +110,20 @@ export function CreatorStudioClient({ tenantType, tenantId }: CreatorStudioClien
       }
       observerRef.current = new MutationObserver(() => {
         // Tina re-renders controlled inputs; re-apply our unsaved overlay.
+        suppressNestedTinaPreview(leftDoc);
         scheduleIndexRebuild();
         scheduleDraftRefresh();
       });
       observerRef.current.observe(leftDoc.body, {
         childList: true,
         subtree: true,
-        attributes: true,
       });
 
       // Initial apply in case Tina loads with different state.
       fieldIndexRef.current = buildFieldIndex(leftDoc);
       reapplyOverlayToEditor(leftDoc, overlayRef.current, fieldIndexRef.current);
       scheduleDraftRefresh();
+      syncSelectedPageFromTinaEditor(leftFrame, pages, setSelectedPageSlug);
     };
 
     const wireRightPreview = () => {
@@ -137,12 +162,46 @@ export function CreatorStudioClient({ tenantType, tenantId }: CreatorStudioClien
 
     wireLeftEditor();
     wireRightPreview();
+    if (hashPollTimerRef.current) window.clearInterval(hashPollTimerRef.current);
+
+    // Listen for suggestion trigger messages from the injected iframe script
+    const onSuggestionMessage = (event: MessageEvent) => {
+      const data = event.data as { type: string; fieldName: string } | undefined;
+      if (!data || data.type !== "studio:show-suggestions") return;
+      const leftDoc2 = leftFrame.contentDocument;
+      if (!leftDoc2) return;
+      const focused = leftDoc2.activeElement as HTMLElement | null;
+      if (!focused) return;
+      const specialty = extractSpecialtyFromEditor(leftDoc2);
+      const context = getSuggestionContextFromFieldName(data.fieldName, tenantType, specialty);
+      if (!context) return;
+      setSuggestionPopup({ anchorEl: focused, context });
+    };
+
+    const onEscapeMessage = (event: MessageEvent) => {
+      const data = event.data as { type: string } | undefined;
+      if (data?.type === "studio:hide-suggestions" || data?.type === "studio:escape") {
+        setSuggestionPopup(null);
+      }
+    };
+
+    window.addEventListener("message", onSuggestionMessage);
+    window.addEventListener("message", onEscapeMessage);
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setSuggestionPopup(null);
+    });
+
+    hashPollTimerRef.current = window.setInterval(() => {
+      syncSelectedPageFromTinaEditor(leftFrame, pages, setSelectedPageSlug);
+    }, 500);
     window.addEventListener("message", onPreviewMessage);
 
     return () => {
       leftFrame.removeEventListener("load", wireLeftEditor);
       rightFrame.removeEventListener("load", wireRightPreview);
       window.removeEventListener("message", onPreviewMessage);
+      window.removeEventListener("message", onSuggestionMessage);
+      window.removeEventListener("message", onEscapeMessage);
       if (refreshTimer.current) {
         window.clearTimeout(refreshTimer.current);
       }
@@ -153,8 +212,13 @@ export function CreatorStudioClient({ tenantType, tenantId }: CreatorStudioClien
         observerRef.current.disconnect();
         observerRef.current = null;
       }
+      if (hashPollTimerRef.current) {
+        window.clearInterval(hashPollTimerRef.current);
+        hashPollTimerRef.current = null;
+      }
+      setSuggestionPopup(null);
     };
-  }, [previewUrl, tenantId, tenantType]);
+  }, [pages, previewUrl, selectedPageSlug, tenantId, tenantType]);
 
   return (
     <main
@@ -181,6 +245,23 @@ export function CreatorStudioClient({ tenantType, tenantId }: CreatorStudioClien
           Creator Studio - {tenantType} / {tenantId}
         </strong>
         <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#e2e8f0" }}>
+            <span>Page</span>
+            <select
+              value={selectedPageSlug}
+              onChange={(e) => {
+                const next = e.target.value;
+                setSelectedPageSlug(next);
+              }}
+              style={{ borderRadius: "6px", padding: "4px 6px" }}
+            >
+              {pages.map((page) => (
+                <option key={page} value={page}>
+                  {page}
+                </option>
+              ))}
+            </select>
+          </div>
           <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#e2e8f0" }}>
             <input
               type="checkbox"
@@ -191,6 +272,7 @@ export function CreatorStudioClient({ tenantType, tenantId }: CreatorStudioClien
           </label>
           <div style={{ fontSize: "12px", color: "#94a3b8" }}>
             Type/reorder on left {"->"} right hot updates. Click Save {"->"} snapshot old JSON + write new JSON.
+            <span style={{ marginLeft: "12px", color: "#60a5fa" }}>Ctrl+Space</span> for suggestions.
           </div>
         </div>
       </header>
@@ -202,11 +284,65 @@ export function CreatorStudioClient({ tenantType, tenantId }: CreatorStudioClien
           minHeight: 0,
         }}
       >
-        <iframe ref={leftRef} title="Tina Editor" src={adminEditUrl} style={frameStyle} />
-        <iframe ref={rightRef} title="Live Preview" src={previewUrl} style={frameStyle} />
+        <iframe key={adminEditUrl} ref={leftRef} title="Tina Editor" src={adminEditUrl} style={frameStyle} />
+        <iframe key={previewUrl} ref={rightRef} title="Live Preview" src={previewUrl} style={frameStyle} />
       </section>
+      {suggestionPopup && (
+        <SuggestionPopup
+          anchorEl={suggestionPopup.anchorEl}
+          context={suggestionPopup.context}
+          onSelect={(value: string) => {
+            const anchor = suggestionPopup?.anchorEl;
+            if (!anchor) return;
+            setReactInputValue(anchor as HTMLInputElement | HTMLTextAreaElement, value);
+            setSuggestionPopup(null);
+          }}
+          onClose={() => setSuggestionPopup(null)}
+        />
+      )}
     </main>
   );
+}
+
+function injectSuggestionScript(leftDoc: Document) {
+  const scriptId = "creator-studio-suggestion-listener";
+  if (leftDoc.getElementById(scriptId)) return;
+  const script = leftDoc.createElement("script");
+  script.id = scriptId;
+  script.textContent = `
+    (function() {
+      var handler = function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === " ") {
+          e.preventDefault();
+          e.stopPropagation();
+          var target = e.target;
+          var name = (target && (target.name || "")) || "";
+          if (name) {
+            window.parent.postMessage({ type: "studio:show-suggestions", fieldName: name }, "*");
+          }
+        }
+        if (e.key === "Escape") {
+          window.parent.postMessage({ type: "studio:hide-suggestions" }, "*");
+        }
+      };
+      document.addEventListener("keydown", handler, true);
+    })();
+  `;
+  leftDoc.head.appendChild(script);
+}
+
+function setReactInputValue(el: HTMLInputElement | HTMLTextAreaElement, value: string) {
+  const prototype = el instanceof HTMLTextAreaElement
+    ? window.HTMLTextAreaElement.prototype
+    : window.HTMLInputElement.prototype;
+  const descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
+  if (descriptor && descriptor.set) {
+    descriptor.set.call(el, value);
+  } else {
+    el.value = value;
+  }
+  el.dispatchEvent(new Event("input", { bubbles: true }));
+  el.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
 function pushDraftToPreview(frame: HTMLIFrameElement, draft: Record<string, unknown>) {
@@ -251,6 +387,118 @@ function collectDraftFromEditor(
   return draft;
 }
 
+function syncSelectedPageFromTinaEditor(
+  leftFrame: HTMLIFrameElement,
+  pages: string[],
+  setSelectedPageSlug: Dispatch<SetStateAction<string>>
+) {
+  const hash = leftFrame.contentWindow?.location.hash ?? "";
+  const match = hash.match(/\/pages\/([^/?#]+)/);
+  const pageSlug = match?.[1] ? decodeURIComponent(match[1]).replace(/\.json$/, "") : "";
+  if (!pageSlug || !pages.includes(pageSlug)) return;
+  setSelectedPageSlug((current) => (current === pageSlug ? current : pageSlug));
+}
+
+function extractSpecialtyFromEditor(leftDoc: Document): string | undefined {
+  const specialtyField = leftDoc.querySelector<HTMLInputElement>("input[name*=\"profile.specialty\"], input[name*=\"specialty\"]");
+  return specialtyField?.value || undefined;
+}
+
+function getSuggestionContextFromFieldName(
+  fieldName: string,
+  _tenantType: "doctor" | "hospital",
+  specialty?: string
+): SuggestionContext | null {
+  const normalized = fieldName.toLowerCase();
+
+  if (normalized.includes("headline")) {
+    return { fieldType: "headline", specialty };
+  }
+  if (normalized.includes("subheadline")) {
+    return { fieldType: "subheadline", specialty };
+  }
+  if (normalized.includes("services") && normalized.includes("title")) {
+    return { fieldType: "serviceTitle", specialty };
+  }
+  if (normalized.includes("services") && normalized.includes("description")) {
+    return { fieldType: "serviceDescription", specialty };
+  }
+  if (normalized.includes("gallery") && normalized.includes("alt")) {
+    return { fieldType: "general", specialty };
+  }
+  if (normalized.includes("testimonials") && normalized.includes("quote")) {
+    return { fieldType: "general", specialty };
+  }
+  if (normalized.includes("testimonials") && normalized.includes("author")) {
+    return { fieldType: "general", specialty };
+  }
+  if (normalized.includes("stats") && normalized.includes("value")) {
+    return { fieldType: "general", specialty };
+  }
+  if (normalized.includes("stats") && normalized.includes("label")) {
+    return { fieldType: "general", specialty };
+  }
+  if (normalized.includes("blocks") && (normalized.includes("kicker") || normalized.includes("title"))) {
+    return { fieldType: "cta", specialty };
+  }
+  if (normalized.includes("copy") && normalized.includes("title")) {
+    return { fieldType: "cta", specialty };
+  }
+  if (normalized.includes("copy") && normalized.includes("body")) {
+    return { fieldType: "cta", specialty };
+  }
+  if (normalized.includes("copy") && normalized.includes("kicker")) {
+    return { fieldType: "cta", specialty };
+  }
+  if (normalized.includes("cta")) {
+    return { fieldType: "cta", specialty };
+  }
+  if (normalized.includes("faq") && normalized.includes("question")) {
+    return { fieldType: "faqQuestion", specialty };
+  }
+  if (normalized.includes("faq") && normalized.includes("answer")) {
+    return { fieldType: "faqAnswer", specialty };
+  }
+  if (normalized.includes("timing") && normalized.includes("day")) {
+    return { fieldType: "timingDay", specialty };
+  }
+  if (normalized.includes("timing")) {
+    return { fieldType: "timingSlot", specialty };
+  }
+  if (normalized.includes("profile") && normalized.includes("bio")) {
+    return { fieldType: "subheadline", specialty };
+  }
+  if (normalized.includes("displayname") || normalized.includes("display_name")) {
+    return { fieldType: "general", specialty };
+  }
+
+  return null;
+}
+
+function suppressNestedTinaPreview(leftDoc: Document) {
+  const styleId = "creator-studio-hide-nested-preview";
+  if (!leftDoc.getElementById(styleId)) {
+    const style = leftDoc.createElement("style");
+    style.id = styleId;
+    style.textContent = `
+      iframe[src*="/site/"],
+      iframe[src*="/creator/"] {
+        display: none !important;
+      }
+    `;
+    leftDoc.head.appendChild(style);
+  }
+
+  leftDoc.querySelectorAll("iframe").forEach((iframe) => {
+    const src = iframe.getAttribute("src") ?? "";
+    const shouldHide = src.includes("/site/") || src.includes("/creator/");
+    if (shouldHide && iframe.getAttribute("data-creator-studio-hidden") !== "true") {
+      iframe.setAttribute("data-creator-studio-hidden", "true");
+      iframe.style.display = "none";
+    }
+  });
+}
+
 function normalizeFieldName(rawName: string): string | null {
   const cleaned = rawName.replace(/\[(\d+)\]/g, ".$1").replace(/^\.+/, "");
   const withoutPrefix = cleaned.replace(/^data\./, "").replace(/^values\./, "");
@@ -267,6 +515,7 @@ function normalizeFieldName(rawName: string): string | null {
     "business",
     "presentation",
     "seo",
+    "pages",
     "content",
   ]);
 
@@ -327,14 +576,14 @@ function setDeepValue(target: Record<string, unknown>, path: string, value: unkn
   }
 }
 
-async function createVersionSnapshot(tenantType: "doctor" | "hospital", tenantId: string) {
+async function createVersionSnapshot(tenantType: "doctor" | "hospital", tenantId: string, pageSlug: string) {
   try {
     await fetch("/api/content/snapshot", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ tenantType, tenantId }),
+      body: JSON.stringify({ tenantType, tenantSlug: tenantId, pageSlug }),
     });
   } catch {
     // Ignore snapshot failures so save flow in Tina is never blocked.
@@ -462,9 +711,9 @@ function setFieldValue(node: HTMLInputElement | HTMLTextAreaElement, value: stri
     (node as HTMLInputElement | HTMLTextAreaElement).value = value;
   }
 
-  node.dispatchEvent(new (win as Window).InputEvent("input", { bubbles: true }));
-  node.dispatchEvent(new (win as Window).KeyboardEvent("keyup", { bubbles: true }));
-  node.dispatchEvent(new (win as Window).Event("change", { bubbles: true }));
+  node.dispatchEvent(new InputEvent("input", { bubbles: true }));
+  node.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true }));
+  node.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
 function reapplyOverlayToEditor(
