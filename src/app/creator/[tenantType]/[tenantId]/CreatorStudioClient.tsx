@@ -35,7 +35,7 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
     context: SuggestionContext;
   } | null>(null);
 
-  const pageCollection = tenantType === "doctor" ? "editDoctorSites" : "editHospitalSites";
+  const pageCollection = tenantType === "doctor" ? "doctorSite" : "hospitalSite";
   const adminEditUrl = `/admin/index.html#/collections/edit/${pageCollection}/${tenantId}/pages/${selectedPageSlug}`;
   const previewUrl = useMemo(
     () => `/site/${tenantId}/${selectedPageSlug}?studio=1&ui=${uiEditingEnabled ? "1" : "0"}`,
@@ -258,6 +258,22 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
             }}
           >
             + Create New Tenant
+          </a>
+          <a
+            href="/admin/index.html#/media"
+            target="_blank"
+            title={`Upload images to: content/${tenantType}s/${tenantId}/`}
+            style={{
+              padding: "6px 12px",
+              background: "#10b981",
+              color: "white",
+              textDecoration: "none",
+              borderRadius: "6px",
+              fontSize: "12px",
+              fontWeight: 500,
+            }}
+          >
+            📁 Media
           </a>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#e2e8f0" }}>
             <span>Page</span>

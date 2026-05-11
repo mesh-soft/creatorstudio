@@ -67,7 +67,12 @@ const siteFields: TinaField[] = [
       { type: "string", name: "registrationNumber", label: "Registration Number" },
       { type: "number", name: "experienceYears", label: "Experience Years" },
       { type: "string", name: "bio", label: "Bio", ui: { component: "textarea" } },
-      { type: "string", name: "photo", label: "Photo URL" },
+      {
+        type: "image",
+        name: "photo",
+        label: "Photo",
+        description: "Upload to Media → content → doctors/hospitals → [tenant] folder",
+      },
     ],
   },
   {
@@ -180,7 +185,12 @@ const siteFields: TinaField[] = [
       { type: "string", name: "title", label: "Title" },
       { type: "string", name: "description", label: "Description", ui: { component: "textarea" } },
       { type: "string", name: "keywords", label: "Keywords", list: true },
-      { type: "string", name: "ogImage", label: "Open Graph Image" },
+      {
+        type: "image",
+        name: "ogImage",
+        label: "Open Graph Image",
+        description: "Upload to Media → content → doctors/hospitals → [tenant] folder",
+      },
     ],
   },
 ];
@@ -235,7 +245,12 @@ const pageContentFields: TinaField[] = [
     label: "Gallery",
     list: true,
     fields: [
-      { type: "string", name: "src", label: "Image URL" },
+      {
+        type: "image",
+        name: "src",
+        label: "Image",
+        description: "Upload images to Media → content → doctors/hospitals → [tenant] folder",
+      },
       { type: "string", name: "alt", label: "Alt Text" },
     ],
   },
@@ -404,7 +419,12 @@ const pageFields: TinaField[] = [
       { type: "string", name: "title", label: "Title" },
       { type: "string", name: "description", label: "Description", ui: { component: "textarea" } },
       { type: "string", name: "keywords", label: "Keywords", list: true },
-      { type: "string", name: "ogImage", label: "Open Graph Image" },
+      {
+        type: "image",
+        name: "ogImage",
+        label: "Open Graph Image",
+        description: "Upload to Media → content → doctors/hospitals → [tenant] folder",
+      },
     ],
   },
   {
@@ -425,7 +445,7 @@ export default defineConfig({
   },
   media: {
     tina: {
-      mediaRoot: "",
+      mediaRoot: "content",
       publicFolder: "public",
     },
   },

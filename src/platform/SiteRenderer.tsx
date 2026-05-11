@@ -12,20 +12,41 @@ type SiteRendererProps = {
   studioMode?: boolean;
 };
 
+const defaultStyle = {
+  colors: {
+    primary: "#2296F3",
+    secondary: "#64748b",
+    accent: "#f59e0b",
+    background: "#ffffff",
+    surface: "#f8fafc",
+    text: "#1e293b",
+  },
+  shape: {
+    radius: "8px",
+  },
+  typography: {
+    heading: "Inter, system-ui, sans-serif",
+    body: "Inter, system-ui, sans-serif",
+  },
+};
+
 export function SiteRenderer({ tenant, previewLinks = false, tinaDocument, studioMode = false }: SiteRendererProps) {
   const preset = getPreset(tenant);
-  const style = tenant.presentation.style;
+  const style = tenant.presentation?.style ?? defaultStyle;
+  const colors = style.colors ?? defaultStyle.colors;
+  const shape = style.shape ?? defaultStyle.shape;
+  const typography = style.typography ?? defaultStyle.typography;
   const tinaContent = (tinaDocument?.content as Record<string, unknown> | undefined) ?? undefined;
   const cssVars = {
-    "--primary": style.colors.primary,
-    "--secondary": style.colors.secondary,
-    "--accent": style.colors.accent,
-    "--site-bg": style.colors.background,
-    "--surface": style.colors.surface,
-    "--site-text": style.colors.text,
-    "--radius": style.shape.radius,
-    "--heading": style.typography.heading,
-    "--body": style.typography.body,
+    "--primary": colors.primary,
+    "--secondary": colors.secondary,
+    "--accent": colors.accent,
+    "--site-bg": colors.background,
+    "--surface": colors.surface,
+    "--site-text": colors.text,
+    "--radius": shape.radius,
+    "--heading": typography.heading,
+    "--body": typography.body,
   } as CSSProperties;
 
   return (
@@ -165,12 +186,17 @@ function PreviewHeader({ tenant }: { tenant: Tenant }) {
 }
 
 function SubscriptionBar({ tenant }: { tenant: Tenant }) {
+  const status = tenant.status ?? "active";
+  const plan = tenant.subscription?.plan ?? "free";
+  const validUntil = tenant.subscription?.validUntil ?? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  const domain = tenant.domains?.primary ?? "localhost:3000";
+  
   return (
     <div className="subscription-bar">
-      <span>{tenant.status}</span>
-      <strong>{tenant.subscription.plan}</strong>
-      <span>Valid until {tenant.subscription.validUntil}</span>
-      <span>{tenant.domains.primary}</span>
+      <span>{status}</span>
+      <strong>{plan}</strong>
+      <span>Valid until {validUntil}</span>
+      <span>{domain}</span>
     </div>
   );
 }
@@ -493,16 +519,21 @@ function ImagePrimitive({ src, alt, className = "" }: { src: string; alt: string
 }
 
 function ButtonGroup({ tenant }: { tenant: Tenant }) {
-  const whatsapp = tenant.business.whatsapp.replace(/\D/g, "");
+  const whatsapp = tenant.business?.whatsapp?.replace(/\D/g, "") ?? "";
+  const phone = tenant.business?.phone ?? "";
 
   return (
     <div className="button-row">
-      <a className="btn primary" href={`https://wa.me/${whatsapp}`}>
-        {copy(tenant, "whatsappLabel")}
-      </a>
-      <a className="btn secondary" href={`tel:${tenant.business.phone}`}>
-        {copy(tenant, "callLabel")}
-      </a>
+      {whatsapp && (
+        <a className="btn primary" href={`https://wa.me/${whatsapp}`}>
+          {copy(tenant, "whatsappLabel")}
+        </a>
+      )}
+      {phone && (
+        <a className="btn secondary" href={`tel:${phone}`}>
+          {copy(tenant, "callLabel")}
+        </a>
+      )}
     </div>
   );
 }

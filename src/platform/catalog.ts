@@ -99,5 +99,11 @@ export const variantPresets: Record<TenantType, Record<string, VariantPreset>> =
 
 export function getPreset(tenant: Tenant): VariantPreset {
   const typePresets = variantPresets[tenant.tenantType];
-  return typePresets[tenant.presentation.variantPresetId] ?? Object.values(typePresets)[0];
+  if (!typePresets) {
+    return Object.values(variantPresets.doctor)[0];
+  }
+  const preset = typePresets[tenant.presentation?.variantPresetId];
+  if (preset) return preset;
+  const firstPreset = Object.values(typePresets)[0];
+  return firstPreset ?? Object.values(variantPresets.doctor)[0];
 }

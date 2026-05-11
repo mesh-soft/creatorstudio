@@ -144,13 +144,45 @@ function applyHomePageSiteOverrides(site: TenantSite, pages: TenantPage[]): Tena
   };
 }
 
+const defaultSubscription = {
+  plan: "free",
+  validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+};
+
+const defaultDomains = {
+  primary: "localhost:3000",
+};
+
 function composeTenant(tenantSlug: string, site: TenantSite, page: TenantPage): Tenant {
   // Merge site-level and page-level presentation (page overrides site)
-  const presentation: typeof site.presentation = {
-    themeId: page.presentation?.themeId ?? site.presentation.themeId,
-    variantPresetId: page.presentation?.variantPresetId ?? site.presentation.variantPresetId,
-    styleId: page.presentation?.styleId ?? site.presentation.styleId,
-    style: site.presentation.style, // Style overrides are always from site level
+  const defaultPresentation = {
+    themeId: "default",
+    variantPresetId: "minimal",
+    styleId: "default",
+    style: {
+      colors: {
+        primary: "#2296F3",
+        secondary: "#64748b",
+        accent: "#f59e0b",
+        background: "#ffffff",
+        surface: "#f8fafc",
+        text: "#1e293b",
+      },
+      shape: {
+        radius: "8px",
+      },
+      typography: {
+        heading: "Inter, system-ui, sans-serif",
+        body: "Inter, system-ui, sans-serif",
+      },
+    },
+  };
+  const sitePresentation = site.presentation ?? defaultPresentation;
+  const presentation = {
+    themeId: page.presentation?.themeId ?? sitePresentation.themeId,
+    variantPresetId: page.presentation?.variantPresetId ?? sitePresentation.variantPresetId,
+    styleId: page.presentation?.styleId ?? sitePresentation.styleId,
+    style: sitePresentation.style, // Style overrides are always from site level
   };
 
   // Merge site-level and page-level SEO (page overrides site)
@@ -167,6 +199,8 @@ function composeTenant(tenantSlug: string, site: TenantSite, page: TenantPage): 
     tenantId: tenantSlug,
     presentation,
     seo,
+    subscription: site.subscription ?? defaultSubscription,
+    domains: site.domains ?? defaultDomains,
     slug,
     title,
     path: pagePath,

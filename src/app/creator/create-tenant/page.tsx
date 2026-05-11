@@ -8,6 +8,7 @@ export default function CreateTenantPage() {
   const [type, setType] = useState<"doctor" | "hospital">("doctor");
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
+  const [plan, setPlan] = useState<"free" | "basic" | "pro">("free");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -34,7 +35,7 @@ export default function CreateTenantPage() {
       const res = await fetch("/api/create-tenant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, name, slug }),
+        body: JSON.stringify({ type, name, slug, plan }),
       });
 
       const data = await res.json();
@@ -190,7 +191,7 @@ export default function CreateTenantPage() {
             />
           </div>
 
-          <div style={{ marginBottom: "24px" }}>
+          <div style={{ marginBottom: "20px" }}>
             <label
               htmlFor="slug"
               style={{
@@ -225,6 +226,38 @@ export default function CreateTenantPage() {
             <p style={{ fontSize: "12px", color: "#64748b", marginTop: "6px" }}>
               This will be the URL: /site/{slug}/home
             </p>
+          </div>
+
+          <div style={{ marginBottom: "24px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "14px",
+                fontWeight: 500,
+                marginBottom: "8px",
+                color: "#94a3b8",
+              }}
+            >
+              Subscription Plan
+            </label>
+            <select
+              value={plan}
+              onChange={(e) => setPlan(e.target.value as "free" | "basic" | "pro")}
+              style={{
+                width: "100%",
+                padding: "12px",
+                borderRadius: "8px",
+                border: "1px solid #334155",
+                background: "#0f172a",
+                color: "#e2e8f0",
+                fontSize: "14px",
+                outline: "none",
+              }}
+            >
+              <option value="free">Free</option>
+              <option value="basic">Basic</option>
+              <option value="pro">Pro</option>
+            </select>
           </div>
 
           <div

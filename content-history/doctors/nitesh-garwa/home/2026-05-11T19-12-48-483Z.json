@@ -1,24 +1,5 @@
 {
-  "blocks": [
-    {
-      "_template": "hero",
-      "variant": "doctor-hero",
-      "headline": "Quality healthcare you can trust",
-      "subheadline": "Personalized medical care with compassion and expertise."
-    },
-    {
-      "_template": "services",
-      "variant": "doctor-services"
-    },
-    {
-      "_template": "timings",
-      "variant": "doctor-timings"
-    },
-    {
-      "_template": "cta",
-      "variant": "doctor-cta"
-    }
-  ],
+  "_template": "page",
   "slug": "home",
   "title": "Home",
   "path": "/",
@@ -101,43 +82,92 @@
     ],
     "gallery": [
       {
-        "src": "/content/doctors/nitesh-garwa/i20_sports2.jpeg",
-        "alt": "Clinic reception"
+        "src": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=900&q=80",
+        "alt": "Clinic reception",
+        "caption": "Welcoming reception area"
       },
       {
         "src": "https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&w=900&q=80",
-        "alt": "Examination room"
+        "alt": "Examination room",
+        "caption": "Modern examination room"
       },
       {
         "src": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=900&q=80",
-        "alt": "Medical equipment"
+        "alt": "Medical equipment",
+        "caption": "Advanced diagnostic equipment"
       }
     ],
     "testimonials": [
       {
-        "quote": "Dr. Nitesh Garwa is very patient and explains everything clearly. Highly recommended!"
+        "name": "Rahul Sharma",
+        "role": "Patient",
+        "quote": "Dr. Nitesh Garwa is very patient and explains everything clearly. Highly recommended!",
+        "rating": 5
       },
       {
-        "quote": "Best doctor in the area. The clinic is clean and the staff is very helpful."
+        "name": "Priya Patel",
+        "role": "Patient",
+        "quote": "Best doctor in the area. The clinic is clean and the staff is very helpful.",
+        "rating": 5
       },
       {
-        "quote": "Got my vaccination done here. Quick and professional service."
+        "name": "Anita Gupta",
+        "role": "Patient",
+        "quote": "Got my vaccination done here. Quick and professional service.",
+        "rating": 4
+      }
+    ],
+    "faq": [
+      {
+        "question": "Do I need an appointment?",
+        "answer": "Walk-ins are welcome, but appointments are recommended to avoid waiting."
+      },
+      {
+        "question": "What payment methods do you accept?",
+        "answer": "We accept cash, cards, UPI, and major insurance plans."
+      },
+      {
+        "question": "How long is a typical consultation?",
+        "answer": "Initial consultations take 15-20 minutes. Follow-ups are usually 10 minutes."
+      },
+      {
+        "question": "Do you provide home visits?",
+        "answer": "Home visits are available for elderly patients and emergencies within 5km radius."
       }
     ],
     "stats": [
       {
-        "value": "15+",
-        "label": "Years Experience"
+        "label": "Years Experience",
+        "value": "15+"
       },
       {
-        "value": "5,000+",
-        "label": "Happy Patients"
+        "label": "Happy Patients",
+        "value": "5,000+"
       },
       {
-        "value": "10,000+",
-        "label": "Consultations"
+        "label": "Consultations",
+        "value": "10,000+"
       }
     ]
   },
-  "_template": "page"
+  "blocks": [
+    {
+      "_template": "hero",
+      "variant": "doctor-hero",
+      "headline": "Quality healthcare you can trust",
+      "subheadline": "Personalized medical care with compassion and expertise."
+    },
+    {
+      "_template": "services",
+      "variant": "doctor-services"
+    },
+    {
+      "_template": "timings",
+      "variant": "doctor-timings"
+    },
+    {
+      "_template": "cta",
+      "variant": "doctor-cta"
+    }
+  ]
 }
