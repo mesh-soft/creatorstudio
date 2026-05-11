@@ -35,7 +35,7 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
     context: SuggestionContext;
   } | null>(null);
 
-  const pageCollection = tenantType === "doctor" ? "doctorSite" : "hospitalSite";
+  const pageCollection = tenantType === "doctor" ? "editDoctorSites" : "editHospitalSites";
   const adminEditUrl = `/admin/index.html#/collections/edit/${pageCollection}/${tenantId}/pages/${selectedPageSlug}`;
   const previewUrl = useMemo(
     () => `/site/${tenantId}/${selectedPageSlug}?studio=1&ui=${uiEditingEnabled ? "1" : "0"}`,
@@ -245,6 +245,20 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
           Creator Studio - {tenantType} / {tenantId}
         </strong>
         <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+          <a
+            href="/creator/create-tenant"
+            style={{
+              padding: "6px 12px",
+              background: "#2296F3",
+              color: "white",
+              textDecoration: "none",
+              borderRadius: "6px",
+              fontSize: "12px",
+              fontWeight: 500,
+            }}
+          >
+            + Create New Tenant
+          </a>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#e2e8f0" }}>
             <span>Page</span>
             <select

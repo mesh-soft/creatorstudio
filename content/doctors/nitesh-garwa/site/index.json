@@ -1,0 +1,27 @@
+{
+  "_template": "site",
+  "name": "Nitesh Garwa",
+  "specialty": "General Practitioner",
+  "catchphrase": "Welcome to Nitesh Garwa",
+  "description": "Nitesh Garwa provides excellent healthcare services.",
+  "contact": {
+    "phone": "",
+    "email": "",
+    "address": ""
+  },
+  "social": {
+    "facebook": "",
+    "instagram": "",
+    "twitter": "",
+    "linkedin": ""
+  },
+  "seo": {
+    "title": "Nitesh Garwa",
+    "description": "Nitesh Garwa - Healthcare Services",
+    "keywords": [
+      "doctor",
+      "healthcare",
+      "medical"
+    ]
+  }
+}

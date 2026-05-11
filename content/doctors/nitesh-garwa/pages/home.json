@@ -1,0 +1,10 @@
+{
+  "_template": "page",
+  "title": "Home",
+  "slug": "home",
+  "meta": {
+    "title": "Home - Nitesh Garwa",
+    "description": "Welcome to Nitesh Garwa"
+  },
+  "sections": []
+}
