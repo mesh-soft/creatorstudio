@@ -118,6 +118,7 @@ export function TenantImageField({
         )}
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <input type="hidden" name={name} value={value || ""} />
           <button
             onClick={handleOpenMedia}
             style={{

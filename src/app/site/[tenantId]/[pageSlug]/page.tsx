@@ -16,7 +16,7 @@ type SitePageProps = {
   }>;
 };
 
-export const dynamic = "force-static";
+// For static export, searchParams is empty; studio/draft only work in dev
 
 export function generateStaticParams() {
   return getAllTenantPageParams().map((item) => ({

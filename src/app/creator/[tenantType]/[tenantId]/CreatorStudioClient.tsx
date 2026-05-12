@@ -123,7 +123,7 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
       fieldIndexRef.current = buildFieldIndex(leftDoc);
       reapplyOverlayToEditor(leftDoc, overlayRef.current, fieldIndexRef.current);
       scheduleDraftRefresh();
-      syncSelectedPageFromTinaEditor(leftFrame, pages, setSelectedPageSlug, tenantType, tenantId, rightFrame);
+      syncSelectedPageFromTinaEditor(leftFrame, pages, setSelectedPageSlug);
     };
 
     const wireRightPreview = () => {
@@ -162,6 +162,7 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
 
     wireLeftEditor();
     wireRightPreview();
+    if (hashPollTimerRef.current) window.clearInterval(hashPollTimerRef.current);
 
     // Listen for suggestion trigger messages from the injected iframe script
     const onSuggestionMessage = (event: MessageEvent) => {
@@ -190,20 +191,9 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
       if (e.key === "Escape") setSuggestionPopup(null);
     });
 
-    // Poll for hash changes in Tina iframe (hashchange doesn't work cross-origin)
-    let lastHash = leftFrame.contentWindow?.location.hash || '';
     hashPollTimerRef.current = window.setInterval(() => {
-      const currentHash = leftFrame.contentWindow?.location.hash || '';
-      if (currentHash !== lastHash) {
-        lastHash = currentHash;
-        const result = syncSelectedPageFromTinaEditor(leftFrame, pages, setSelectedPageSlug, tenantType, tenantId, rightFrame);
-        // If tenant changed, reload the preview with new tenant
-        if (result?.tenantChanged && result.newTenantId && result.newTenantType) {
-          const newPreviewUrl = `/site/${result.newTenantId}/home?studio=1&ui=${uiEditingEnabled ? "1" : "0"}`;
-          rightFrame.src = newPreviewUrl;
-        }
-      }
-    }, 300);
+      syncSelectedPageFromTinaEditor(leftFrame, pages, setSelectedPageSlug);
+    }, 500);
     window.addEventListener("message", onPreviewMessage);
 
     return () => {
@@ -215,16 +205,16 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
       if (refreshTimer.current) {
         window.clearTimeout(refreshTimer.current);
       }
-      if (hashPollTimerRef.current) {
-        window.clearInterval(hashPollTimerRef.current);
-        hashPollTimerRef.current = null;
-      }
       if (indexTimerRef.current) {
         window.clearTimeout(indexTimerRef.current);
       }
       if (observerRef.current) {
         observerRef.current.disconnect();
         observerRef.current = null;
+      }
+      if (hashPollTimerRef.current) {
+        window.clearInterval(hashPollTimerRef.current);
+        hashPollTimerRef.current = null;
       }
       setSuggestionPopup(null);
     };
@@ -244,39 +234,16 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 20px",
-          height: "56px",
-          background: "#1e293b",
+          gap: "12px",
+          padding: "0 16px",
+          borderBottom: "1px solid #1e293b",
           color: "#e2e8f0",
-          borderBottom: "1px solid #334155",
+          fontFamily: "Inter, Arial, sans-serif",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <strong>Creator Studio</strong>
-          <select
-            value={`${tenantType}/${tenantId}`}
-            onChange={(e) => {
-              const [type, id] = e.target.value.split('/');
-              window.location.href = `/creator/${type}/${id}`;
-            }}
-            style={{
-              background: "#334155",
-              color: "#e2e8f0",
-              border: "none",
-              borderRadius: "4px",
-              padding: "4px 8px",
-              fontSize: "13px",
-            }}
-          >
-            <optgroup label="Doctors">
-              <option value="doctor/dr-amit-sharma">dr-amit-sharma</option>
-              <option value="doctor/nitesh-garwa">nitesh-garwa</option>
-            </optgroup>
-            <optgroup label="Hospitals">
-              <option value="hospital/test-hospital">test-hospital</option>
-            </optgroup>
-          </select>
-        </div>
+        <strong>
+          Creator Studio - {tenantType} / {tenantId}
+        </strong>
         <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
           <a
             href="/creator/create-tenant"
@@ -453,49 +420,13 @@ function collectDraftFromEditor(
 function syncSelectedPageFromTinaEditor(
   leftFrame: HTMLIFrameElement,
   pages: string[],
-  setSelectedPageSlug: Dispatch<SetStateAction<string>>,
-  tenantType: string,
-  tenantId: string,
-  rightFrame?: HTMLIFrameElement
-): { tenantChanged: boolean; newTenantId?: string; newTenantType?: string } | undefined {
+  setSelectedPageSlug: Dispatch<SetStateAction<string>>
+) {
   const hash = leftFrame.contentWindow?.location.hash ?? "";
-  
-  // Tina URL format: #/collections/doctorSite/~/nitesh-garwa/pages/home.json
-  // Match: /{collectionType}/~/{tenantId}
-  const tenantMatch = hash.match(/\/(doctorSite|hospitalSite)\/~\/([^/?#]+)/);
-  if (!tenantMatch) return; // Not in a tenant context
-  
-  // Extract tenant info from Tina URL
-  const tinaType = tenantMatch[1] === 'doctorSite' ? 'doctor' : 'hospital';
-  const tinaId = tenantMatch[2];
-  
-  // Check if tenant changed
-  const tenantChanged = tinaId !== tenantId || tinaType !== tenantType;
-  
-  // Try to extract specific page being edited
-  const pageMatch = hash.match(/\/pages\/([^/?#]+)/);
-  let pageSlug: string;
-  
-  if (pageMatch) {
-    // Editing a specific page
-    pageSlug = decodeURIComponent(pageMatch[1]).replace(/\.json$/, "");
-  } else {
-    // In tenant folder but not editing a specific page - default to home
-    pageSlug = "home";
-  }
-  
-  if (!pages.includes(pageSlug)) return;
-  
-  // Update state
+  const match = hash.match(/\/pages\/([^/?#]+)/);
+  const pageSlug = match?.[1] ? decodeURIComponent(match[1]).replace(/\.json$/, "") : "";
+  if (!pageSlug || !pages.includes(pageSlug)) return;
   setSelectedPageSlug((current) => (current === pageSlug ? current : pageSlug));
-  
-  // Update browser URL to match current state
-  const newUrl = `/creator/${tinaType}/${tinaId}/${pageSlug}`;
-  if (window.location.pathname !== newUrl) {
-    window.history.replaceState(null, '', newUrl);
-  }
-  
-  return { tenantChanged, newTenantId: tinaId, newTenantType: tinaType };
 }
 
 function extractSpecialtyFromEditor(leftDoc: Document): string | undefined {
@@ -599,11 +530,20 @@ function suppressNestedTinaPreview(leftDoc: Document) {
 }
 
 function normalizeFieldName(rawName: string): string | null {
-  const cleaned = rawName.replace(/\[(\d+)\]/g, ".$1").replace(/^\.+/, "");
-  const withoutPrefix = cleaned.replace(/^data\./, "").replace(/^values\./, "");
-  if (!withoutPrefix) return null;
+  let cleaned = rawName.replace(/\[(\d+)\]/g, ".$1").replace(/^\.+/, "");
+  
+  // Strip prefixes repeatedly until none remain
+  let stripped = true;
+  while (stripped) {
+    const prev = cleaned;
+    cleaned = cleaned
+      .replace(/^(data|values|doctorSite|hospitalSite)\./, "");
+    stripped = prev !== cleaned;
+  }
+    
+  if (!cleaned) return null;
 
-  const root = withoutPrefix.split(".")[0];
+  const root = cleaned.split(".")[0];
   const allowedRoots = new Set([
     "tenantId",
     "tenantType",
@@ -740,7 +680,15 @@ function buildFieldIndex(leftDoc: Document) {
 
 function normalizeAnyName(raw: string) {
   const out = new Set<string>();
-  const cleaned = raw.replace(/^data\./, "").replace(/^values\./, "");
+  let cleaned = raw.replace(/\[(\d+)\]/g, ".$1").replace(/^\.+/, "");
+  
+  let stripped = true;
+  while (stripped) {
+    const prev = cleaned;
+    cleaned = cleaned.replace(/^(data|values|doctorSite|hospitalSite)\./, "");
+    stripped = prev !== cleaned;
+  }
+  
   out.add(cleaned);
   out.add(cleaned.replace(/\[(\d+)\]/g, ".$1"));
   out.add(toDotPath(cleaned));
