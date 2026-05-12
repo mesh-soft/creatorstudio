@@ -558,7 +558,7 @@ function normalizeFieldName(rawName: string): string | null {
     "content",
   ]);
 
-  return allowedRoots.has(root) ? withoutPrefix : null;
+  return allowedRoots.has(root) ? cleaned : null;
 }
 
 function parseFieldValue(field: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement): unknown {

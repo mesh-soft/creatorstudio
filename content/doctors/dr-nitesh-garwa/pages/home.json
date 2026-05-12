@@ -42,7 +42,7 @@
   "path": "/",
   "isHome": true,
   "presentation": {
-    "themeId": "doctor-standard",
+    "themeId": "doctor-profile-heavy",
     "variantPresetId": "doctor-classic",
     "styleId": "doctor-teal-clean"
   },
