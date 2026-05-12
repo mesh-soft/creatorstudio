@@ -1,4 +1,4 @@
-import type { StylePreset, Tenant, TenantType, VariantPreset } from "./types";
+import type { StylePreset, Tenant, TenantBlock, TenantType, VariantPreset } from "./types";
 
 export const stylePresets: Record<string, StylePreset> = {
   "doctor-teal-clean": {
