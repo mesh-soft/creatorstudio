@@ -21,6 +21,10 @@
     "stats": [],
     "blocks": [
       {
+        "_template": "header",
+        "enabled": true
+      },
+      {
         "enabled": true,
         "_template": "hero"
       },
@@ -31,6 +35,10 @@
       {
         "enabled": true,
         "_template": "cta"
+      },
+      {
+        "_template": "awards",
+        "enabled": true
       }
     ]
   },

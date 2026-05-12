@@ -7,7 +7,7 @@
     "styleId": "hospital-blue-modern"
   },
   "content": {
-    "headline": "Your health is our mission",
+    "headline": "Compassionate care, proven results",
     "subheadline": "Personalized medical care with compassion and expertise for you and your family.",
     "copy": {
       "servicesKicker": "Services",
@@ -129,40 +129,30 @@
     ],
     "blocks": [
       {
-        "enabled": true,
-        "navLinks": [
-          "test"
-        ],
-        "_template": "header"
+        "_template": "header",
+        "enabled": true
       },
       {
-        "enabled": true,
-        "_template": "hero"
+        "_template": "hero",
+        "variant": "doctor-hero",
+        "headline": "Quality healthcare you can trust",
+        "subheadline": "Personalized medical care with compassion and expertise."
       },
       {
-        "_template": "services"
+        "_template": "awards",
+        "enabled": true
       },
       {
-        "enabled": true,
-        "_template": "awards"
+        "_template": "services",
+        "variant": "doctor-services"
       },
       {
-        "_template": "timings"
+        "_template": "timings",
+        "variant": "doctor-timings"
       },
       {
-        "enabled": true,
-        "_template": "faq"
-      },
-      {
-        "enabled": true,
-        "_template": "testimonials"
-      },
-      {
-        "enabled": true,
-        "_template": "stats"
-      },
-      {
-        "_template": "cta"
+        "_template": "cta",
+        "variant": "doctor-cta"
       }
     ]
   },

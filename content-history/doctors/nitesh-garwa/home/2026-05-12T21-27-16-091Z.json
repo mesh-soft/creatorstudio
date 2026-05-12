@@ -7,7 +7,7 @@
     "styleId": "hospital-blue-modern"
   },
   "content": {
-    "headline": "Your health is our mission",
+    "headline": "Compassionate care, proven results",
     "subheadline": "Personalized medical care with compassion and expertise for you and your family.",
     "copy": {
       "servicesKicker": "Services",
@@ -150,6 +150,9 @@
         "_template": "timings"
       },
       {
+        "_template": "cta"
+      },
+      {
         "enabled": true,
         "_template": "faq"
       },
@@ -160,9 +163,6 @@
       {
         "enabled": true,
         "_template": "stats"
-      },
-      {
-        "_template": "cta"
       }
     ]
   },

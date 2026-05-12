@@ -104,11 +104,19 @@
     ],
     "blocks": [
       {
+        "_template": "header",
+        "enabled": true
+      },
+      {
         "_template": "hero",
         "enabled": true
       },
       {
         "_template": "profile",
+        "enabled": true
+      },
+      {
+        "_template": "awards",
         "enabled": true
       },
       {

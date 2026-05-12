@@ -1,4 +1,32 @@
 {
+  "blocks": [
+    {
+      "_template": "header",
+      "enabled": true
+    },
+    {
+      "_template": "hero",
+      "variant": "doctor-hero",
+      "headline": "Quality healthcare you can trust",
+      "subheadline": "Personalized medical care with compassion and expertise."
+    },
+    {
+      "_template": "awards",
+      "enabled": true
+    },
+    {
+      "_template": "services",
+      "variant": "doctor-services"
+    },
+    {
+      "_template": "timings",
+      "variant": "doctor-timings"
+    },
+    {
+      "_template": "cta",
+      "variant": "doctor-cta"
+    }
+  ],
   "slug": "home",
   "title": "Home",
   "path": "/",
@@ -7,7 +35,7 @@
     "styleId": "hospital-blue-modern"
   },
   "content": {
-    "headline": "Your health is our mission",
+    "headline": "Compassionate care, proven results",
     "subheadline": "Personalized medical care with compassion and expertise for you and your family.",
     "copy": {
       "servicesKicker": "Services",
@@ -96,12 +124,6 @@
         "alt": "Medical equipment"
       }
     ],
-    "faqs": [
-      {
-        "question": "are these possible?",
-        "answer": "no, it has not been done."
-      }
-    ],
     "testimonials": [
       {
         "quote": "Dr. Nitesh Garwa is very patient and explains everything clearly. Highly recommended!"
@@ -130,39 +152,9 @@
     "blocks": [
       {
         "enabled": true,
-        "navLinks": [
-          "test"
-        ],
-        "_template": "header"
-      },
-      {
-        "enabled": true,
-        "_template": "hero"
-      },
-      {
-        "_template": "services"
-      },
-      {
-        "enabled": true,
-        "_template": "awards"
-      },
-      {
-        "_template": "timings"
-      },
-      {
-        "enabled": true,
-        "_template": "faq"
-      },
-      {
-        "enabled": true,
-        "_template": "testimonials"
-      },
-      {
-        "enabled": true,
-        "_template": "stats"
-      },
-      {
-        "_template": "cta"
+        "heading": "are you sure to add this",
+        "body": "you are adding this",
+        "_template": "text"
       }
     ]
   },

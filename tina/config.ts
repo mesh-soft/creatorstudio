@@ -98,12 +98,12 @@ const siteFields: TinaField[] = [
         name: "themeId",
         label: "Theme Layout",
         options: [
-          "doctor-standard",
-          "doctor-profile-heavy",
-          "doctor-service-heavy",
-          "hospital-standard",
-          "hospital-emergency-first",
-          "hospital-departments",
+          { label: "Standard Practice", value: "doctor-standard" },
+          { label: "Profile Intensive", value: "doctor-profile-heavy" },
+          { label: "Service Focused", value: "doctor-service-heavy" },
+          { label: "Hospital Standard", value: "hospital-standard" },
+          { label: "Emergency First", value: "hospital-emergency-first" },
+          { label: "Departmental", value: "hospital-departments" },
         ],
       },
       {
@@ -111,16 +111,16 @@ const siteFields: TinaField[] = [
         name: "variantPresetId",
         label: "Variant Preset",
         options: [
-          "doctor-classic",
-          "doctor-editorial",
-          "doctor-compact",
-          "doctor-premium",
-          "doctor-specialist",
-          "hospital-standard",
-          "hospital-emergency",
-          "hospital-specialty",
-          "hospital-community",
-          "hospital-network",
+          { label: "Classic Medical", value: "doctor-classic" },
+          { label: "Editorial Showcase", value: "doctor-editorial" },
+          { label: "Compact Profile", value: "doctor-compact" },
+          { label: "Premium Concierge", value: "doctor-premium" },
+          { label: "Specialist Portfolio", value: "doctor-specialist" },
+          { label: "Standard Institution", value: "hospital-standard" },
+          { label: "Emergency Priority", value: "hospital-emergency" },
+          { label: "Specialty Center", value: "hospital-specialty" },
+          { label: "Community Health", value: "hospital-community" },
+          { label: "Network Directory", value: "hospital-network" },
         ],
       },
       {
@@ -128,16 +128,16 @@ const siteFields: TinaField[] = [
         name: "styleId",
         label: "Style Preset",
         options: [
-          "doctor-teal-clean",
-          "doctor-premium-warm",
-          "doctor-bright-child",
-          "doctor-derma-minimal",
-          "doctor-slate-precision",
-          "hospital-blue-modern",
-          "hospital-green-trust",
-          "hospital-red-emergency",
-          "hospital-indigo-specialty",
-          "hospital-community-soft",
+          { label: "Clinical Emerald", value: "doctor-teal-clean" },
+          { label: "Warm Patient-Centric", value: "doctor-premium-warm" },
+          { label: "Pediatric Playful", value: "doctor-bright-child" },
+          { label: "Minimalist Aesthetic", value: "doctor-derma-minimal" },
+          { label: "Modern Specialist", value: "doctor-slate-precision" },
+          { label: "Trusted Institution", value: "hospital-blue-modern" },
+          { label: "Wellness & Recovery", value: "hospital-green-trust" },
+          { label: "High-Response Emergency", value: "hospital-red-emergency" },
+          { label: "Corporate Specialty", value: "hospital-indigo-specialty" },
+          { label: "Friendly Local Clinic", value: "hospital-community-soft" },
         ],
       },
       {
@@ -175,6 +175,16 @@ const siteFields: TinaField[] = [
           },
         ],
       },
+    ],
+  },
+  {
+    type: "object",
+    name: "header",
+    label: "Global Header",
+    fields: [
+      { type: "boolean", name: "show", label: "Show Header" },
+      { type: "image", name: "logo", label: "Custom Logo" },
+      { type: "string", name: "navLinks", label: "Navigation Links (Label|URL)", list: true },
     ],
   },
   {
@@ -290,6 +300,35 @@ const pageContentFields: TinaField[] = [
     label: "Page Blocks",
     list: true,
     templates: [
+      {
+        name: "header",
+        label: "Header",
+        fields: [
+          { type: "boolean", name: "enabled", label: "Enabled" },
+          { type: "image", name: "logo", label: "Logo Override" },
+          { type: "string", name: "navLinks", label: "Custom Links (Label|URL)", list: true },
+        ],
+      },
+      {
+        name: "awards",
+        label: "Awards & Recognitions",
+        fields: [
+          { type: "boolean", name: "enabled", label: "Enabled" },
+          { type: "string", name: "kicker", label: "Kicker Override" },
+          { type: "string", name: "title", label: "Title Override" },
+          {
+            type: "object",
+            name: "items",
+            label: "Awards",
+            list: true,
+            fields: [
+              { type: "string", name: "title", label: "Award Name" },
+              { type: "string", name: "year", label: "Year" },
+              { type: "string", name: "organization", label: "Organization" },
+            ],
+          },
+        ],
+      },
       { name: "hero", label: "Hero", fields: [{ type: "boolean", name: "enabled", label: "Enabled" }] },
       { name: "profile", label: "Profile", fields: [{ type: "boolean", name: "enabled", label: "Enabled" }] },
       {
@@ -326,6 +365,22 @@ const pageContentFields: TinaField[] = [
           { type: "boolean", name: "enabled", label: "Enabled" },
           { type: "string", name: "kicker", label: "Kicker Override" },
           { type: "string", name: "title", label: "Title Override" },
+        ],
+      },
+      {
+        name: "testimonials",
+        label: "Testimonials",
+        fields: [
+          { type: "boolean", name: "enabled", label: "Enabled" },
+          { type: "string", name: "kicker", label: "Kicker Override" },
+          { type: "string", name: "title", label: "Title Override" },
+        ],
+      },
+      {
+        name: "stats",
+        label: "Stats",
+        fields: [
+          { type: "boolean", name: "enabled", label: "Enabled" },
         ],
       },
       {
@@ -366,12 +421,12 @@ const pageFields: TinaField[] = [
         name: "themeId",
         label: "Theme Layout",
         options: [
-          "doctor-standard",
-          "doctor-profile-heavy",
-          "doctor-service-heavy",
-          "hospital-standard",
-          "hospital-emergency-first",
-          "hospital-departments",
+          { label: "Standard Practice", value: "doctor-standard" },
+          { label: "Profile Intensive", value: "doctor-profile-heavy" },
+          { label: "Service Focused", value: "doctor-service-heavy" },
+          { label: "Hospital Standard", value: "hospital-standard" },
+          { label: "Emergency First", value: "hospital-emergency-first" },
+          { label: "Departmental", value: "hospital-departments" },
         ],
       },
       {
@@ -379,16 +434,16 @@ const pageFields: TinaField[] = [
         name: "variantPresetId",
         label: "Variant Preset",
         options: [
-          "doctor-classic",
-          "doctor-editorial",
-          "doctor-compact",
-          "doctor-premium",
-          "doctor-specialist",
-          "hospital-standard",
-          "hospital-emergency",
-          "hospital-specialty",
-          "hospital-community",
-          "hospital-network",
+          { label: "Classic Medical", value: "doctor-classic" },
+          { label: "Editorial Showcase", value: "doctor-editorial" },
+          { label: "Compact Profile", value: "doctor-compact" },
+          { label: "Premium Concierge", value: "doctor-premium" },
+          { label: "Specialist Portfolio", value: "doctor-specialist" },
+          { label: "Standard Institution", value: "hospital-standard" },
+          { label: "Emergency Priority", value: "hospital-emergency" },
+          { label: "Specialty Center", value: "hospital-specialty" },
+          { label: "Community Health", value: "hospital-community" },
+          { label: "Network Directory", value: "hospital-network" },
         ],
       },
       {
@@ -396,16 +451,16 @@ const pageFields: TinaField[] = [
         name: "styleId",
         label: "Style Preset",
         options: [
-          "doctor-teal-clean",
-          "doctor-premium-warm",
-          "doctor-bright-child",
-          "doctor-derma-minimal",
-          "doctor-slate-precision",
-          "hospital-blue-modern",
-          "hospital-green-trust",
-          "hospital-red-emergency",
-          "hospital-indigo-specialty",
-          "hospital-community-soft",
+          { label: "Clinical Emerald", value: "doctor-teal-clean" },
+          { label: "Warm Patient-Centric", value: "doctor-premium-warm" },
+          { label: "Pediatric Playful", value: "doctor-bright-child" },
+          { label: "Minimalist Aesthetic", value: "doctor-derma-minimal" },
+          { label: "Modern Specialist", value: "doctor-slate-precision" },
+          { label: "Trusted Institution", value: "hospital-blue-modern" },
+          { label: "Wellness & Recovery", value: "hospital-green-trust" },
+          { label: "High-Response Emergency", value: "hospital-red-emergency" },
+          { label: "Corporate Specialty", value: "hospital-indigo-specialty" },
+          { label: "Friendly Local Clinic", value: "hospital-community-soft" },
         ],
       },
     ],
@@ -486,7 +541,7 @@ export default defineConfig({
               return `/site/${tenantSlug}/${pageSlug}/preview`;
             }
             const tenantSlug = getTenantSlugFromSiteDocument(document);
-            return `/site/${tenantSlug}/home/preview`;
+            return `/site/${tenantSlug}/home/preview?editing=site`;
           },
         },
       },
@@ -525,7 +580,7 @@ export default defineConfig({
               return `/site/${tenantSlug}/${pageSlug}/preview`;
             }
             const tenantSlug = getTenantSlugFromSiteDocument(document);
-            return `/site/${tenantSlug}/home/preview`;
+            return `/site/${tenantSlug}/home/preview?editing=site`;
           },
         },
       },

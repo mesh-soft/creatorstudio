@@ -104,6 +104,10 @@
     ],
     "blocks": [
       {
+        "_template": "header",
+        "enabled": true
+      },
+      {
         "_template": "hero",
         "enabled": true
       },
@@ -129,6 +133,18 @@
       },
       {
         "_template": "cta",
+        "enabled": true
+      },
+      {
+        "_template": "awards",
+        "enabled": true
+      },
+      {
+        "_template": "testimonials",
+        "enabled": true
+      },
+      {
+        "_template": "stats",
         "enabled": true
       }
     ]

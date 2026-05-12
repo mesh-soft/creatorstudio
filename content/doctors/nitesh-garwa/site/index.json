@@ -35,9 +35,9 @@
     "mapUrl": "https://maps.google.com"
   },
   "presentation": {
-    "themeId": "doctor-standard",
-    "variantPresetId": "doctor-classic",
-    "styleId": "doctor-slate-precision",
+    "themeId": "doctor-service-heavy",
+    "variantPresetId": "doctor-editorial",
+    "styleId": "hospital-blue-modern",
     "style": {
       "colors": {
         "primary": "#0f766e",
@@ -55,6 +55,15 @@
         "body": "Inter, Arial, sans-serif"
       }
     }
+  },
+  "header": {
+    "show": true,
+    "navLinks": [
+      "Services",
+      "About",
+      "Contact",
+      "Awards"
+    ]
   },
   "seo": {
     "title": "Nitesh Garwa | General Practitioner",
