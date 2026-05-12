@@ -16,6 +16,8 @@ type SitePageProps = {
   }>;
 };
 
+export const dynamic = "force-static";
+
 export function generateStaticParams() {
   return getAllTenantPageParams().map((item) => ({
     tenantId: item.tenantSlug,
@@ -49,6 +51,7 @@ export default async function SitePage({ params, searchParams }: SitePageProps) 
     notFound();
   }
 
+  // For static export, searchParams is empty; studio/draft only work in dev
   const resolvedSearchParams = await searchParams;
   const draftParam = resolvedSearchParams?.draft;
   const studioMode = resolvedSearchParams?.studio === "1";

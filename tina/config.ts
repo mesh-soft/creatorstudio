@@ -68,10 +68,13 @@ const siteFields: TinaField[] = [
       { type: "number", name: "experienceYears", label: "Experience Years" },
       { type: "string", name: "bio", label: "Bio", ui: { component: "textarea" } },
       {
-        type: "image",
+        type: "string",
         name: "photo",
         label: "Photo",
-        description: "Upload to Media → content → doctors/hospitals → [tenant] folder",
+        description: "Upload to tenant's media folder",
+        ui: {
+          component: "TenantImageField",
+        },
       },
     ],
   },
@@ -186,10 +189,13 @@ const siteFields: TinaField[] = [
       { type: "string", name: "description", label: "Description", ui: { component: "textarea" } },
       { type: "string", name: "keywords", label: "Keywords", list: true },
       {
-        type: "image",
+        type: "string",
         name: "ogImage",
         label: "Open Graph Image",
-        description: "Upload to Media → content → doctors/hospitals → [tenant] folder",
+        description: "Upload to tenant's media folder",
+        ui: {
+          component: "TenantImageField",
+        },
       },
     ],
   },
@@ -246,10 +252,13 @@ const pageContentFields: TinaField[] = [
     list: true,
     fields: [
       {
-        type: "image",
+        type: "string",
         name: "src",
         label: "Image",
-        description: "Upload images to Media → content → doctors/hospitals → [tenant] folder",
+        description: "Upload to tenant's media folder",
+        ui: {
+          component: "TenantImageField",
+        },
       },
       { type: "string", name: "alt", label: "Alt Text" },
     ],
@@ -420,10 +429,13 @@ const pageFields: TinaField[] = [
       { type: "string", name: "description", label: "Description", ui: { component: "textarea" } },
       { type: "string", name: "keywords", label: "Keywords", list: true },
       {
-        type: "image",
+        type: "string",
         name: "ogImage",
         label: "Open Graph Image",
-        description: "Upload to Media → content → doctors/hospitals → [tenant] folder",
+        description: "Upload to tenant's media folder",
+        ui: {
+          component: "TenantImageField",
+        },
       },
     ],
   },
@@ -448,6 +460,15 @@ export default defineConfig({
       mediaRoot: "content",
       publicFolder: "public",
     },
+  },
+  cmsCallback: (cms) => {
+    // Register custom TenantImageField component
+    import('../src/components/TenantImageField').then(({ TenantImageField }) => {
+      cms.fields.add({
+        name: 'TenantImageField',
+        Component: TenantImageField,
+      });
+    });
   },
   schema: {
     collections: [
