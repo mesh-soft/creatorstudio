@@ -1,3 +1,0 @@
-[submodule "packages/tinacms"]
-	path = packages/tinacms
-	url = https://github.com/tinacms/tinacms.git

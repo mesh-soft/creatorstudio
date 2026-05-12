@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useCMS } from 'tinacms';
 import type { Media } from 'tinacms';
 
@@ -21,22 +21,29 @@ export function TenantImageField({
 }: TenantImageFieldProps) {
   const cms = useCMS();
 
+  const [, setHashTick] = useState(0);
+  useEffect(() => {
+    const onHashChange = () => setHashTick((t) => t + 1);
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
   const getTenantDirectory = useCallback(() => {
     if (typeof window === 'undefined') return undefined;
     const path = window.location.hash || window.location.pathname;
-    console.log('[TenantImageField] Current path:', path);
     
-    // Tina URL format: #/collections/doctorSite/~/nitesh-garwa/...
-    // Match: /collections/{collectionType}/~/{tenantId}
-    const match = path.match(/\/collections\/(doctorSite|hospitalSite)\/~\/([^\/]+)/);
-    console.log('[TenantImageField] Regex match:', match);
+    // Tina admin URL format (inside iframe):
+    //   #/collections/edit/doctorSite/nitesh-garwa/pages/home.json
+    // OR the ~/  format used in some Tina versions:
+    //   #/collections/doctorSite/~/nitesh-garwa/...
+    const match =
+      path.match(/\/collections\/edit\/(doctorSite|hospitalSite)\/([^/?#\/]+)/) ||
+      path.match(/\/collections\/(doctorSite|hospitalSite)\/~\/([^/?#\/]+)/);
     
     if (match) {
       const type = match[1] === 'doctorSite' ? 'doctors' : 'hospitals';
       const tenantId = match[2];
-      const dir = `content/${type}/${tenantId}`;
-      console.log('[TenantImageField] Directory:', dir);
-      return dir;
+      return `${type}/${tenantId}`;
     }
     return undefined;
   }, []);
