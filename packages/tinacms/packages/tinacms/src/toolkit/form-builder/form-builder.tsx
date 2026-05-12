@@ -1,0 +1,442 @@
+import type { Form } from '@toolkit/forms';
+import * as React from 'react';
+import { type FC, useEffect } from 'react';
+import { FORM_ERROR } from 'final-form';
+import { Form as FinalForm } from 'react-final-form';
+import { Button } from '@toolkit/styles';
+import {
+  DragDropContext,
+  type DropResult,
+} from '../fields/plugins/dnd-kit-wrapper';
+import { FaCircle } from 'react-icons/fa';
+import { cn } from '@utils/cn';
+import { FileStack } from 'lucide-react';
+import { useCMS } from '../react-core';
+import { FieldsBuilder } from './fields-builder';
+import { FormActionMenu } from './form-actions';
+import { FormPortalProvider } from './form-portal';
+import { LoadingDots } from './loading-dots';
+import { ResetForm } from './reset-form';
+import { CreateBranchModal } from './create-branch-modal';
+import { BranchDeletedModal } from './branch-deleted-modal';
+import {
+  SavedContentEvent,
+  SaveContentErrorEvent,
+  FormResetEvent,
+} from '../../lib/posthog/posthog';
+import { captureEvent } from '../../lib/posthog/posthogProvider';
+
+export interface FormBuilderProps {
+  form: { tinaForm: Form; activeFieldName?: string };
+  hideFooter?: boolean;
+  label?: string;
+  onPristineChange?: (_pristine: boolean) => unknown;
+}
+
+interface FormKeyBindingsProps {
+  onSubmit: () => void;
+}
+
+const NoFieldsPlaceholder = () => (
+  <div
+    className='relative flex flex-col items-center justify-center text-center p-5 pb-16 w-full h-full overflow-y-auto'
+    style={{
+      animationName: 'fade-in',
+      animationDelay: '300ms',
+      animationTimingFunction: 'ease-out',
+      animationIterationCount: 1,
+      animationFillMode: 'both',
+      animationDuration: '150ms',
+    }}
+  >
+    <Emoji className='block pb-5'>🤔</Emoji>
+    <h3 className='font-sans font-normal text-lg block pb-5'>
+      Hey, you don't have any fields added to this form.
+    </h3>
+    <p className='block pb-5'>
+      <a
+        className='text-center rounded-3xl border border-solid border-gray-100 shadow-[0_2px_3px_rgba(0,0,0,0.12)] font-normal cursor-pointer text-[12px] transition-all duration-100 ease-out bg-white text-gray-700 py-3 pr-5 pl-14 relative no-underline inline-block hover:text-blue-500'
+        href='https://tinacms.org/docs/fields'
+        target='_blank'
+        rel='noopener noreferrer'
+      >
+        <Emoji
+          className='absolute left-5 top-1/2 origin-center -translate-y-1/2 transition-all duration-100 ease-out'
+          style={{ fontSize: 24 }}
+        >
+          📖
+        </Emoji>{' '}
+        Field Setup Guide
+      </a>
+    </p>
+  </div>
+);
+
+const FormKeyBindings: FC<FormKeyBindingsProps> = ({ onSubmit }) => {
+  // Submit when cmd/ctrl + s is pressed
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        onSubmit();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onSubmit]);
+
+  return null;
+};
+
+export const FormBuilder: FC<FormBuilderProps> = ({
+  form,
+  onPristineChange,
+  ...rest
+}) => {
+  const cms = useCMS();
+  const hideFooter = !!rest.hideFooter;
+  const [createBranchModalOpen, setCreateBranchModalOpen] =
+    React.useState(false);
+  const [deletedBranchModalOpen, setDeletedBranchModalOpen] =
+    React.useState(false);
+  const [isGuardChecking, setIsGuardChecking] = React.useState(false);
+
+  const tinaForm = form.tinaForm;
+  const finalForm = form.tinaForm.finalForm;
+
+  React.useEffect(() => {
+    const collection = cms.api.tina.schema.getCollectionByFullPath(
+      tinaForm.path
+    );
+    if (collection?.ui?.beforeSubmit) {
+      tinaForm.beforeSubmit = (values: any) =>
+        collection.ui.beforeSubmit({ cms, form: tinaForm, values });
+    } else {
+      tinaForm.beforeSubmit = undefined;
+    }
+  }, [tinaForm.path]);
+
+  const moveArrayItem = React.useCallback(
+    (result: DropResult) => {
+      if (!result.destination || !finalForm) return;
+      const name = result.type;
+      finalForm.mutators.move(
+        name,
+        result.source.index,
+        result.destination.index
+      );
+    },
+    [tinaForm]
+  );
+
+  /**
+   * Prevent navigation away from the window when the form is dirty
+   */
+  React.useEffect(() => {
+    // const onBeforeUnload = (event) => {
+    //   event.preventDefault()
+    //   event.returnValue = ''
+    // }
+
+    const unsubscribe = finalForm.subscribe(
+      ({ pristine }) => {
+        if (onPristineChange) {
+          onPristineChange(pristine);
+        }
+
+        // if (!pristine) {
+        //   window.addEventListener('beforeunload', onBeforeUnload)
+        // } else {
+        //   window.removeEventListener('beforeunload', onBeforeUnload)
+        // }
+      },
+      { pristine: true }
+    );
+    return () => {
+      // window.removeEventListener('beforeunload', onBeforeUnload)
+      unsubscribe();
+    };
+  }, [finalForm]);
+
+  const fieldGroup = tinaForm.getActiveField(form.activeFieldName);
+
+  return (
+    <FinalForm
+      key={tinaForm.id}
+      form={tinaForm.finalForm}
+      onSubmit={tinaForm.onSubmit}
+    >
+      {({
+        handleSubmit,
+        pristine,
+        invalid,
+        submitting,
+        dirtySinceLastSubmit,
+        hasValidationErrors,
+      }) => {
+        const usingProtectedBranch = cms.api.tina.usingProtectedBranch();
+
+        const canSubmit =
+          !pristine &&
+          !submitting &&
+          !hasValidationErrors &&
+          !(invalid && !dirtySinceLastSubmit);
+
+        const safeSubmit = async () => {
+          if (canSubmit) {
+            const alertsBefore = new Set(cms.alerts.all.map((a) => a.id));
+            console.debug(
+              '[tina:branch-guard] safeSubmit: calling handleSubmit'
+            );
+
+            const result = await handleSubmit();
+            if (result && result[FORM_ERROR]) {
+              const error = result[FORM_ERROR];
+              const errorMsg =
+                error instanceof Error ? error.message : String(error);
+
+              console.debug(
+                '[tina:branch-guard] safeSubmit: FORM_ERROR detected:',
+                errorMsg
+              );
+
+              // If the save failed because the branch no longer exists,
+              // intercept the generic error alert and replace it with the
+              // branch-deleted modal.
+              if (/branch.*not found/i.test(errorMsg)) {
+                console.debug(
+                  '[tina:branch-guard] safeSubmit: branch-not-found — dismissing alert and opening modal'
+                );
+                for (const alert of cms.alerts.all) {
+                  if (!alertsBefore.has(alert.id) && alert.level === 'error') {
+                    cms.alerts.dismiss(alert);
+                  }
+                }
+                setDeletedBranchModalOpen(true);
+                return;
+              }
+
+              captureEvent(SaveContentErrorEvent, {
+                documentPath: tinaForm.path,
+                error: errorMsg,
+              });
+            } else {
+              captureEvent(SavedContentEvent, {
+                documentPath: tinaForm.path,
+              });
+            }
+          } else {
+            console.debug(
+              '[tina:branch-guard] safeSubmit: skipped — canSubmit is false'
+            );
+          }
+        };
+
+        const safeHandleSubmit = async () => {
+          setIsGuardChecking(true);
+
+          const currentBranch = decodeURIComponent(cms.api.tina.getBranch());
+
+          let exists = true;
+          try {
+            console.debug(
+              '[tina:branch-guard] safeHandleSubmit: checking branch:',
+              currentBranch
+            );
+            exists = await cms.api.tina.branchExists(currentBranch);
+          } catch (err) {
+            console.error(
+              '[tina:branch-guard] safeHandleSubmit: branchExists threw, failing open:',
+              err
+            );
+          }
+
+          console.debug(
+            '[tina:branch-guard] safeHandleSubmit: branchExists returned:',
+            exists
+          );
+          if (!exists) {
+            console.debug(
+              '[tina:branch-guard] safeHandleSubmit: branch missing — opening modal'
+            );
+            setIsGuardChecking(false);
+            setDeletedBranchModalOpen(true);
+            return;
+          }
+
+          if (usingProtectedBranch) {
+            setCreateBranchModalOpen(true);
+          } else {
+            await safeSubmit();
+          }
+
+          setIsGuardChecking(false);
+        };
+
+        return (
+          <>
+            {createBranchModalOpen && (
+              <CreateBranchModal
+                safeSubmit={safeSubmit}
+                crudType={tinaForm.crudType}
+                path={tinaForm.path}
+                values={tinaForm.values}
+                tinaForm={tinaForm}
+                close={() => setCreateBranchModalOpen(false)}
+                onBaseBranchDeleted={() => {
+                  setCreateBranchModalOpen(false);
+                  setDeletedBranchModalOpen(true);
+                }}
+              />
+            )}
+            {deletedBranchModalOpen && (
+              <BranchDeletedModal
+                branchName={decodeURIComponent(cms.api.tina.getBranch())}
+                close={() => setDeletedBranchModalOpen(false)}
+                path={tinaForm.path}
+                values={tinaForm.values}
+                crudType={tinaForm.crudType}
+                tinaForm={tinaForm}
+              />
+            )}
+            <DragDropContext onDragEnd={moveArrayItem}>
+              <FormKeyBindings onSubmit={safeHandleSubmit} />
+              <FormPortalProvider>
+                <FormWrapper id={tinaForm.id}>
+                  {tinaForm?.fields.length ? (
+                    <FieldsBuilder
+                      form={tinaForm}
+                      activeFieldName={form.activeFieldName}
+                      fields={fieldGroup.fields}
+                    />
+                  ) : (
+                    <NoFieldsPlaceholder />
+                  )}
+                </FormWrapper>
+              </FormPortalProvider>
+              {!hideFooter && (
+                <>
+                  <RelatedFilesBanner />
+                  <div className='relative flex-none w-full h-16 px-6 bg-white border-t border-gray-100 flex items-center justify-end'>
+                    <div className='flex-1 w-full justify-end gap-2	flex items-center max-w-form'>
+                      {tinaForm.reset && (
+                        <ResetForm
+                          pristine={pristine}
+                          reset={async () => {
+                            finalForm.reset();
+                            await tinaForm.reset!();
+                            captureEvent(FormResetEvent);
+                          }}
+                        >
+                          {tinaForm.buttons.reset}
+                        </ResetForm>
+                      )}
+                      <Button
+                        onClick={safeHandleSubmit}
+                        disabled={!canSubmit || isGuardChecking}
+                        busy={submitting || isGuardChecking}
+                        variant='primary'
+                      >
+                        {submitting && <LoadingDots />}
+                        {!submitting && tinaForm.buttons.save}
+                      </Button>
+                      {tinaForm.actions.length > 0 && (
+                        <FormActionMenu
+                          form={tinaForm as Form}
+                          actions={tinaForm.actions}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+            </DragDropContext>
+          </>
+        );
+      }}
+    </FinalForm>
+  );
+};
+
+export const FormStatus = ({ pristine }: { pristine: boolean }) => {
+  const pristineClass = pristine ? 'text-green-500' : 'text-red-500';
+  return <FaCircle className={cn('h-3', pristineClass)} />;
+};
+
+const RelatedFilesBanner = () => {
+  const cms = useCMS();
+  const isReferencingManyForms = cms.state.forms.length > 1;
+
+  if (!isReferencingManyForms) {
+    return null;
+  }
+
+  const handleNavigateToRelatedFiles = () => {
+    cms.dispatch({ type: 'forms:set-active-form-id', value: null });
+  };
+
+  return (
+    <div className='relative flex-none w-full border-t border-gray-100'>
+      <button
+        type='button'
+        onClick={handleNavigateToRelatedFiles}
+        className='w-full px-6 py-3 flex items-center gap-2 text-left text-sm text-gray-700 hover:text-orange-500 hover:bg-gray-100 transition-all ease-out duration-150'
+      >
+        <FileStack className='w-5 h-5' />
+        <span>Referenced Files</span>
+      </button>
+    </div>
+  );
+};
+
+export const FormWrapper = ({
+  id,
+  children,
+}: {
+  id: string;
+  children: React.ReactNode;
+}) => {
+  return (
+    <div
+      data-test={`form:${id?.replace(/\\/g, '/')}`}
+      className='h-full overflow-y-auto max-h-full bg-gray-50 @container'
+    >
+      <div className='py-5 px-4'>{children}</div>
+    </div>
+  );
+};
+
+const Emoji = ({ className = '', ...props }) => (
+  <span
+    className={`text-[40px] leading-none inline-block ${className}`}
+    {...props}
+  />
+);
+
+/**
+ * @deprecated
+ * Original misspelt version of CreateBranchModal
+ */
+export const CreateBranchModel = ({
+  close,
+  safeSubmit,
+  relativePath,
+  values,
+  crudType,
+}: {
+  safeSubmit: () => Promise<void>;
+  close: () => void;
+  relativePath: string;
+  values: Record<string, unknown>;
+  crudType: string;
+}) => (
+  <CreateBranchModal
+    close={close}
+    safeSubmit={safeSubmit}
+    path={relativePath}
+    values={values}
+    crudType={crudType}
+  />
+);

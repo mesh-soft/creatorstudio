@@ -1,0 +1,10 @@
+mutation {
+  updatePost(
+    relativePath: "hello-world.md"
+    params: { post: { title: "Ok" } }
+  ) {
+    ... on PostPost {
+      title
+    }
+  }
+}

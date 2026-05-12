@@ -1,0 +1,47 @@
+{
+	"name": "@tinacms/datalayer",
+	"type": "module",
+	"version": "2.0.20",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"package.json",
+		"dist"
+	],
+	"license": "SEE LICENSE IN LICENSE",
+	"buildConfig": {
+		"entryPoints": [
+			{
+				"name": "src/index.ts",
+				"target": "node",
+				"bundle": []
+			}
+		]
+	},
+	"scripts": {
+		"types": "pnpm tsc",
+		"build": "tinacms-scripts build",
+		"test": "jest --passWithNoTests"
+	},
+	"dependencies": {
+		"@tinacms/graphql": "workspace:*"
+	},
+	"publishConfig": {
+		"registry": "https://registry.npmjs.org"
+	},
+	"repository": {
+		"url": "https://github.com/tinacms/tinacms.git",
+		"directory": "packages/@tinacms/datalayer"
+	},
+	"devDependencies": {
+		"@tinacms/scripts": "workspace:*",
+		"@types/fs-extra": "^9.0.13",
+		"@types/jest": "^27.5.2",
+		"@types/js-yaml": "^3.12.10",
+		"@types/level": "catalog:",
+		"@types/node": "^22.13.1",
+		"@types/normalize-path": "catalog:",
+		"jest": "catalog:",
+		"typescript": "^5.7.3"
+	}
+}

@@ -1,0 +1,23 @@
+query {
+  movieConnection(filter: { title: { eq: "Star Wars" }, archived: { eq: true } }) {
+    edges {
+      node {
+        id
+      }
+    }
+  }
+  b: movieConnection(filter: { title: { startsWith: "Star" } }) {
+    edges {
+      node {
+        id
+      }
+    }
+  }
+  c: actorConnection(filter: { name: { eq: "Harrison Ford" } }) {
+    edges {
+      node {
+        id
+      }
+    }
+  }
+}

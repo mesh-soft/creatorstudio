@@ -1,0 +1,6 @@
+query {
+  director (relativePath: "george.md") {
+    id
+    name
+  }
+}

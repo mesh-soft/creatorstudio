@@ -1,0 +1,10 @@
+{
+  "data": {
+    "post": {
+      "title": "Hello, World!",
+      "author": {
+        "name": "Homer J Simpson"
+      }
+    }
+  }
+}

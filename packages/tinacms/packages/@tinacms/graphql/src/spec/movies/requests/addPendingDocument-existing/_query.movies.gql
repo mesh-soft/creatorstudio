@@ -1,0 +1,7 @@
+mutation {
+  addPendingDocument(collection: "movie", relativePath: "star-wars.mdx") {
+    ... on MovieDocument {
+      id
+    }
+  }
+}

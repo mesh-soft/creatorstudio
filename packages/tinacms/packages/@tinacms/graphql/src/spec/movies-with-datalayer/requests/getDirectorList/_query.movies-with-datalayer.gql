@@ -1,0 +1,23 @@
+query {
+  directorConnection {
+    edges {
+      node {
+        name
+      }
+    }
+  },
+  sortedByHeight: directorConnection(sort: "height") {
+    edges {
+      node {
+        name
+      }
+    }
+  },
+  sofiaParent: directorConnection(sort: "name", filter: { relatives: { child: { relative: { name: { eq: "Sofia Coppolla" } } } } }) {
+    edges {
+      node {
+        name
+      }
+    }
+  },
+}

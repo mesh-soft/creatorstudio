@@ -1,0 +1,20 @@
+mutation {
+  updateDocument(
+    relativePath: "star-wars.mdx"
+    # Changes the genre to action
+    params: {
+      movie: {
+        genre: "action"
+        archived: true
+        releaseDate: "2021-02-02T07:00:00.000Z"
+      }
+    }
+  ) {
+    ... on MovieDocument {
+      id
+      releaseDate
+      archived
+      genre
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+	"name": "@tinacms/app",
+	"version": "2.4.7",
+	"main": "src/main.tsx",
+	"license": "Apache-2.0",
+	"devDependencies": {
+		"@types/react": "^18.3.18",
+		"@types/react-dom": "catalog:",
+		"typescript": "^5.7.3"
+	},
+	"peerDependencies": {
+		"react": ">=18.3.1 <20.0.0",
+		"react-dom": ">=18.3.1 <20.0.0"
+	},
+	"dependencies": {
+		"@graphiql/toolkit": "catalog:",
+		"@headlessui/react": "2.1.8",
+		"@heroicons/react": "^1.0.6",
+		"@monaco-editor/react": "catalog:",
+		"@tinacms/mdx": "workspace:*",
+		"final-form": "catalog:",
+		"graphiql": "catalog:",
+		"graphql": "15.8.0",
+		"monaco-editor": "catalog:",
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1",
+		"react-router-dom": "catalog:",
+		"tinacms": "workspace:*",
+		"typescript": "^5.7.3",
+		"zod": "catalog:"
+	},
+	"repository": {
+		"url": "https://github.com/tinacms/tinacms.git",
+		"directory": "packages/@tinacms/app"
+	}
+}

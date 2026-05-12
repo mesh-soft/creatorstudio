@@ -1,0 +1,18 @@
+{
+  "data": {
+    "directorConnection": {
+      "edges": [
+        {
+          "node": {
+            "name": "Francis Ford Coppolla"
+          }
+        },
+        {
+          "node": {
+            "name": "George Lucas"
+          }
+        }
+      ]
+    }
+  }
+}

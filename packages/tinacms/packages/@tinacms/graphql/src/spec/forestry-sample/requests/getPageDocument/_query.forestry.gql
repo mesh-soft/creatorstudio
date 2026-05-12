@@ -1,0 +1,22 @@
+query {
+  page(relativePath: "home.md") {
+    id
+    title
+    seo {
+      seoTitle
+      ogImage
+      ogDescription
+    }
+    blocks {
+      __typename
+      ... on PageBlocksHero {
+        backgroundImage
+        description
+      }
+      ... on PageBlocksCta {
+        ctaText
+        ctaStyle
+      }
+    }
+  }
+}

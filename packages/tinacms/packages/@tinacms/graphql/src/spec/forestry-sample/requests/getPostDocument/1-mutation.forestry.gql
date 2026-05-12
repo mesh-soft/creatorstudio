@@ -1,0 +1,16 @@
+mutation {
+  updatePost(
+    relativePath: "hello-world.md"
+    params: {
+      post: {
+        title: "Hello, again!"
+        author: "content/authors/marge.md"
+        body: "It's working again"
+      }
+    }
+  ) {
+    ...on Document {
+      id
+    }
+  }
+}

@@ -1,0 +1,188 @@
+/**
+
+*/
+
+import React from 'react';
+import { useCMS } from '@tinacms/toolkit';
+import { ContentCreatorPlugin, OnNewDocument } from './create-page-plugin';
+import { Template } from '@tinacms/schema-tools';
+
+export type FilterCollections = (
+  options: {
+    label: string;
+    value: string;
+  }[]
+) => { label: string; value: string }[];
+
+export type DocumentCreatorArgs = {
+  onNewDocument?: OnNewDocument;
+  filterCollections?: FilterCollections;
+};
+
+export const useDocumentCreatorPlugin = (args?: DocumentCreatorArgs) => {
+  const cms = useCMS();
+  const [values, setValues] = React.useState<{
+    collection?: string;
+    template?: string;
+    relativePath?: string;
+  }>({});
+  const [plugin, setPlugin] = React.useState(null);
+
+  React.useEffect(() => {
+    const run = async () => {
+      /**
+       * Query for Collections and Templates
+       */
+      const res: {
+        collections: {
+          label?: string;
+          slug: string;
+          format: string;
+          templates: Template[];
+        }[];
+      } = await cms.api.tina.request(
+        (gql) => gql`
+          {
+            collections {
+              label
+              slug
+              format
+              templates
+            }
+          }
+        `,
+        { variables: {} }
+      );
+
+      /**
+       * Build Collection Options
+       */
+      const allCollectionOptions: { label: string; value: string }[] = [];
+      res.collections.forEach((collection) => {
+        const value = collection.slug;
+        const label = `${collection.label}`;
+        allCollectionOptions.push({ value, label });
+      });
+
+      let collectionOptions;
+      if (
+        args &&
+        args.filterCollections &&
+        typeof args.filterCollections === 'function'
+      ) {
+        const filtered = args.filterCollections(allCollectionOptions);
+        collectionOptions = [
+          { value: '', label: 'Choose Collection' },
+          ...filtered,
+        ];
+      } else {
+        collectionOptions = [
+          { value: '', label: 'Choose Collection' },
+          ...allCollectionOptions,
+        ];
+      }
+
+      /**
+       * Build Template Options
+       */
+      const templateOptions: { label: string; value: string }[] = [
+        { value: '', label: 'Choose Template' },
+      ];
+
+      if (values.collection) {
+        const filteredCollection = res.collections.find(
+          (c) => c.slug === values.collection
+        );
+        filteredCollection?.templates?.forEach((template) => {
+          // @ts-ignore
+          templateOptions.push({ value: template.name, label: template.label });
+        });
+      }
+
+      /**
+       * Build 'Add Document' Form
+       */
+      setPlugin(
+        new ContentCreatorPlugin({
+          label: 'Add Document',
+          onNewDocument: args && args.onNewDocument,
+          // @ts-ignore
+          collections: res.collections,
+          onChange: async ({ values }) => {
+            setValues(values);
+          },
+          initialValues: values,
+          fields: [
+            {
+              component: 'select',
+              name: 'collection',
+              label: 'Collection',
+              description: 'Select the collection.',
+              options: collectionOptions,
+              validate: async (value: any, allValues: any, meta: any) => {
+                if (!value) {
+                  return true;
+                }
+              },
+            },
+            {
+              component: 'select',
+              name: 'template',
+              label: 'Template',
+              description: 'Select the template.',
+              options: templateOptions,
+              validate: async (value: any, allValues: any, meta: any) => {
+                // If there are no templates, this isn't required
+                if (!value && templateOptions.length > 1) {
+                  if (meta.dirty) {
+                    return 'Required';
+                  }
+                  return true;
+                }
+              },
+            },
+            {
+              component: 'text',
+              name: 'relativePath',
+              label: 'Name',
+              description: `A unique name for the content. Example: "newPost" or "blog_022021`,
+              placeholder: 'newPost',
+              validate: (value: any, allValues: any, meta: any) => {
+                if (!value) {
+                  if (meta.dirty) {
+                    return 'Required';
+                  }
+                  return true;
+                }
+
+                /**
+                 * Check for valid `name` based on
+                 * https://github.com/tinacms/tina-graphql-gateway/blob/682e2ed54c51520d1a87fac2887950839892f465/packages/tina-graphql-gateway-cli/src/cmds/compile/index.ts#L296
+                 * */
+
+                const isValid = /^[_a-zA-Z0-9][\-_a-zA-Z0-9]*$/.test(value);
+                if (value && !isValid) {
+                  return 'Must begin with a-z, A-Z, 0-9, or _ and contain only a-z, A-Z, 0-9, - or _';
+                }
+              },
+            },
+          ],
+        })
+      );
+    };
+
+    run();
+  }, [cms]);
+
+  React.useEffect(() => {
+    if (plugin) {
+      cms.plugins.add(plugin);
+    }
+
+    return () => {
+      if (plugin) {
+        cms.plugins.remove(plugin);
+      }
+    };
+  }, [plugin]);
+};

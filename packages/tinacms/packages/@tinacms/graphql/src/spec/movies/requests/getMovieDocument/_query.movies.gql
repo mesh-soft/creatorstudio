@@ -1,0 +1,26 @@
+query {
+  movie(relativePath: "star-wars.mdx") {
+    id
+    _sys {
+      filename
+      basename
+      breadcrumbs
+      path
+      relativePath
+      extension
+      template
+      collection {
+        name
+      }
+    }
+    title
+    genre
+    body
+    rating
+    director {
+      ... on Director {
+        name
+      }
+    }
+  }
+}

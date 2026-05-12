@@ -1,0 +1,433 @@
+import {
+  Breadcrumb,
+  BreadcrumbEllipsis,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@toolkit/components/ui/breadcrumb';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@toolkit/components/ui/dropdown-menu';
+import { FormBuilder, FormStatus } from '@toolkit/form-builder';
+import type { Form } from '@toolkit/forms';
+import type { FormMetaPlugin } from '@toolkit/plugin-form-meta';
+import { useCMS } from '@toolkit/react-core';
+import * as React from 'react';
+import { FormLists } from './form-list';
+import { SidebarContext } from './sidebar';
+import { SidebarLoadingPlaceholder } from './sidebar-loading-placeholder';
+import { SidebarNoFormsPlaceholder } from './sidebar-no-forms-placeholder';
+import { History } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../../../admin/components/ui/tooltip';
+import { Transition } from '@headlessui/react';
+
+// this is the minimum time to show the loading indicator (in milliseconds)
+// this is to prevent the loading indicator from flashing or the 'no forms' placeholder from showing pre-maturely
+const minimumTimeToShowLoadingIndicator = 1000;
+
+export interface FormsViewProps {
+  loadingPlaceholder?: React.FC;
+}
+
+export const FormsView = ({ loadingPlaceholder }: FormsViewProps = {}) => {
+  const cms = useCMS();
+  const { setFormIsPristine } = React.useContext(SidebarContext);
+  const [isShowingLoading, setIsShowingLoading] = React.useState(true); // Default to showing loading
+  const [initialLoadComplete, setInitialLoadComplete] = React.useState(false);
+  const [lastActiveFormId, setLastActiveFormId] = React.useState<string | null>(
+    null
+  );
+
+  // Track the last active form ID for the back button
+  React.useEffect(() => {
+    if (cms.state.activeFormId) {
+      setLastActiveFormId(cms.state.activeFormId);
+    }
+  }, [cms.state.activeFormId]);
+
+  // Handle loading state with minimum display time
+  React.useEffect(() => {
+    // Always start with loading state
+    if (cms.state.isLoadingContent) {
+      setIsShowingLoading(true);
+
+      // Even if loading completes quickly, show the placeholder for a minimum time
+      const timer = setTimeout(() => {
+        if (!cms.state.isLoadingContent) {
+          setIsShowingLoading(false);
+          setInitialLoadComplete(true);
+        }
+      }, minimumTimeToShowLoadingIndicator);
+
+      return () => clearTimeout(timer);
+    } else {
+      // If not loading anymore, check if we need to maintain the placeholder
+      const timer = setTimeout(() => {
+        setIsShowingLoading(false);
+        setInitialLoadComplete(true);
+      }, minimumTimeToShowLoadingIndicator);
+
+      return () => clearTimeout(timer);
+    }
+  }, [cms.state.isLoadingContent]);
+
+  if (isShowingLoading || !initialLoadComplete) {
+    // Loading - show when explicitly loading or during initial render
+    const LoadingPlaceholder = loadingPlaceholder || SidebarLoadingPlaceholder;
+    return <LoadingPlaceholder />;
+  }
+
+  if (!cms.state.formLists.length) {
+    // No Forms
+    return <SidebarNoFormsPlaceholder />;
+  }
+  const isReferencingManyForms = cms.state.forms.length > 1;
+  const activeForm = cms.state.forms.find(
+    ({ tinaForm }) => tinaForm.id === cms.state.activeFormId
+  );
+  const isEditing = !!activeForm;
+  const formMetas = cms.plugins.all<FormMetaPlugin>('form:meta');
+
+  // Single form - no transitions needed
+  if (!isReferencingManyForms) {
+    return (
+      <>
+        {activeForm && (
+          <div className='flex-1 flex flex-col flex-nowrap overflow-hidden h-full w-full relative bg-white'>
+            <FormHeader
+              activeForm={activeForm}
+              branch={cms.api.admin.api.branch}
+              repoProvider={cms.api.admin.api.schema.config.config.repoProvider}
+              isLocalMode={cms.api?.tina?.isLocalMode}
+            />
+            {formMetas?.map((meta) => (
+              <React.Fragment key={meta.name}>
+                <meta.Component />
+              </React.Fragment>
+            ))}
+            <FormBuilder
+              form={activeForm}
+              onPristineChange={setFormIsPristine}
+            />
+          </div>
+        )}
+      </>
+    );
+  }
+
+  // Referencing many forms - coordinate transitions between list and form view
+  return (
+    <>
+      {/* Form List View - shows when not editing */}
+      <Transition
+        show={!isEditing}
+        as='div'
+        className='h-full flex flex-col'
+        enter='transition-all ease-out duration-150'
+        enterFrom='opacity-0 translate-y-1/2'
+        enterTo='opacity-100 translate-y-0'
+        leave='transition-all ease-out duration-150'
+        leaveFrom='opacity-100 translate-y-0'
+        leaveTo='opacity-0 translate-y-1/2'
+      >
+        <FormLists lastActiveFormId={lastActiveFormId} />
+      </Transition>
+
+      {/* Form Edit View - shows when editing */}
+      <Transition
+        show={isEditing}
+        as='div'
+        className='flex-1 flex flex-col flex-nowrap overflow-hidden h-full w-full relative bg-white'
+        enter='transition-opacity ease-out duration-150 delay-150'
+        enterFrom='opacity-0'
+        enterTo='opacity-100'
+        leave='transition-opacity ease-out duration-150'
+        leaveFrom='opacity-100'
+        leaveTo='opacity-0'
+      >
+        {activeForm && (
+          <>
+            <FormHeader
+              activeForm={activeForm}
+              branch={cms.api.admin.api.branch}
+              repoProvider={cms.api.admin.api.schema.config.config.repoProvider}
+              isLocalMode={cms.api?.tina?.isLocalMode}
+            />
+            {formMetas?.map((meta) => (
+              <React.Fragment key={meta.name}>
+                <meta.Component />
+              </React.Fragment>
+            ))}
+            <FormBuilder
+              form={activeForm}
+              onPristineChange={setFormIsPristine}
+            />
+          </>
+        )}
+      </Transition>
+    </>
+  );
+};
+
+export interface FormHeaderProps {
+  activeForm: { activeFieldName?: string; tinaForm: Form };
+  branch?: string;
+  isLocalMode?: boolean;
+  repoProvider?: {
+    defaultBranchName?: string;
+    historyUrl?: (context: {
+      relativePath: string;
+      branch: string;
+    }) => { url: string };
+  };
+}
+
+export const FormHeader = ({
+  activeForm,
+  repoProvider,
+  branch,
+  isLocalMode,
+}: FormHeaderProps) => {
+  const { formIsPristine } = React.useContext(SidebarContext);
+
+  return (
+    <div className='px-4 pt-2 pb-4 flex flex-row flex-nowrap justify-between items-center gap-2 bg-gradient-to-t from-white to-gray-50 border-b border-gray-100'>
+      <FormBreadcrumbs
+        className='w-[calc(100%-3rem)]'
+        contentPath={activeForm.tinaForm.path}
+      />
+      <FileHistoryProvider
+        defaultBranchName={repoProvider?.defaultBranchName}
+        historyUrl={repoProvider?.historyUrl}
+        contentRelativePath={activeForm.tinaForm.path}
+        tinaBranch={branch}
+        isLocalMode={isLocalMode}
+      />
+      <FormStatus pristine={formIsPristine} />
+    </div>
+  );
+};
+
+interface RepositoryProviderProps {
+  contentRelativePath: string;
+  tinaBranch?: string;
+  isLocalMode?: boolean;
+  defaultBranchName?: string;
+  historyUrl?: (context: {
+    relativePath: string;
+    branch: string;
+  }) => { url: string };
+}
+
+export const FileHistoryProvider = ({
+  contentRelativePath,
+  tinaBranch,
+  defaultBranchName,
+  historyUrl,
+  isLocalMode,
+}: RepositoryProviderProps) => {
+  if (!historyUrl) {
+    return null;
+  }
+
+  const branch = isLocalMode ? defaultBranchName || tinaBranch : tinaBranch;
+
+  if (!branch) {
+    return null;
+  }
+
+  const { url } = historyUrl({
+    relativePath: contentRelativePath,
+    branch: branch,
+  });
+
+  if (!url) {
+    return null;
+  }
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button type='button'>
+            <a
+              href={url}
+              target='_blank'
+              className='flex items-center gap-1 border-[0.5px] hover:bg-gray-300/10 transition-all duration-300 border-gray-300 rounded-md p-2'
+            >
+              <History className='size-4 text-gray-700' />
+            </a>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side='top' className='shadow-md'>
+          View file history
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
+
+const BreadcrumbItemLink = ({
+  breadcrumb,
+  onClick,
+}: { breadcrumb: string; onClick: () => void }) => {
+  return (
+    <BreadcrumbItem className='shrink truncate'>
+      <BreadcrumbLink
+        asChild
+        className='text-gray-700 truncate hover:text-orange-500'
+      >
+        <button type='button' onClick={onClick}>
+          {breadcrumb}
+        </button>
+      </BreadcrumbLink>
+    </BreadcrumbItem>
+  );
+};
+
+const FinalBreadcrumbItem = ({ breadcrumb }: { breadcrumb: string }) => {
+  return (
+    <BreadcrumbItem className='shrink truncate'>
+      <BreadcrumbPage className='text-gray-700 font-medium cursor-default'>
+        {breadcrumb}
+      </BreadcrumbPage>
+    </BreadcrumbItem>
+  );
+};
+
+export const FormBreadcrumbs = ({
+  rootBreadcrumbName,
+  contentPath,
+  ...props
+}: {
+  rootBreadcrumbName?: string;
+  contentPath?: string;
+} & React.HTMLAttributes<HTMLDivElement>) => {
+  const cms = useCMS();
+  const breadcrumbs = cms.state.breadcrumbs;
+
+  if (breadcrumbs.length === 0) {
+    return null;
+  }
+
+  const goBack = (formId: string, fieldName: string) => {
+    cms.dispatch({
+      type: 'forms:set-active-field-name',
+      value: {
+        formId,
+        fieldName,
+      },
+    });
+  };
+
+  const firstBreadcrumb = breadcrumbs[0];
+  const secondLastBreadcrumb =
+    breadcrumbs.length > 2 ? breadcrumbs[breadcrumbs.length - 2] : null;
+  const lastBreadcrumb =
+    breadcrumbs.length > 1 ? breadcrumbs[breadcrumbs.length - 1] : null;
+  const dropdownBreadcrumbs =
+    breadcrumbs.length > 3 ? breadcrumbs.slice(1, -2) : [];
+
+  return (
+    <Breadcrumb {...props}>
+      <BreadcrumbList className='flex-nowrap text-nowrap'>
+        {/* First breadcrumb */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                {breadcrumbs.length > 1 ? (
+                  <BreadcrumbItemLink
+                    breadcrumb={rootBreadcrumbName || firstBreadcrumb.label}
+                    onClick={() =>
+                      goBack(firstBreadcrumb.formId, firstBreadcrumb.formName)
+                    }
+                  />
+                ) : (
+                  <FinalBreadcrumbItem
+                    breadcrumb={rootBreadcrumbName || firstBreadcrumb.label}
+                  />
+                )}
+              </span>
+            </TooltipTrigger>
+            {contentPath && (
+              <TooltipContent
+                side='bottom'
+                align='start'
+                className='shadow-md max-w-xs break-all'
+              >
+                {contentPath}
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+
+        {/* Dropdown for middle breadcrumbs */}
+        {dropdownBreadcrumbs.length > 0 && (
+          <>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <DropdownMenu>
+                <DropdownMenuTrigger className='flex items-center gap-1'>
+                  <BreadcrumbEllipsis className='size-4' />
+                  <span className='sr-only'>Toggle menu</span>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align='start'>
+                  {dropdownBreadcrumbs.map((breadcrumb) => (
+                    <DropdownMenuItem
+                      key={breadcrumb.formId}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        goBack(breadcrumb.formId, breadcrumb.formName);
+                      }}
+                    >
+                      {breadcrumb.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </BreadcrumbItem>
+          </>
+        )}
+
+        {/* Second last breadcrumb */}
+        {secondLastBreadcrumb && (
+          <>
+            <BreadcrumbSeparator />
+            {breadcrumbs.length > 1 ? (
+              <BreadcrumbItemLink
+                breadcrumb={secondLastBreadcrumb.label}
+                onClick={() =>
+                  goBack(
+                    secondLastBreadcrumb.formId,
+                    secondLastBreadcrumb.formName
+                  )
+                }
+              />
+            ) : (
+              <FinalBreadcrumbItem breadcrumb={secondLastBreadcrumb.label} />
+            )}
+          </>
+        )}
+
+        {/* Last breadcrumb - only use when there is more than 2 breadcrumbs */}
+        {lastBreadcrumb && (
+          <>
+            {breadcrumbs.length > 1 && <BreadcrumbSeparator />}
+            <FinalBreadcrumbItem breadcrumb={lastBreadcrumb.label} />
+          </>
+        )}
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
+};

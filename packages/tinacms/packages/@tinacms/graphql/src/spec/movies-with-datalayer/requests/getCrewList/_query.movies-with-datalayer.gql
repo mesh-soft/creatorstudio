@@ -1,0 +1,22 @@
+{
+  crewConnection (filter: { costumeDesigner: { favoriteColor: { eq: "blue" } } }) {
+    edges {
+      node {
+        ...on Document {
+          id
+        }
+      }
+    }
+  }
+  shouldBeEmpty: crewConnection(
+    filter: { costumeDesigner: { favoriteColor: { eq: "red" } } }
+  ) {
+    edges {
+      node {
+        ...on Document {
+          id
+        }
+      }
+    }
+  }
+}

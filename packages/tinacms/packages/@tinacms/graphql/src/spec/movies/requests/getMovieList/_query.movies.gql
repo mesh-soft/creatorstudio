@@ -1,0 +1,10 @@
+query {
+  # intentional error
+  movieConnectionZ(filter: { archived: { eq: true } }) {
+    edges {
+      node {
+        id
+      }
+    }
+  }
+}

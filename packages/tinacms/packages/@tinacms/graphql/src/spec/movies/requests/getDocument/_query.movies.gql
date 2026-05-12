@@ -1,0 +1,14 @@
+query {
+  document(collection: "movie", relativePath: "star-wars.mdx") {
+    ... on Movie {
+      id
+      title
+      genre
+      director {
+        ... on Director {
+            name
+        }
+      }
+    }
+  }
+}

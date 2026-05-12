@@ -1,0 +1,14 @@
+query {
+  post(relativePath: "hello-world.md") {
+    ... on PostPost{
+      title
+      author {
+        ...AuthorFragment
+      }
+    }
+  }
+}
+
+fragment AuthorFragment on AuthorAuthor {
+  name
+}

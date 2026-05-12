@@ -1,0 +1,41 @@
+{
+  "data": {
+    "directorConnection": {
+      "edges": [
+        {
+          "node": {
+            "name": "Francis Ford Coppolla"
+          }
+        },
+        {
+          "node": {
+            "name": "George Lucas"
+          }
+        }
+      ]
+    },
+    "sortedByHeight": {
+      "edges": [
+        {
+          "node": {
+            "name": "George Lucas"
+          }
+        },
+        {
+          "node": {
+            "name": "Francis Ford Coppolla"
+          }
+        }
+      ]
+    },
+    "sofiaParent": {
+      "edges": [
+        {
+          "node": {
+            "name": "Francis Ford Coppolla"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "data": {
+    "author": {
+      "__typename": "AuthorAuthor",
+      "name": "Homer Jay Simpson",
+      "socialMedia": [
+        {
+          "platform": "instagram",
+          "handle": "homerJay"
+        }
+      ]
+    }
+  }
+}

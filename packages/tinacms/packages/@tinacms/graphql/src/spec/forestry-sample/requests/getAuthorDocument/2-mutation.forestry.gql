@@ -1,0 +1,16 @@
+mutation {
+  updateAuthor(
+    relativePath: "homer.md"
+    params: {
+      author: {
+        name: "Homer J"
+        socialMedia: [{ handle: "homerJay", platform: "instagram" }]
+      }
+    }
+  ) {
+    ... on AuthorAuthor {
+      id
+      name
+    }
+  }
+}

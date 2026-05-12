@@ -1,0 +1,15 @@
+{
+  "data": {
+    "collections": [
+      {
+        "name": "movie"
+      },
+      {
+        "name": "director"
+      },
+      {
+        "name": "actor"
+      }
+    ]
+  }
+}
