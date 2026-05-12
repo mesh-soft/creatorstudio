@@ -483,10 +483,10 @@ export default defineConfig({
             if (pagesIndex > 0) {
               const tenantSlug = breadcrumbs[pagesIndex - 1] ?? "";
               const pageSlug = document?._sys?.filename ?? "home";
-              return `/site/${tenantSlug}/${pageSlug}`;
+              return `/site/${tenantSlug}/${pageSlug}/preview`;
             }
             const tenantSlug = getTenantSlugFromSiteDocument(document);
-            return `/site/${tenantSlug}/home`;
+            return `/site/${tenantSlug}/home/preview`;
           },
         },
       },
@@ -522,10 +522,10 @@ export default defineConfig({
             if (pagesIndex > 0) {
               const tenantSlug = breadcrumbs[pagesIndex - 1] ?? "";
               const pageSlug = document?._sys?.filename ?? "home";
-              return `/site/${tenantSlug}/${pageSlug}`;
+              return `/site/${tenantSlug}/${pageSlug}/preview`;
             }
             const tenantSlug = getTenantSlugFromSiteDocument(document);
-            return `/site/${tenantSlug}/home`;
+            return `/site/${tenantSlug}/home/preview`;
           },
         },
       },
