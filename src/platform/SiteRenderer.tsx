@@ -2,7 +2,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { tinaField } from "tinacms/dist/react";
-import { getPreset } from "./catalog";
+import { getPreset, stylePresets } from "./catalog";
 import type { Tenant, TenantBlock } from "./types";
 
 type SiteRendererProps = {
@@ -32,7 +32,11 @@ const defaultStyle = {
 
 export function SiteRenderer({ tenant, previewLinks = false, tinaDocument, studioMode = false }: SiteRendererProps) {
   const preset = getPreset(tenant);
-  const style = tenant.presentation?.style ?? defaultStyle;
+  const styleId = tenant.presentation?.styleId;
+  const catalogStyle = styleId ? stylePresets[styleId] : undefined;
+  
+  // Priority: Catalog Preset -> Explicit Style Object -> Default Style
+  const style = catalogStyle ?? tenant.presentation?.style ?? defaultStyle;
   const colors = style.colors ?? defaultStyle.colors;
   const shape = style.shape ?? defaultStyle.shape;
   const typography = style.typography ?? defaultStyle.typography;

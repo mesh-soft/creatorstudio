@@ -176,3 +176,20 @@ export type VariantPreset = {
   faq: string;
   cta: string;
 };
+export type StylePreset = {
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: string;
+    surface: string;
+    text: string;
+  };
+  shape: {
+    radius: string;
+  };
+  typography: {
+    heading: string;
+    body: string;
+  };
+};
