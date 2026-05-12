@@ -220,13 +220,57 @@ export const variantPresets: Record<TenantType, Record<string, VariantPreset>> =
   },
 };
 
+export const themeLayouts: Record<string, TenantBlock[]> = {
+  "doctor-standard": [
+    { _template: "hero", enabled: true },
+    { _template: "profile", enabled: true },
+    { _template: "services", enabled: true },
+    { _template: "gallery", enabled: true },
+    { _template: "cta", enabled: true },
+  ],
+  "doctor-profile-heavy": [
+    { _template: "hero", enabled: true },
+    { _template: "profile", enabled: true },
+    { _template: "timings", enabled: true },
+    { _template: "faq", enabled: true },
+    { _template: "cta", enabled: true },
+  ],
+  "doctor-service-heavy": [
+    { _template: "hero", enabled: true },
+    { _template: "services", enabled: true },
+    { _template: "timings", enabled: true },
+    { _template: "profile", enabled: true },
+    { _template: "cta", enabled: true },
+  ],
+  "hospital-standard": [
+    { _template: "hero", enabled: true },
+    { _template: "services", enabled: true },
+    { _template: "timings", enabled: true },
+    { _template: "gallery", enabled: true },
+    { _template: "cta", enabled: true },
+  ],
+  "hospital-emergency-first": [
+    { _template: "timings", enabled: true },
+    { _template: "hero", enabled: true },
+    { _template: "services", enabled: true },
+    { _template: "cta", enabled: true },
+  ],
+};
+
 export function getPreset(tenant: Tenant): VariantPreset {
   const typePresets = variantPresets[tenant.tenantType];
   if (!typePresets) {
     return Object.values(variantPresets.doctor)[0];
   }
-  const preset = typePresets[tenant.presentation?.variantPresetId];
+  const presetId = tenant.presentation?.variantPresetId;
+  const preset = typePresets[presetId];
   if (preset) return preset;
+  
   const firstPreset = Object.values(typePresets)[0];
   return firstPreset ?? Object.values(variantPresets.doctor)[0];
+}
+
+export function getThemeBlocks(tenant: Tenant): TenantBlock[] {
+  const themeId = tenant.presentation?.themeId;
+  return themeLayouts[themeId] ?? themeLayouts["doctor-standard"];
 }

@@ -2,7 +2,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { tinaField } from "tinacms/dist/react";
-import { getPreset, stylePresets } from "./catalog";
+import { getPreset, getThemeBlocks, stylePresets } from "./catalog";
 import type { Tenant, TenantBlock } from "./types";
 
 type SiteRendererProps = {
@@ -70,7 +70,10 @@ function renderBlocks(
   tinaDocument?: Record<string, unknown>,
   studioMode = false
 ) {
-  const blocks = Array.isArray(tenant.content.blocks) && tenant.content.blocks.length > 0 ? tenant.content.blocks : defaultBlocks;
+  const themeBlocks = getThemeBlocks(tenant);
+  const blocks = Array.isArray(tenant.content.blocks) && tenant.content.blocks.length > 0 
+    ? tenant.content.blocks 
+    : themeBlocks;
   const tinaBlocks = Array.isArray((tinaDocument?.content as { blocks?: unknown[] } | undefined)?.blocks)
     ? ((tinaDocument?.content as { blocks?: unknown[] }).blocks ?? [])
     : [];

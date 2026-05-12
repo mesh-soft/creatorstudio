@@ -1,12 +1,8 @@
 import { listTenantPages, getAllTenants } from "@/platform/content";
 import { CreatorStudioClient } from "./CreatorStudioClient";
 
-export const dynamicParams = false;
-
-export async function generateStaticParams() {
-  // Exclude Creator Studio from static export - it's dynamic admin interface
-  return [];
-}
+export const dynamic = "force-dynamic";
+export const dynamicParams = true;
 
 type CreatorPageProps = {
   params: Promise<{

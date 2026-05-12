@@ -445,3 +445,102 @@ a {
     height: 250px;
   }
 }
+
+/* Theme Variants: Hero */
+.hero-centered, .hero-community, .hero-compact {
+  grid-template-columns: 1fr;
+  text-align: center;
+  min-height: 400px;
+}
+.hero-centered .hero-photo, .hero-community .hero-photo, .hero-compact .hero-photo {
+  display: none;
+}
+.hero-profile-card {
+  grid-template-columns: 1fr 1fr;
+  background: var(--surface);
+  border-radius: calc(var(--radius) * 2);
+  margin: 20px;
+}
+.hero-emergency {
+  background: color-mix(in srgb, #ef4444, white 90%);
+  border-left: 10px solid #ef4444;
+}
+
+/* Theme Variants: Profile */
+.profile-editorial {
+  grid-template-columns: 1fr;
+}
+.profile-editorial .hero-photo {
+  height: 600px;
+  margin-bottom: 24px;
+}
+.profile-credentials {
+  grid-template-columns: 1fr 300px;
+}
+.profile-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* Theme Variants: Services */
+.services-featured {
+  grid-template-columns: 1fr;
+}
+.services-featured .card {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 24px;
+  align-items: center;
+}
+
+/* Theme Variants: Gallery */
+.gallery-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+.gallery-strip {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding-bottom: 10px;
+}
+.gallery-strip img {
+  flex: 0 0 300px;
+}
+
+/* Theme Variants: CTA */
+.cta-banner {
+  flex-direction: row;
+}
+.cta-floating {
+  position: sticky;
+  bottom: 20px;
+  margin: 0 20px;
+  border-radius: 999px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.cta-inline {
+  background: none;
+  color: var(--site-text);
+  border-top: 1px solid var(--primary);
+  padding: 40px 0;
+}
+.cta-inline h2, .cta-inline p {
+  color: var(--site-text);
+}
+
+.hero-emergency, .hero-specialty, .hero-network, .hero-hospital {
+  background: linear-gradient(to bottom, var(--surface), white);
+  border-bottom: 2px solid var(--primary);
+}
+.hero-credential {
+  grid-template-columns: 0.8fr 1.2fr;
+  background: var(--surface);
+  border-radius: 0;
+  border-left: 6px solid var(--primary);
+}
+.profile-overview, .profile-leadership {
+  grid-template-columns: 1fr;
+  max-width: 900px;
+  margin: 0 auto;
+}
