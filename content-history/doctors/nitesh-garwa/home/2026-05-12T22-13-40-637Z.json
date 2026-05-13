@@ -1,4 +1,11 @@
 {
+  "slug": "home",
+  "title": "Home",
+  "path": "/",
+  "isHome": true,
+  "presentation": {
+    "styleId": "hospital-blue-modern"
+  },
   "blocks": [
     {
       "enabled": true,
@@ -139,22 +146,6 @@
       "title": "Ready to book?",
       "body": "Call or WhatsApp the clinic.",
       "_template": "cta"
-    }
-  ],
-  "settings": [
-    {
-      "slug": "home",
-      "title": "Home",
-      "path": "/",
-      "isHome": true,
-      "_template": "urlSettings"
-    },
-    {
-      "styleId": "hospital-blue-modern",
-      "_template": "presentation"
-    },
-    {
-      "_template": "seo"
     }
   ],
   "_template": "page"

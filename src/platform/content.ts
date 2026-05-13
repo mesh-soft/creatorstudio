@@ -42,12 +42,32 @@ export function listTenantPages(tenantType: TenantType, tenantSlug: string): Ten
   return readTenantFolders(tenantType).find((entry) => entry.tenantSlug === tenantSlug)?.pages ?? [];
 }
 
+function getUrlSettings(page: TenantPage) {
+  const block = Array.isArray(page.settings) ? page.settings.find((s) => s._template === "urlSettings") : undefined;
+  return {
+    slug: block && "slug" in block ? block.slug : page.slug,
+    title: block && "title" in block ? block.title : page.title,
+    path: block && "path" in block ? block.path : page.path,
+    isHome: block && "isHome" in block ? block.isHome : page.isHome,
+  };
+}
+
+function getPagePresentation(page: TenantPage) {
+  const block = Array.isArray(page.settings) ? page.settings.find((s) => s._template === "presentation") : undefined;
+  return block ?? page.presentation;
+}
+
+function getPageSeo(page: TenantPage) {
+  const block = Array.isArray(page.settings) ? page.settings.find((s) => s._template === "seo") : undefined;
+  return block ?? page.seo;
+}
+
 export function getTenantPageBySlug(
   tenantType: TenantType,
   tenantSlug: string,
   pageSlug: string
 ): TenantPage | undefined {
-  return listTenantPages(tenantType, tenantSlug).find((page) => page.slug === pageSlug);
+  return listTenantPages(tenantType, tenantSlug).find((page) => getUrlSettings(page).slug === pageSlug);
 }
 
 export function getTenantByPageSlug(tenantSlug: string, pageSlug: string): Tenant | undefined {
@@ -55,7 +75,7 @@ export function getTenantByPageSlug(tenantSlug: string, pageSlug: string): Tenan
   const entry = allEntries.find((item) => item.tenantSlug === tenantSlug);
   if (!entry) return undefined;
 
-  const page = entry.pages.find((item) => item.slug === pageSlug);
+  const page = entry.pages.find((item) => getUrlSettings(item).slug === pageSlug);
   if (!page) return undefined;
   return composeTenant(entry.tenantSlug, entry.site, page);
 }
@@ -64,7 +84,7 @@ export function getAllTenantPageParams(): Array<{ tenantSlug: string; pageSlug: 
   return [...readTenantFolders("doctor"), ...readTenantFolders("hospital")].flatMap((entry) =>
     entry.pages.map((page) => ({
       tenantSlug: entry.tenantSlug,
-      pageSlug: page.slug,
+      pageSlug: getUrlSettings(page).slug || "home",
     }))
   );
 }
@@ -120,27 +140,31 @@ function readTenantPages(tenantDirectory: string, site: TenantSite): TenantPage[
       .readdirSync(pagesDirectory)
       .filter((entry) => entry.endsWith(".json"))
       .map((entry) => JSON.parse(fs.readFileSync(path.join(pagesDirectory, entry), "utf8")) as TenantPage)
-      .sort((a, b) => Number(Boolean(b.isHome)) - Number(Boolean(a.isHome)) || a.slug.localeCompare(b.slug));
+      .sort((a, b) => {
+        const aUrl = getUrlSettings(a);
+        const bUrl = getUrlSettings(b);
+        const aIsHome = aUrl.isHome;
+        const bIsHome = bUrl.isHome;
+        const aSlug = aUrl.slug ?? "";
+        const bSlug = bUrl.slug ?? "";
+        return Number(Boolean(bIsHome)) - Number(Boolean(aIsHome)) || aSlug.localeCompare(bSlug);
+      });
   }
 
   return site.pages ?? [];
 }
 
 function applyHomePageSiteOverrides(site: TenantSite, pages: TenantPage[]): TenantSite {
-  const homePage = pages.find((page) => page.slug === "home" || page.isHome) as Partial<TenantSite> | undefined;
+  const homePage = pages.find((page) => getUrlSettings(page).slug === "home" || getUrlSettings(page).isHome);
   if (!homePage) return site;
+
+  const presentation = getPagePresentation(homePage);
+  const seo = getPageSeo(homePage);
 
   return {
     ...site,
-    tenantId: homePage.tenantId ?? site.tenantId,
-    tenantType: homePage.tenantType ?? site.tenantType,
-    status: homePage.status ?? site.status,
-    subscription: homePage.subscription ?? site.subscription,
-    domains: homePage.domains ?? site.domains,
-    profile: homePage.profile ?? site.profile,
-    business: homePage.business ?? site.business,
-    presentation: homePage.presentation && "style" in homePage.presentation ? homePage.presentation : site.presentation,
-    seo: homePage.seo ?? site.seo,
+    presentation: presentation && "style" in presentation ? (presentation as any) : site.presentation,
+    seo: seo ?? site.seo,
   };
 }
 
@@ -178,21 +202,26 @@ function composeTenant(tenantSlug: string, site: TenantSite, page: TenantPage): 
     },
   };
   const sitePresentation = site.presentation ?? defaultPresentation;
+  const pagePres = getPagePresentation(page);
   const presentation = {
-    themeId: page.presentation?.themeId ?? sitePresentation.themeId,
-    variantPresetId: page.presentation?.variantPresetId ?? sitePresentation.variantPresetId,
-    styleId: page.presentation?.styleId ?? sitePresentation.styleId,
+    themeId: pagePres?.themeId ?? sitePresentation.themeId,
+    variantPresetId: pagePres?.variantPresetId ?? sitePresentation.variantPresetId,
+    styleId: pagePres?.styleId ?? sitePresentation.styleId,
     style: sitePresentation.style, // Style overrides are always from site level
   };
 
   // Merge site-level and page-level SEO (page overrides site)
   const seo = {
     ...site.seo,
-    ...(page.seo ?? {}),
+    ...(getPageSeo(page) ?? {}),
   };
 
-  const { slug, title, isHome, content } = page;
-  const pagePath = typeof page.path === "string" && page.path.startsWith("/") ? page.path : `/${page.path ?? slug}`;
+  const urlSettings = getUrlSettings(page);
+  const slug = urlSettings.slug;
+  const title = urlSettings.title;
+  const isHome = urlSettings.isHome;
+  const pathValue = urlSettings.path;
+  const pagePath = typeof pathValue === "string" && pathValue.startsWith("/") ? pathValue : `/${pathValue ?? slug}`;
 
   return {
     ...site,
@@ -201,38 +230,21 @@ function composeTenant(tenantSlug: string, site: TenantSite, page: TenantPage): 
     seo,
     subscription: site.subscription ?? defaultSubscription,
     domains: site.domains ?? defaultDomains,
-    slug,
-    title,
+    slug: slug || "home",
+    title: title || "Home",
     path: pagePath,
-    isHome,
-    content: normalizePageContent(content),
+    isHome: isHome || false,
+    blocks: Array.isArray(page.blocks) ? page.blocks : [],
   };
 }
 
-function normalizePageContent(content: Partial<PageContent> | undefined): PageContent {
-  return {
-    headline: typeof content?.headline === "string" ? content.headline : "",
-    subheadline: typeof content?.subheadline === "string" ? content.subheadline : "",
-    copy: isRecord(content?.copy) ? content.copy : {},
-    services: Array.isArray(content?.services) ? content.services : [],
-    timings: Array.isArray(content?.timings) ? content.timings : [],
-    gallery: Array.isArray(content?.gallery) ? content.gallery : [],
-    faqs: Array.isArray(content?.faqs) ? content.faqs : [],
-    testimonials: Array.isArray(content?.testimonials) ? content.testimonials : [],
-    stats: Array.isArray(content?.stats) ? content.stats : [],
-    blocks: Array.isArray(content?.blocks) ? content.blocks : [],
-  };
-}
 
-function isRecord(value: unknown): value is Record<string, string> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function getHomePage(pages: TenantPage[]): TenantPage {
-  const explicitHome = pages.find((page) => page.isHome);
+  const explicitHome = pages.find((page) => getUrlSettings(page).isHome);
   if (explicitHome) return explicitHome;
 
-  const rootPath = pages.find((page) => page.path === "/");
+  const rootPath = pages.find((page) => getUrlSettings(page).path === "/");
   if (rootPath) return rootPath;
 
   if (pages[0]) return pages[0];
@@ -242,17 +254,6 @@ function getHomePage(pages: TenantPage[]): TenantPage {
     title: "Home",
     path: "/",
     isHome: true,
-    content: {
-      headline: "",
-      subheadline: "",
-      copy: {},
-      services: [],
-      timings: [],
-      gallery: [],
-      faqs: [],
-      testimonials: [],
-      stats: [],
-      blocks: [],
-    },
+    blocks: [],
   };
 }

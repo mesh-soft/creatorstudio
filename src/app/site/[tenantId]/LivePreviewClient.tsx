@@ -42,7 +42,26 @@ export function LivePreviewClient({ initialTenant }: LivePreviewClientProps) {
       // Merge incoming left-panel draft BUT keep any inline edits authoritative
       // until they are explicitly changed/cleared.
       setTenant((previous) => {
-        const merged = deepMerge(previous, data.payload);
+        const merged = deepMerge(previous, data.payload) as Tenant & { settings?: any[] };
+        
+        // Flatten settings array to root on the fly for the renderer
+        const urlSettings = Array.isArray(merged.settings) ? merged.settings.find(s => s._template === "urlSettings") : undefined;
+        const presentation = Array.isArray(merged.settings) ? merged.settings.find(s => s._template === "presentation") : undefined;
+        const seo = Array.isArray(merged.settings) ? merged.settings.find(s => s._template === "seo") : undefined;
+
+        if (urlSettings) {
+          merged.slug = urlSettings.slug ?? merged.slug;
+          merged.title = urlSettings.title ?? merged.title;
+          merged.path = urlSettings.path ?? merged.path;
+          merged.isHome = urlSettings.isHome ?? merged.isHome;
+        }
+        if (presentation) {
+          merged.presentation = presentation as any;
+        }
+        if (seo) {
+          merged.seo = seo as any;
+        }
+
         const withInline = applyOverlay(merged, inlineOverlay);
         return withInline as Tenant;
       });

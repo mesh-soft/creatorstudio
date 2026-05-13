@@ -1,4 +1,13 @@
 {
+  "settings": {
+    "slug": "home",
+    "title": "Home",
+    "path": "/",
+    "isHome": true,
+    "presentation": {
+      "styleId": "hospital-blue-modern"
+    }
+  },
   "blocks": [
     {
       "enabled": true,
@@ -9,12 +18,12 @@
     },
     {
       "enabled": true,
+      "_template": "hero",
       "headline": "Your health is our mission",
-      "subheadline": "Personalized medical care with compassion and expertise for you and your family.",
-      "_template": "hero"
+      "subheadline": "Personalized medical care with compassion and expertise for you and your family."
     },
     {
-      "enabled": true,
+      "_template": "services",
       "kicker": "Services",
       "title": "What patients can book",
       "items": [
@@ -38,15 +47,14 @@
           "description": "Quick outpatient procedures and wound care.",
           "icon": "bandage"
         }
-      ],
-      "_template": "services"
+      ]
     },
     {
       "enabled": true,
       "_template": "awards"
     },
     {
-      "enabled": true,
+      "_template": "timings",
       "kicker": "Timings",
       "title": "Clinic availability",
       "items": [
@@ -85,23 +93,23 @@
           "primary": "Closed",
           "secondary": "Closed"
         }
-      ],
-      "_template": "timings"
+      ]
     },
     {
       "enabled": true,
-      "kicker": "FAQs",
+      "_template": "faq",
+      "kicker": "FAQ",
       "title": "Common patient questions",
       "items": [
         {
           "question": "are these possible?",
           "answer": "no, it has not been done."
         }
-      ],
-      "_template": "faq"
+      ]
     },
     {
       "enabled": true,
+      "_template": "testimonials",
       "kicker": "",
       "title": "",
       "items": [
@@ -114,11 +122,11 @@
         {
           "quote": "Got my vaccination done here. Quick and professional service."
         }
-      ],
-      "_template": "testimonials"
+      ]
     },
     {
       "enabled": true,
+      "_template": "stats",
       "items": [
         {
           "value": "15+",
@@ -132,29 +140,12 @@
           "value": "10,000+",
           "label": "Consultations"
         }
-      ],
-      "_template": "stats"
+      ]
     },
     {
+      "_template": "cta",
       "title": "Ready to book?",
-      "body": "Call or WhatsApp the clinic.",
-      "_template": "cta"
-    }
-  ],
-  "settings": [
-    {
-      "slug": "home",
-      "title": "Home",
-      "path": "/",
-      "isHome": true,
-      "_template": "urlSettings"
-    },
-    {
-      "styleId": "hospital-blue-modern",
-      "_template": "presentation"
-    },
-    {
-      "_template": "seo"
+      "body": "Call or WhatsApp the clinic."
     }
   ],
   "_template": "page"

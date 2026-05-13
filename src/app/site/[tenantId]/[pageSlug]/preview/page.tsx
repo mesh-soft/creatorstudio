@@ -40,25 +40,31 @@ function parseDraftTenant(encodedDraft: string, baseTenant: Tenant): Tenant {
   }
 }
 
-function normalizeDraftTenant(tenant: Tenant): Tenant {
+function normalizeDraftTenant(tenant: Tenant & { settings?: any[] }): Tenant {
+  const urlSettings = Array.isArray(tenant.settings) ? tenant.settings.find(s => s._template === "urlSettings") : undefined;
+  const presentation = Array.isArray(tenant.settings) ? tenant.settings.find(s => s._template === "presentation") : undefined;
+  const seo = Array.isArray(tenant.settings) ? tenant.settings.find(s => s._template === "seo") : undefined;
+
   return {
     ...tenant,
     profile: {
       ...tenant.profile,
-      degrees: Array.isArray(tenant.profile.degrees) ? tenant.profile.degrees : [],
+      degrees: Array.isArray(tenant.profile?.degrees) ? tenant.profile.degrees : [],
     },
-    content: {
-      headline: typeof tenant.content?.headline === "string" ? tenant.content.headline : "",
-      subheadline: typeof tenant.content?.subheadline === "string" ? tenant.content.subheadline : "",
-      copy: typeof tenant.content?.copy === "object" && tenant.content.copy !== null && !Array.isArray(tenant.content.copy) ? tenant.content.copy : {},
-      services: Array.isArray(tenant.content?.services) ? tenant.content.services : [],
-      timings: Array.isArray(tenant.content?.timings) ? tenant.content.timings : [],
-      gallery: Array.isArray(tenant.content?.gallery) ? tenant.content.gallery : [],
-      faqs: Array.isArray(tenant.content?.faqs) ? tenant.content.faqs : [],
-      testimonials: Array.isArray(tenant.content?.testimonials) ? tenant.content.testimonials : [],
-      stats: Array.isArray(tenant.content?.stats) ? tenant.content.stats : [],
-      blocks: Array.isArray(tenant.content?.blocks) ? tenant.content.blocks : [],
-    },
+    blocks: Array.isArray(tenant.blocks) ? tenant.blocks : [],
+    // Flatten settings array back to root for renderer
+    ...(urlSettings && {
+      slug: urlSettings.slug ?? tenant.slug,
+      title: urlSettings.title ?? tenant.title,
+      path: urlSettings.path ?? tenant.path,
+      isHome: urlSettings.isHome ?? tenant.isHome,
+    }),
+    ...(presentation && {
+      presentation: presentation ?? tenant.presentation,
+    }),
+    ...(seo && {
+      seo: seo ?? tenant.seo,
+    }),
   };
 }
 

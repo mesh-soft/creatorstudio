@@ -8,7 +8,7 @@
       "_template": "header"
     },
     {
-      "enabled": true,
+      "enabled": false,
       "headline": "Your health is our mission",
       "subheadline": "Personalized medical care with compassion and expertise for you and your family.",
       "_template": "hero"

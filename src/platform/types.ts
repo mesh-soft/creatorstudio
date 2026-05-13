@@ -2,8 +2,23 @@ export type TenantType = "doctor" | "hospital";
 
 export type TenantBlock =
   | {
+      _template: "header";
+      enabled?: boolean;
+      logo?: string;
+      navLinks?: string[];
+    }
+  | {
+      _template: "awards";
+      enabled?: boolean;
+      kicker?: string;
+      title?: string;
+      items?: Array<{ title: string; year: string; organization: string }>;
+    }
+  | {
       _template: "hero";
       enabled?: boolean;
+      headline?: string;
+      subheadline?: string;
     }
   | {
       _template: "profile";
@@ -14,24 +29,40 @@ export type TenantBlock =
       enabled?: boolean;
       kicker?: string;
       title?: string;
+      items?: Array<{ title: string; description: string; icon?: string }>;
     }
   | {
       _template: "timings";
       enabled?: boolean;
       kicker?: string;
       title?: string;
+      items?: Array<{ day: string; primary: string; secondary: string }>;
     }
   | {
       _template: "gallery";
       enabled?: boolean;
       kicker?: string;
       title?: string;
+      items?: Array<{ src: string; alt: string }>;
     }
   | {
       _template: "faq";
       enabled?: boolean;
       kicker?: string;
       title?: string;
+      items?: Array<{ question: string; answer: string }>;
+    }
+  | {
+      _template: "testimonials";
+      enabled?: boolean;
+      kicker?: string;
+      title?: string;
+      items?: Array<{ quote: string; author: string }>;
+    }
+  | {
+      _template: "stats";
+      enabled?: boolean;
+      items?: Array<{ value: string; label: string }>;
     }
   | {
       _template: "cta";
@@ -45,39 +76,6 @@ export type TenantBlock =
       heading?: string;
       body?: string;
     };
-
-export type PageContent = {
-  headline: string;
-  subheadline: string;
-  copy: Record<string, string>;
-  services: Array<{
-    title: string;
-    description: string;
-    icon?: string;
-  }>;
-  timings: Array<{
-    day: string;
-    primary: string;
-    secondary: string;
-  }>;
-  gallery: Array<{
-    src: string;
-    alt: string;
-  }>;
-  faqs: Array<{
-    question: string;
-    answer: string;
-  }>;
-  testimonials: Array<{
-    quote: string;
-    author: string;
-  }>;
-  stats: Array<{
-    value: string;
-    label: string;
-  }>;
-  blocks?: TenantBlock[];
-};
 
 export type Presentation = {
   themeId: string;
@@ -93,13 +91,18 @@ export type SEO = {
 };
 
 export type TenantPage = {
-  slug: string;
-  title: string;
-  path: string;
+  slug?: string;
+  title?: string;
+  path?: string;
   isHome?: boolean;
   presentation?: Presentation;
   seo?: SEO;
-  content: PageContent;
+  settings?: Array<
+    | ({ _template: "urlSettings" } & { slug?: string; title?: string; path?: string; isHome?: boolean })
+    | ({ _template: "presentation" } & Presentation)
+    | ({ _template: "seo" } & SEO)
+  >;
+  blocks: TenantBlock[];
 };
 
 export type TenantSite = {
@@ -160,13 +163,6 @@ export type TenantSite = {
 
 export type Tenant = TenantSite & TenantPage;
 
-export type TenantFolderEntry = {
-  tenantSlug: string;
-  tenantType: TenantType;
-  site: TenantSite;
-  pages: TenantPage[];
-};
-
 export type VariantPreset = {
   hero: string;
   profile: string;
@@ -176,6 +172,7 @@ export type VariantPreset = {
   faq: string;
   cta: string;
 };
+
 export type StylePreset = {
   colors: {
     primary: string;

@@ -9,7 +9,7 @@
     },
     {
       "enabled": true,
-      "headline": "Your health is our mission",
+      "headline": "Your health is our missionss",
       "subheadline": "Personalized medical care with compassion and expertise for you and your family.",
       "_template": "hero"
     },
@@ -46,7 +46,6 @@
       "_template": "awards"
     },
     {
-      "enabled": true,
       "kicker": "Timings",
       "title": "Clinic availability",
       "items": [
@@ -90,7 +89,7 @@
     },
     {
       "enabled": true,
-      "kicker": "FAQs",
+      "kicker": "FAQ",
       "title": "Common patient questions",
       "items": [
         {
@@ -141,21 +140,14 @@
       "_template": "cta"
     }
   ],
-  "settings": [
-    {
-      "slug": "home",
-      "title": "Home",
-      "path": "/",
-      "isHome": true,
-      "_template": "urlSettings"
-    },
-    {
-      "styleId": "hospital-blue-modern",
-      "_template": "presentation"
-    },
-    {
-      "_template": "seo"
+  "settings": {
+    "slug": "home",
+    "title": "Home",
+    "path": "/",
+    "isHome": true,
+    "presentation": {
+      "styleId": "hospital-blue-modern"
     }
-  ],
+  },
   "_template": "page"
 }

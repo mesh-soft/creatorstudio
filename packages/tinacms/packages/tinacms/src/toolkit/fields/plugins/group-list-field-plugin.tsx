@@ -6,7 +6,8 @@ import { AddIcon, DragIcon, ReorderIcon, TrashIcon } from '@toolkit/icons';
 import { useEvent } from '@toolkit/react-core/use-cms-event';
 import type { FieldHoverEvent, FieldFocusEvent } from '../field-events';
 import { useCMS } from '@toolkit/react-core/use-cms';
-import { BiPencil } from 'react-icons/bi';
+import { BiPencil, BiChevronRight, BiChevronDown, BiShow, BiHide } from 'react-icons/bi';
+import { FieldsBuilder } from '@toolkit/form-builder';
 import { EmptyList, ListFieldMeta, ListPanel } from './list-field-meta';
 
 interface GroupFieldDefinititon extends Field {
@@ -155,15 +156,23 @@ const Group = ({ tinaForm, form, field, input, meta, index }: GroupProps) => {
   );
 };
 
-interface ItemProps {
-  tinaForm: Form;
-  field: GroupFieldDefinititon;
-  index: number;
-  item: any;
-  label?: string;
-  isMin: boolean;
-  fixedLength: boolean;
-}
+const Toggle = ({ enabled, onClick }: { enabled: boolean; onClick: (e: any) => void }) => {
+  return (
+    <div
+      onClick={onClick}
+      className={`relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+        enabled ? 'bg-blue-500' : 'bg-gray-300'
+      }`}
+    >
+      <span
+        aria-hidden="true"
+        className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+          enabled ? 'translate-x-3' : 'translate-x-0'
+        }`}
+      />
+    </div>
+  );
+};
 
 const Item = ({
   tinaForm,
@@ -176,29 +185,53 @@ const Item = ({
   ...p
 }: ItemProps) => {
   const cms = useCMS();
+  const [isExpanded, setIsExpanded] = React.useState(false);
+
   const removeItem = React.useCallback(() => {
     tinaForm.mutators.remove(field.name, index);
   }, [tinaForm, field, index]);
+
+  const toggleEnabled = React.useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newValue = item?.enabled === false ? true : false;
+    tinaForm.finalForm.change(`${field.name}.${index}.enabled`, newValue);
+    
+    // Trigger a native event so the Creator Studio scraper picks up the change
+    setTimeout(() => {
+      const el = document.querySelector(`input[name="${field.name}.${index}.enabled"]`);
+      if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+    }, 10);
+  }, [tinaForm, field, index, item]);
+
+  const hasEnabledField = field.fields?.some(f => f.name === 'enabled');
+  const isEnabled = item?.enabled !== false;
+  // @ts-ignore
+  const dragDisabled = field.disableDrag === true;
   const title = label || `${field.label || field.name} Item`;
 
   const { dispatch: setHoveredField } =
     useEvent<FieldHoverEvent>('field:hover');
   const { dispatch: setFocusedField } =
     useEvent<FieldFocusEvent>('field:focus');
+    
   return (
-    <Draggable draggableId={`${field.name}.${index}`} index={index}>
+    <Draggable draggableId={`${field.name}.${index}`} index={index} disabled={dragDisabled}>
       {(provider, snapshot) => (
-        <>
+        <div className={`mb-0.5 bg-white border border-gray-100 rounded shadow-sm ${isEnabled ? '' : 'opacity-60'}`}>
           <ItemHeader
             provider={provider}
             isDragging={snapshot.isDragging}
+            className="border-0 m-0 shadow-none"
             {...p}
           >
-            <DragHandle
-              isDragging={snapshot.isDragging}
-              dragHandleProps={provider.dragHandleProps}
-            />
+            {!dragDisabled && (
+              <DragHandle
+                isDragging={snapshot.isDragging}
+                dragHandleProps={provider.dragHandleProps}
+              />
+            )}
             <ItemClickTarget
+              onClick={() => setIsExpanded(!isExpanded)}
               onMouseOver={() =>
                 setHoveredField({
                   id: tinaForm.id,
@@ -206,37 +239,45 @@ const Item = ({
                 })
               }
               onMouseOut={() => setHoveredField({ id: null, fieldName: null })}
-              onClick={() => {
-                const state = tinaForm.finalForm.getState();
-                if (state.invalid === true) {
-                  // @ts-ignore
-                  cms.alerts.error(
-                    'Cannot navigate away from an invalid form.'
-                  );
-                  return;
-                }
-
-                cms.dispatch({
-                  type: 'forms:set-active-field-name',
-                  value: {
-                    formId: tinaForm.id,
-                    fieldName: `${field.name}.${index}`,
-                  },
-                });
-                setFocusedField({
-                  id: tinaForm.id,
-                  fieldName: `${field.name}.${index}`,
-                });
-              }}
             >
-              <GroupLabel>{title}</GroupLabel>
-              <BiPencil className='h-5 w-auto fill-current text-gray-200 group-hover:text-inherit transition-colors duration-150 ease-out' />
+              <div className="flex items-center gap-2">
+                {isExpanded ? <BiChevronDown className="h-5 w-5 text-gray-400" /> : <BiChevronRight className="h-5 w-5 text-gray-400" />}
+                <GroupLabel>{title}</GroupLabel>
+              </div>
             </ItemClickTarget>
-            {(!fixedLength || (fixedLength && !isMin)) && (
-              <ItemDeleteButton disabled={isMin} onClick={removeItem} />
-            )}
+            <div className="flex items-center pr-2 gap-2">
+              {hasEnabledField && (
+                <Toggle enabled={isEnabled} onClick={toggleEnabled} />
+              )}
+              {(!fixedLength || (fixedLength && !isMin)) && (
+                <ItemDeleteButton disabled={isMin} onClick={removeItem} />
+              )}
+              {hasEnabledField && (
+                <input 
+                  type="checkbox" 
+                  name={`${field.name}.${index}.enabled`} 
+                  checked={isEnabled} 
+                  readOnly 
+                  style={{ display: 'none' }} 
+                />
+              )}
+            </div>
           </ItemHeader>
-        </>
+          
+          {isExpanded && field.fields && (
+            <div className="p-4 border-t border-gray-100 bg-gray-50 rounded-b">
+              <FieldsBuilder
+                form={tinaForm}
+                fields={field.fields
+                  .filter(f => f.name !== 'enabled')
+                  .map(f => ({
+                    ...f,
+                    name: `${field.name}.${index}.${f.name}`
+                  }))}
+              />
+            </div>
+          )}
+        </div>
       )}
     </Draggable>
   );

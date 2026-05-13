@@ -9,12 +9,6 @@
     },
     {
       "enabled": true,
-      "headline": "Your health is our mission",
-      "subheadline": "Personalized medical care with compassion and expertise for you and your family.",
-      "_template": "hero"
-    },
-    {
-      "enabled": true,
       "kicker": "Services",
       "title": "What patients can book",
       "items": [
@@ -40,6 +34,12 @@
         }
       ],
       "_template": "services"
+    },
+    {
+      "enabled": true,
+      "headline": "Your health is our mission",
+      "subheadline": "Personalized medical care with compassion and expertise for you and your family.",
+      "_template": "hero"
     },
     {
       "enabled": true,
@@ -141,21 +141,12 @@
       "_template": "cta"
     }
   ],
-  "settings": [
-    {
-      "slug": "home",
-      "title": "Home",
-      "path": "/",
-      "isHome": true,
-      "_template": "urlSettings"
-    },
-    {
-      "styleId": "hospital-blue-modern",
-      "_template": "presentation"
-    },
-    {
-      "_template": "seo"
-    }
-  ],
+  "slug": "home",
+  "title": "Home",
+  "path": "/",
+  "isHome": true,
+  "presentation": {
+    "styleId": "hospital-blue-modern"
+  },
   "_template": "page"
 }

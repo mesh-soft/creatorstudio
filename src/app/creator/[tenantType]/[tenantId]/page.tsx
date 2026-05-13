@@ -18,7 +18,12 @@ export default async function CreatorPage({ params, searchParams }: CreatorPageP
   const { tenantType, tenantId } = await params;
   const resolvedSearchParams = await searchParams;
   const pageSlug = resolvedSearchParams?.page ?? "home";
-  const pages = listTenantPages(tenantType, tenantId).map((page) => page.slug);
+  const pages = listTenantPages(tenantType, tenantId)
+    .map((page) => {
+      const urlSettings = Array.isArray(page.settings) ? page.settings.find((s) => s._template === "urlSettings") : undefined;
+      return urlSettings?.slug ?? page.slug;
+    })
+    .filter((slug): slug is string => Boolean(slug));
   const safePageSlug = pages.includes(pageSlug) ? pageSlug : pages[0] ?? "home";
 
   return (

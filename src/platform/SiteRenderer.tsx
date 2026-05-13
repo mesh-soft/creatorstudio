@@ -55,8 +55,8 @@ export function SiteRenderer({ tenant, pageSlug = "home", previewLinks = false, 
   } as CSSProperties;
 
   const themeBlocks = getThemeBlocks(tenant);
-  const pageBlocks = Array.isArray(tenant.content.blocks) && tenant.content.blocks.length > 0 
-    ? tenant.content.blocks 
+  const pageBlocks = Array.isArray(tenant.blocks) && tenant.blocks.length > 0 
+    ? tenant.blocks 
     : themeBlocks;
 
   const hasPageHeader = pageBlocks.some(b => b._template === "header" && b.enabled !== false);
@@ -91,12 +91,12 @@ function renderBlocks(
   tinaDocument?: Record<string, unknown>,
   studioMode = false
 ) {
-  const tinaBlocks = Array.isArray((tinaDocument?.content as { blocks?: unknown[] } | undefined)?.blocks)
-    ? ((tinaDocument?.content as { blocks?: unknown[] }).blocks ?? [])
+  const tinaBlocks = Array.isArray((tinaDocument as { blocks?: unknown[] } | undefined)?.blocks)
+    ? ((tinaDocument as { blocks?: unknown[] }).blocks ?? [])
     : [];
 
   return blocks.map((block, index) => {
-    if (block.enabled === false) return null;
+    if (block.enabled === false || block.enabled === "false") return null;
 
     const key = `${block._template}-${index}`;
     const tinaBlock = (tinaBlocks[index] as Record<string, unknown> | undefined) ?? undefined;
@@ -119,15 +119,14 @@ function renderBlocks(
           <Awards
             key={key}
             tenant={tenant}
-            items={block.items}
-            kicker={block.kicker}
-            title={block.title}
+            block={block}
+            blockIndex={index}
             sectionField={sectionField}
             studioMode={studioMode}
           />
         );
       case "hero":
-        return <Hero key={key} tenant={tenant} variant={preset.hero} sectionField={sectionField} tinaDocument={tinaDocument} studioMode={studioMode} />;
+        return <Hero key={key} tenant={tenant} block={block} blockIndex={index} variant={preset.hero} sectionField={sectionField} tinaDocument={tinaDocument} studioMode={studioMode} />;
       case "profile":
         return (
           <Profile
@@ -144,9 +143,9 @@ function renderBlocks(
           <Services
             key={key}
             tenant={tenant}
+            block={block}
+            blockIndex={index}
             variant={preset.services}
-            kicker={block.kicker}
-            title={block.title}
             sectionField={sectionField}
             tinaDocument={tinaDocument}
             studioMode={studioMode}
@@ -157,9 +156,9 @@ function renderBlocks(
           <Timings
             key={key}
             tenant={tenant}
+            block={block}
+            blockIndex={index}
             variant={preset.timings}
-            kicker={block.kicker}
-            title={block.title}
             sectionField={sectionField}
             tinaDocument={tinaDocument}
             studioMode={studioMode}
@@ -170,9 +169,9 @@ function renderBlocks(
           <Gallery
             key={key}
             tenant={tenant}
+            block={block}
+            blockIndex={index}
             variant={preset.gallery}
-            kicker={block.kicker}
-            title={block.title}
             sectionField={sectionField}
             tinaDocument={tinaDocument}
             studioMode={studioMode}
@@ -183,9 +182,9 @@ function renderBlocks(
           <FAQ
             key={key}
             tenant={tenant}
+            block={block}
+            blockIndex={index}
             variant={preset.faq}
-            kicker={block.kicker}
-            title={block.title}
             sectionField={sectionField}
             tinaDocument={tinaDocument}
             studioMode={studioMode}
@@ -196,9 +195,9 @@ function renderBlocks(
           <CTA
             key={key}
             tenant={tenant}
+            block={block}
+            blockIndex={index}
             variant={preset.cta}
-            title={block.title}
-            body={block.body}
             sectionField={sectionField}
             tinaDocument={tinaDocument}
             studioMode={studioMode}
@@ -209,8 +208,8 @@ function renderBlocks(
           <Testimonials
             key={key}
             tenant={tenant}
-            kicker={block.kicker}
-            title={block.title}
+            block={block}
+            blockIndex={index}
             sectionField={sectionField}
             studioMode={studioMode}
           />
@@ -220,12 +219,14 @@ function renderBlocks(
           <Stats
             key={key}
             tenant={tenant}
+            block={block}
+            blockIndex={index}
             sectionField={sectionField}
             studioMode={studioMode}
           />
         );
       case "text":
-        return <TextBlock key={key} heading={block.heading} body={block.body} sectionField={sectionField} />;
+        return <TextBlock key={key} block={block} blockIndex={index} sectionField={sectionField} studioMode={studioMode} />;
       default:
         return null;
     }
@@ -270,33 +271,34 @@ function Header({
 
 function Awards({
   tenant,
-  items,
-  kicker,
-  title,
+  block,
+  blockIndex,
   sectionField,
   studioMode,
 }: {
   tenant: Tenant;
-  items?: any[];
-  kicker?: string;
-  title?: string;
+  block: any;
+  blockIndex: number;
   sectionField?: string;
   studioMode?: boolean;
 }) {
-  const awards = Array.isArray(items) && items.length > 0 ? items : [
+  const awards = Array.isArray(block.items) && block.items.length > 0 ? block.items : [
     { title: "Best Healthcare Provider", year: "2023", organization: "Global Health Awards" },
     { title: "Excellence in Surgery", year: "2022", organization: "National Medical Board" }
   ];
 
   return (
     <Section className="block awards-section" sectionField={sectionField}>
-      <BlockTitle kicker={kicker ?? "Recognition"} title={title ?? "Awards & Achievements"} />
+      <BlockTitle kicker={block.kicker ?? "Recognition"} title={block.title ?? "Awards & Achievements"} />
       <div className="awards-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px" }}>
-        {awards.map((award, i) => (
+        {awards.map((award: any, i: number) => (
           <Card key={i} className="award-card" style={{ textAlign: "center", padding: "24px" }}>
             <div style={{ fontSize: "24px", marginBottom: "12px" }}>🏆</div>
-            <h3 style={{ fontSize: "18px", marginBottom: "4px" }}>{award.title}</h3>
-            <div style={{ fontSize: "14px", opacity: 0.6 }}>{award.organization} • {award.year}</div>
+            <h3 data-edit-path={studioMode ? `blocks.${blockIndex}.items.${i}.title` : undefined} style={{ fontSize: "18px", marginBottom: "4px" }}>{award.title}</h3>
+            <div style={{ fontSize: "14px", opacity: 0.6 }}>
+              <span data-edit-path={studioMode ? `blocks.${blockIndex}.items.${i}.organization` : undefined}>{award.organization}</span> • 
+              <span data-edit-path={studioMode ? `blocks.${blockIndex}.items.${i}.year` : undefined}>{award.year}</span>
+            </div>
           </Card>
         ))}
       </div>
@@ -329,18 +331,21 @@ function SubscriptionBar({ tenant }: { tenant: Tenant }) {
 
 function Hero({
   tenant,
+  block,
+  blockIndex,
   variant,
   sectionField,
   tinaDocument,
   studioMode,
 }: {
   tenant: Tenant;
+  block: any;
+  blockIndex: number;
   variant: string;
   sectionField?: string;
   tinaDocument?: Record<string, unknown>;
   studioMode?: boolean;
 }) {
-  const tinaContent = tinaDocument?.content as Record<string, unknown> | undefined;
   return (
     <Section className={`hero hero-${variant}`} sectionField={sectionField}>
       <div className="hero-content">
@@ -352,16 +357,14 @@ function Hero({
         </Eyebrow>
         <Heading
           level={1}
-          field={tinaContent ? tinaField(tinaContent as any, "headline" as any) : undefined}
-          editPath={studioMode ? "content.headline" : undefined}
+          editPath={studioMode ? `blocks.${blockIndex}.headline` : undefined}
         >
-          {tenant.content.headline}
+          {block.headline}
         </Heading>
         <Text
-          field={tinaContent ? tinaField(tinaContent as any, "subheadline" as any) : undefined}
-          editPath={studioMode ? "content.subheadline" : undefined}
+          editPath={studioMode ? `blocks.${blockIndex}.subheadline` : undefined}
         >
-          {tenant.content.subheadline}
+          {block.subheadline}
         </Text>
         <ButtonGroup tenant={tenant} />
       </div>
@@ -415,30 +418,30 @@ function Profile({
 
 function Services({
   tenant,
+  block,
+  blockIndex,
   variant,
-  kicker,
-  title,
   sectionField,
   tinaDocument,
   studioMode,
 }: {
   tenant: Tenant;
+  block: any;
+  blockIndex: number;
   variant: string;
-  kicker?: string;
-  title?: string;
   sectionField?: string;
   tinaDocument?: Record<string, unknown>;
   studioMode?: boolean;
 }) {
   return (
     <Section className="block" sectionField={sectionField}>
-      <BlockTitle kicker={kicker ?? copy(tenant, "servicesKicker")} title={title ?? copy(tenant, "servicesTitle")} />
+      <BlockTitle kicker={block.kicker ?? "Services"} title={block.title ?? "What We Offer"} />
       <div className={`services services-${variant}`}>
-        {safeArray(tenant.content.services).map((service, index) => (
+        {safeArray(block.items).map((service: any, index: number) => (
           <Card key={`${service?.title ?? "service"}-${index}`} className="service-card">
             <span className="icon">{iconFor(service.icon)}</span>
-            <h3 data-edit-path={studioMode ? `content.services.${index}.title` : undefined}>{service.title}</h3>
-            <Text editPath={studioMode ? `content.services.${index}.description` : undefined}>{service.description}</Text>
+            <h3 data-edit-path={studioMode ? `blocks.${blockIndex}.items.${index}.title` : undefined}>{service.title}</h3>
+            <Text editPath={studioMode ? `blocks.${blockIndex}.items.${index}.description` : undefined}>{service.description}</Text>
           </Card>
         ))}
       </div>
@@ -448,32 +451,32 @@ function Services({
 
 function Timings({
   tenant,
+  block,
+  blockIndex,
   variant,
-  kicker,
-  title,
   sectionField,
   tinaDocument,
   studioMode,
 }: {
   tenant: Tenant;
+  block: any;
+  blockIndex: number;
   variant: string;
-  kicker?: string;
-  title?: string;
   sectionField?: string;
   tinaDocument?: Record<string, unknown>;
   studioMode?: boolean;
 }) {
   return (
     <Section className="block" sectionField={sectionField}>
-      <BlockTitle kicker={kicker ?? copy(tenant, "timingsKicker")} title={title ?? copy(tenant, "timingsTitle")} />
+      <BlockTitle kicker={block.kicker ?? "Schedule"} title={block.title ?? "Visiting Hours"} />
       <div className={`timings timings-${variant}`}>
-        {safeArray(tenant.content.timings).map((timing, index) => (
+        {safeArray(block.items).map((timing: any, index: number) => (
           <div key={`${timing?.day ?? "timing"}-${index}`} className="timing-row" style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
-            <strong data-edit-path={studioMode ? `content.timings.${index}.day` : undefined}>{timing.day}</strong>
+            <strong data-edit-path={studioMode ? `blocks.${blockIndex}.items.${index}.day` : undefined}>{timing.day}</strong>
             <div style={{ textAlign: "right" }}>
-              <span data-edit-path={studioMode ? `content.timings.${index}.primary` : undefined}>{timing.primary}</span>
+              <span data-edit-path={studioMode ? `blocks.${blockIndex}.items.${index}.primary` : undefined}>{timing.primary}</span>
               <br />
-              <small style={{ opacity: 0.6 }} data-edit-path={studioMode ? `content.timings.${index}.secondary` : undefined}>{timing.secondary}</small>
+              <small style={{ opacity: 0.6 }} data-edit-path={studioMode ? `blocks.${blockIndex}.items.${index}.secondary` : undefined}>{timing.secondary}</small>
             </div>
           </div>
         ))}
@@ -484,26 +487,26 @@ function Timings({
 
 function Gallery({
   tenant,
+  block,
+  blockIndex,
   variant,
-  kicker,
-  title,
   sectionField,
   tinaDocument,
   studioMode,
 }: {
   tenant: Tenant;
+  block: any;
+  blockIndex: number;
   variant: string;
-  kicker?: string;
-  title?: string;
   sectionField?: string;
   tinaDocument?: Record<string, unknown>;
   studioMode?: boolean;
 }) {
   return (
     <Section className="block" sectionField={sectionField}>
-      <BlockTitle kicker={kicker ?? copy(tenant, "galleryKicker")} title={title ?? copy(tenant, "galleryTitle")} />
+      <BlockTitle kicker={block.kicker ?? "Gallery"} title={block.title ?? "Clinic Photos"} />
       <div className={`gallery gallery-${variant}`}>
-        {safeArray(tenant.content.gallery).map((image, index) => (
+        {safeArray(block.items).map((image: any, index: number) => (
           <div key={`${image?.src ?? "image"}-${index}`} className="gallery-item" style={{ overflow: "hidden", borderRadius: "var(--radius)" }}>
             <ImagePrimitive src={image.src} alt={image.alt} style={{ transition: "transform 0.5s ease" }} />
           </div>
@@ -515,29 +518,29 @@ function Gallery({
 
 function FAQ({
   tenant,
+  block,
+  blockIndex,
   variant,
-  kicker,
-  title,
   sectionField,
   tinaDocument,
   studioMode,
 }: {
   tenant: Tenant;
+  block: any;
+  blockIndex: number;
   variant: string;
-  kicker?: string;
-  title?: string;
   sectionField?: string;
   tinaDocument?: Record<string, unknown>;
   studioMode?: boolean;
 }) {
   return (
     <Section className="block" sectionField={sectionField}>
-      <BlockTitle kicker={kicker ?? copy(tenant, "faqKicker")} title={title ?? copy(tenant, "faqTitle")} />
+      <BlockTitle kicker={block.kicker ?? "FAQ"} title={block.title ?? "Frequently Asked Questions"} />
       <div className={`faq faq-${variant}`}>
-        {safeArray(tenant.content.faqs).map((faq, index) => (
+        {safeArray(block.items).map((faq: any, index: number) => (
           <Card key={`${faq?.question ?? "faq"}-${index}`} className="faq-card">
-            <h3 data-edit-path={studioMode ? `content.faqs.${index}.question` : undefined}>{faq.question}</h3>
-            <Text editPath={studioMode ? `content.faqs.${index}.answer` : undefined}>{faq.answer}</Text>
+            <h3 data-edit-path={studioMode ? `blocks.${blockIndex}.items.${index}.question` : undefined}>{faq.question}</h3>
+            <Text editPath={studioMode ? `blocks.${blockIndex}.items.${index}.answer` : undefined}>{faq.answer}</Text>
           </Card>
         ))}
       </div>
@@ -547,17 +550,17 @@ function FAQ({
 
 function CTA({
   tenant,
+  block,
+  blockIndex,
   variant,
-  title,
-  body,
   sectionField,
   tinaDocument,
   studioMode,
 }: {
   tenant: Tenant;
+  block: any;
+  blockIndex: number;
   variant: string;
-  title?: string;
-  body?: string;
   sectionField?: string;
   tinaDocument?: Record<string, unknown>;
   studioMode?: boolean;
@@ -565,23 +568,23 @@ function CTA({
   return (
     <Section className={`cta cta-${variant}`} sectionField={sectionField}>
       <div className="cta-content">
-        <Heading level={2} editPath={studioMode ? "content.copy.ctaTitle" : undefined}>
-          {title ?? copy(tenant, "ctaTitle")}
+        <Heading level={2} editPath={studioMode ? `blocks.${blockIndex}.title` : undefined}>
+          {block.title ?? "Ready to book?"}
         </Heading>
-        <Text editPath={studioMode ? "content.copy.ctaBody" : undefined}>{body ?? copy(tenant, "ctaBody")}</Text>
+        <Text editPath={studioMode ? `blocks.${blockIndex}.body` : undefined}>{block.body}</Text>
       </div>
       <ButtonGroup tenant={tenant} />
     </Section>
   );
 }
 
-function TextBlock({ heading, body, sectionField }: { heading?: string; body?: string; sectionField?: string }) {
-  if (!heading && !body) return null;
+function TextBlock({ block, blockIndex, sectionField, studioMode }: { block: any; blockIndex: number; sectionField?: string; studioMode?: boolean }) {
+  if (!block.heading && !block.body) return null;
 
   return (
     <Section className="block text-block" sectionField={sectionField}>
-      {heading ? <Heading level={2}>{heading}</Heading> : null}
-      {body ? <Text>{body}</Text> : null}
+      {block.heading ? <Heading level={2} editPath={studioMode ? `blocks.${blockIndex}.heading` : undefined}>{block.heading}</Heading> : null}
+      {block.body ? <Text editPath={studioMode ? `blocks.${blockIndex}.body` : undefined}>{block.body}</Text> : null}
     </Section>
   );
 }
@@ -662,20 +665,16 @@ function ButtonGroup({ tenant }: { tenant: Tenant }) {
     <div className="button-row">
       {whatsapp && (
         <a className="btn primary" href={`https://wa.me/${whatsapp}`}>
-          {copy(tenant, "whatsappLabel")}
+          WhatsApp
         </a>
       )}
       {phone && (
         <a className="btn secondary" href={`tel:${phone}`}>
-          {copy(tenant, "callLabel")}
+          Call Us
         </a>
       )}
     </div>
   );
-}
-
-function copy(tenant: Tenant, key: string) {
-  return tenant.content.copy?.[key] ?? key;
 }
 
 function safeArray<T>(value: T[] | undefined): T[] {
@@ -696,29 +695,29 @@ function iconFor(icon?: string) {
 
 function Testimonials({
   tenant,
-  kicker,
-  title,
+  block,
+  blockIndex,
   sectionField,
   studioMode,
 }: {
   tenant: Tenant;
-  kicker?: string;
-  title?: string;
+  block: any;
+  blockIndex: number;
   sectionField?: string;
   studioMode?: boolean;
 }) {
-  const testimonials = safeArray(tenant.content.testimonials);
+  const testimonials = safeArray(block.items);
   if (testimonials.length === 0) return null;
 
   return (
     <Section className="block testimonials-section" sectionField={sectionField}>
-      <BlockTitle kicker={kicker ?? "Testimonials"} title={title ?? "What our patients say"} />
+      <BlockTitle kicker={block.kicker ?? "Testimonials"} title={block.title ?? "What our patients say"} />
       <div className="testimonials-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
-        {testimonials.map((t, i) => (
+        {testimonials.map((t: any, i: number) => (
           <Card key={i} className="testimonial-card">
-            <Text editPath={studioMode ? `content.testimonials.${i}.quote` : undefined}>"{t.quote}"</Text>
+            <Text editPath={studioMode ? `blocks.${blockIndex}.items.${i}.quote` : undefined}>"{t.quote}"</Text>
             <div style={{ marginTop: "16px", fontWeight: "bold" }}>
-              <span data-edit-path={studioMode ? `content.testimonials.${i}.author` : undefined}>- {t.author || "Patient"}</span>
+              <span data-edit-path={studioMode ? `blocks.${blockIndex}.items.${i}.author` : undefined}>- {t.author || "Patient"}</span>
             </div>
           </Card>
         ))}
@@ -729,25 +728,29 @@ function Testimonials({
 
 function Stats({
   tenant,
+  block,
+  blockIndex,
   sectionField,
   studioMode,
 }: {
   tenant: Tenant;
+  block: any;
+  blockIndex: number;
   sectionField?: string;
   studioMode?: boolean;
 }) {
-  const stats = safeArray(tenant.content.stats);
+  const stats = safeArray(block.items);
   if (stats.length === 0) return null;
 
   return (
     <Section className="block stats-section" sectionField={sectionField} style={{ background: "var(--primary)", color: "white", borderRadius: "var(--radius)" }}>
       <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-around", gap: "24px", textAlign: "center" }}>
-        {stats.map((s, i) => (
+        {stats.map((s: any, i: number) => (
           <div key={i} className="stat-item" style={{ flex: "1 1 200px" }}>
-            <div style={{ fontSize: "3rem", fontWeight: 800, marginBottom: "8px" }} data-edit-path={studioMode ? `content.stats.${i}.value` : undefined}>
+            <div style={{ fontSize: "3rem", fontWeight: 800, marginBottom: "8px" }} data-edit-path={studioMode ? `blocks.${blockIndex}.items.${i}.value` : undefined}>
               {s.value}
             </div>
-            <div style={{ fontSize: "1rem", opacity: 0.8, textTransform: "uppercase", letterSpacing: "1px" }} data-edit-path={studioMode ? `content.stats.${i}.label` : undefined}>
+            <div style={{ fontSize: "1rem", opacity: 0.8, textTransform: "uppercase", letterSpacing: "1px" }} data-edit-path={studioMode ? `blocks.${blockIndex}.items.${i}.label` : undefined}>
               {s.label}
             </div>
           </div>

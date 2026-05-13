@@ -362,9 +362,10 @@ function injectSuggestionScript(leftDoc: Document) {
 }
 
 function setReactInputValue(el: HTMLInputElement | HTMLTextAreaElement, value: string) {
-  const prototype = el instanceof HTMLTextAreaElement
-    ? window.HTMLTextAreaElement.prototype
-    : window.HTMLInputElement.prototype;
+  const win = el.ownerDocument.defaultView || window;
+  const prototype = el.tagName === "TEXTAREA"
+    ? win.HTMLTextAreaElement.prototype
+    : win.HTMLInputElement.prototype;
   const descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
   if (descriptor && descriptor.set) {
     descriptor.set.call(el, value);
@@ -397,7 +398,8 @@ function collectDraftFromEditor(
 
   fields.forEach((field) => {
     if (field.disabled) return;
-    if (field instanceof HTMLInputElement && (field.type === "button" || field.type === "submit")) return;
+    const type = field.getAttribute("type");
+    if (type === "button" || type === "submit") return;
 
     const rawName = field.name.trim();
     if (!rawName) return;
@@ -556,16 +558,19 @@ function normalizeFieldName(rawName: string): string | null {
     "seo",
     "pages",
     "content",
+    "settings",
+    "blocks",
   ]);
 
   return allowedRoots.has(root) ? cleaned : null;
 }
 
 function parseFieldValue(field: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement): unknown {
-  if (field instanceof HTMLInputElement && field.type === "checkbox") {
-    return field.checked;
+  const type = field.getAttribute("type");
+  if (type === "checkbox") {
+    return (field as HTMLInputElement).checked;
   }
-  if (field instanceof HTMLInputElement && field.type === "number") {
+  if (type === "number") {
     if (field.value.trim() === "") return undefined;
     return Number(field.value);
   }

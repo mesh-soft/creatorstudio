@@ -1,46 +1,45 @@
 {
-  "slug": "service",
-  "title": "services",
-  "path": "/services",
-  "content": {
-    "headline": "Check the services we provide",
-    "subheadline": "Here are the services",
-    "copy": {
-      "servicesKicker": "Start with the service"
+  "_template": "page",
+  "blocks": [
+    {
+      "_template": "header",
+      "enabled": true
     },
-    "services": [
-      {
-        "title": "new service",
-        "description": "new service"
-      }
-    ],
-    "timings": [],
-    "gallery": [],
-    "faqs": [],
-    "testimonials": [],
-    "stats": [],
-    "blocks": [
-      {
-        "_template": "header",
-        "enabled": true
-      },
-      {
-        "enabled": true,
-        "_template": "hero"
-      },
-      {
-        "enabled": true,
-        "_template": "services"
-      },
-      {
-        "enabled": true,
-        "_template": "cta"
-      },
-      {
-        "_template": "awards",
-        "enabled": true
-      }
-    ]
-  },
-  "_template": "page"
+    {
+      "enabled": true,
+      "_template": "hero",
+      "headline": "Check the services we provide",
+      "subheadline": "Here are the services"
+    },
+    {
+      "enabled": true,
+      "_template": "services",
+      "kicker": "Start with the service",
+      "title": "",
+      "items": [
+        {
+          "title": "new service",
+          "description": "new service"
+        }
+      ]
+    },
+    {
+      "enabled": true,
+      "_template": "cta",
+      "title": "",
+      "body": ""
+    },
+    {
+      "_template": "awards",
+      "enabled": true
+    }
+  ],
+  "settings": [
+    {
+      "_template": "urlSettings",
+      "slug": "service",
+      "title": "services",
+      "path": "/services"
+    }
+  ]
 }

@@ -42,7 +42,7 @@
       "_template": "services"
     },
     {
-      "enabled": true,
+      "enabled": false,
       "_template": "awards"
     },
     {

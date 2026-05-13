@@ -2,6 +2,9 @@
   "name": "doctor-sites",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "TINA_PUBLIC_IS_LOCAL=true tinacms dev -c \"next dev\"",
     "build": "next build",
@@ -18,10 +21,12 @@
     "migrate:home-site-fields": "node scripts/copy-site-fields-to-home-pages.mjs"
   },
   "dependencies": {
+    "date-fns": "^2.30.0",
+    "graphql": "15.8.0",
     "next": "16.2.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "tinacms": "^3.7.6"
+    "tinacms": "file:./packages/tinacms"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

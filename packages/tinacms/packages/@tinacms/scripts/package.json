@@ -11,7 +11,7 @@
     ],
     "license": "Apache-2.0",
     "bin": {
-        "tinacms-scripts": "./bin/tina-build"
+        "tinacms-scripts": "./bin/tina-build.js"
     },
     "scripts": {
         "build:all": "bin/tina-build build:all",

@@ -1,224 +1,189 @@
 {
-  "slug": "home",
-  "title": "Home",
-  "path": "/",
-  "isHome": true,
-  "content": {
-    "headline": "Care teams, diagnostics, and emergency access in one place",
-    "subheadline": "Multi-specialty OPD, emergency support, lab services, and family health programs.",
-    "copy": {
-      "servicesKicker": "Departments",
-      "servicesTitle": "Care available today",
-      "timingsKicker": "Timings",
-      "timingsTitle": "Hospital availability",
-      "galleryKicker": "Gallery",
-      "galleryTitle": "Hospital and facility photos",
-      "faqKicker": "FAQ",
-      "faqTitle": "Common patient questions",
-      "ctaTitle": "Ready to visit?",
-      "ctaBody": "Call or WhatsApp the hospital desk.",
-      "whatsappLabel": "WhatsApp",
-      "callLabel": "Call"
+  "_template": "page",
+  "blocks": [
+    {
+      "_template": "header",
+      "enabled": true
     },
-    "services": [
-      {
-        "title": "Emergency Care",
-        "description": "24/7 first response and stabilization.",
-        "icon": "cross"
-      },
-      {
-        "title": "OPD Departments",
-        "description": "General medicine, pediatrics, cardiology, and orthopedics.",
-        "icon": "users"
-      },
-      {
-        "title": "Diagnostics",
-        "description": "Lab tests, ECG, ultrasound, and imaging coordination.",
-        "icon": "scan"
-      }
-    ],
-    "timings": [
-      {
-        "day": "Emergency",
-        "primary": "24 hours",
-        "secondary": "All days"
-      },
-      {
-        "day": "OPD",
-        "primary": "9 AM - 8 PM",
-        "secondary": "Mon - Sat"
-      },
-      {
-        "day": "Diagnostics",
-        "primary": "7 AM - 7 PM",
-        "secondary": "Mon - Sun"
-      }
-    ],
-    "gallery": [
-      {
-        "src": "https://images.unsplash.com/photo-1538108149393-fbbd81895907?auto=format&fit=crop&w=900&q=80",
-        "alt": "Hospital building"
-      },
-      {
-        "src": "https://images.unsplash.com/photo-1519494080410-f9aa8f52f1e1?auto=format&fit=crop&w=900&q=80",
-        "alt": "Hospital corridor"
-      },
-      {
-        "src": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=900&q=80",
-        "alt": "Hospital diagnostic room"
-      }
-    ],
-    "faqs": [
-      {
-        "question": "Is emergency open at night?",
-        "answer": "Yes, emergency and pharmacy services are available 24/7."
-      },
-      {
-        "question": "Are diagnostics available?",
-        "answer": "Yes, common lab and cardiac diagnostics are available."
-      }
-    ],
-    "testimonials": [
-      {
-        "quote": "Fast emergency response and helpful staff.",
-        "author": "Local resident"
-      },
-      {
-        "quote": "Clean facility and coordinated diagnostics.",
-        "author": "OPD patient"
-      }
-    ],
-    "stats": [
-      {
-        "value": "24/7",
-        "label": "Emergency"
-      },
-      {
-        "value": "12+",
-        "label": "Departments"
-      },
-      {
-        "value": "50+",
-        "label": "Care staff"
-      }
-    ],
-    "blocks": [
-      {
-        "_template": "header",
-        "enabled": true
-      },
-      {
-        "_template": "hero",
-        "enabled": true
-      },
-      {
-        "_template": "profile",
-        "enabled": true
-      },
-      {
-        "_template": "services",
-        "enabled": true
-      },
-      {
-        "_template": "timings",
-        "enabled": true
-      },
-      {
-        "_template": "gallery",
-        "enabled": true
-      },
-      {
-        "_template": "faq",
-        "enabled": true
-      },
-      {
-        "_template": "cta",
-        "enabled": true
-      },
-      {
-        "_template": "awards",
-        "enabled": true
-      },
-      {
-        "_template": "testimonials",
-        "enabled": true
-      },
-      {
-        "_template": "stats",
-        "enabled": true
-      }
-    ]
-  },
-  "tenantId": "city-care-hospital",
-  "tenantType": "hospital",
-  "status": "trial",
-  "subscription": {
-    "plan": "hospital_launch",
-    "billingCycle": "monthly",
-    "validFrom": "2026-05-10",
-    "validUntil": "2026-06-09",
-    "graceUntil": "2026-06-16",
-    "paymentStatus": "manual_review"
-  },
-  "domains": {
-    "primary": "citycarehospital.com",
-    "aliases": [
-      "citycare.yourbrand.in"
-    ]
-  },
-  "profile": {
-    "displayName": "City Care Hospital",
-    "specialty": "Multi-specialty Hospital",
-    "degrees": [
-      "24/7 Emergency",
-      "Diagnostics",
-      "OPD"
-    ],
-    "registrationNumber": "HSP-77881",
-    "experienceYears": 12,
-    "bio": "A neighborhood hospital with emergency care, OPD consultations, diagnostics, and day-care procedures.",
-    "photo": "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&w=900&q=80"
-  },
-  "business": {
-    "clinicName": "City Care Hospital",
-    "phone": "+91 88888 88888",
-    "whatsapp": "+918888888888",
-    "email": "care@example.com",
-    "address": "45 Ring Road, Bengaluru",
-    "mapUrl": "https://maps.google.com"
-  },
-  "presentation": {
-    "themeId": "hospital-standard",
-    "variantPresetId": "hospital-standard",
-    "styleId": "hospital-blue-modern",
-    "style": {
-      "colors": {
-        "primary": "#1d4ed8",
-        "secondary": "#047857",
-        "accent": "#dc2626",
-        "background": "#f3f7fb",
-        "surface": "#ffffff",
-        "text": "#172033"
-      },
-      "shape": {
-        "radius": "6px"
-      },
-      "typography": {
-        "heading": "Inter, Arial, sans-serif",
-        "body": "Inter, Arial, sans-serif"
-      }
+    {
+      "_template": "hero",
+      "enabled": true,
+      "headline": "Care teams, diagnostics, and emergency access in one place",
+      "subheadline": "Multi-specialty OPD, emergency support, lab services, and family health programs."
+    },
+    {
+      "_template": "profile",
+      "enabled": true
+    },
+    {
+      "_template": "services",
+      "enabled": true,
+      "kicker": "Departments",
+      "title": "Care available today",
+      "items": [
+        {
+          "title": "Emergency Care",
+          "description": "24/7 first response and stabilization.",
+          "icon": "cross"
+        },
+        {
+          "title": "OPD Departments",
+          "description": "General medicine, pediatrics, cardiology, and orthopedics.",
+          "icon": "users"
+        },
+        {
+          "title": "Diagnostics",
+          "description": "Lab tests, ECG, ultrasound, and imaging coordination.",
+          "icon": "scan"
+        }
+      ]
+    },
+    {
+      "_template": "timings",
+      "enabled": true,
+      "kicker": "Timings",
+      "title": "Hospital availability",
+      "items": [
+        {
+          "day": "Emergency",
+          "primary": "24 hours",
+          "secondary": "All days"
+        },
+        {
+          "day": "OPD",
+          "primary": "9 AM - 8 PM",
+          "secondary": "Mon - Sat"
+        },
+        {
+          "day": "Diagnostics",
+          "primary": "7 AM - 7 PM",
+          "secondary": "Mon - Sun"
+        }
+      ]
+    },
+    {
+      "_template": "gallery",
+      "enabled": true,
+      "kicker": "Gallery",
+      "title": "Hospital and facility photos",
+      "items": [
+        {
+          "src": "https://images.unsplash.com/photo-1538108149393-fbbd81895907?auto=format&fit=crop&w=900&q=80",
+          "alt": "Hospital building"
+        },
+        {
+          "src": "https://images.unsplash.com/photo-1519494080410-f9aa8f52f1e1?auto=format&fit=crop&w=900&q=80",
+          "alt": "Hospital corridor"
+        },
+        {
+          "src": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=900&q=80",
+          "alt": "Hospital diagnostic room"
+        }
+      ]
+    },
+    {
+      "_template": "faq",
+      "enabled": true,
+      "kicker": "FAQ",
+      "title": "Common patient questions",
+      "items": [
+        {
+          "question": "Is emergency open at night?",
+          "answer": "Yes, emergency and pharmacy services are available 24/7."
+        },
+        {
+          "question": "Are diagnostics available?",
+          "answer": "Yes, common lab and cardiac diagnostics are available."
+        }
+      ]
+    },
+    {
+      "_template": "cta",
+      "enabled": true,
+      "title": "Ready to visit?",
+      "body": "Call or WhatsApp the hospital desk."
+    },
+    {
+      "_template": "awards",
+      "enabled": true
+    },
+    {
+      "_template": "testimonials",
+      "enabled": true,
+      "kicker": "",
+      "title": "",
+      "items": [
+        {
+          "quote": "Fast emergency response and helpful staff.",
+          "author": "Local resident"
+        },
+        {
+          "quote": "Clean facility and coordinated diagnostics.",
+          "author": "OPD patient"
+        }
+      ]
+    },
+    {
+      "_template": "stats",
+      "enabled": true,
+      "items": [
+        {
+          "value": "24/7",
+          "label": "Emergency"
+        },
+        {
+          "value": "12+",
+          "label": "Departments"
+        },
+        {
+          "value": "50+",
+          "label": "Care staff"
+        }
+      ]
     }
-  },
-  "seo": {
-    "title": "City Care Hospital | Multi-specialty Hospital",
-    "description": "Emergency, OPD, diagnostics, and family care.",
-    "keywords": [
-      "hospital",
-      "emergency",
-      "OPD",
-      "diagnostics"
-    ],
-    "ogImage": "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&w=1200&q=80"
-  },
-  "_template": "page"
+  ],
+  "settings": [
+    {
+      "_template": "urlSettings",
+      "slug": "home",
+      "title": "Home",
+      "path": "/",
+      "isHome": true
+    },
+    {
+      "_template": "presentation",
+      "themeId": "hospital-standard",
+      "variantPresetId": "hospital-standard",
+      "styleId": "hospital-blue-modern",
+      "style": {
+        "colors": {
+          "primary": "#1d4ed8",
+          "secondary": "#047857",
+          "accent": "#dc2626",
+          "background": "#f3f7fb",
+          "surface": "#ffffff",
+          "text": "#172033"
+        },
+        "shape": {
+          "radius": "6px"
+        },
+        "typography": {
+          "heading": "Inter, Arial, sans-serif",
+          "body": "Inter, Arial, sans-serif"
+        }
+      }
+    },
+    {
+      "_template": "seo",
+      "title": "City Care Hospital | Multi-specialty Hospital",
+      "description": "Emergency, OPD, diagnostics, and family care.",
+      "keywords": [
+        "hospital",
+        "emergency",
+        "OPD",
+        "diagnostics"
+      ],
+      "ogImage": "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&w=1200&q=80"
+    }
+  ]
 }
