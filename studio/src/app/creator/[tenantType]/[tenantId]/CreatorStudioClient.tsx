@@ -18,6 +18,79 @@ type InlineEditMessage = {
   value: string;
 };
 
+// Routes in the admin where the preview pane should be hidden (Tina takes full width)
+const NON_CONTENT_HASH_PREFIXES = [
+  "#/media",
+  "#/graphql",
+  "#/screen",
+  "#/collections/new",
+  "#/login",
+];
+
+/**
+ * Detect if a Tina hash should show the preview pane.
+ *
+ * - No preview: media, graphql, list views, collection root (no tenant selected)
+ * - Preview: editing a specific tenant's document/page
+ */
+function shouldShowPreview(hash: string, tenantId: string): boolean {
+  if (!hash || hash === "#/" || hash === "#") return false;
+  if (NON_CONTENT_HASH_PREFIXES.some((p) => hash.startsWith(p))) return false;
+  // Must contain tenantId to know which tenant to preview
+  return hash.includes(tenantId);
+}
+
+/**
+ * Parse the TinaCMS admin iframe hash to extract which page is being edited.
+ * Tina hash format: #/collections/edit/<collection>/<tenantId>/pages/<pageSlug>
+ * Returns the page slug (without .json) or "home" for the root.
+ */
+function parsePageSlugFromHash(hash: string, tenantId: string): string {
+  const pageMatch = hash.match(/\/pages\/([^/?#]+)/);
+  if (pageMatch?.[1]) {
+    return decodeURIComponent(pageMatch[1]).replace(/\.json$/, "");
+  }
+  if (hash.includes(tenantId)) return "home";
+  return "home";
+}
+
+/**
+ * Translate a TinaCMS admin hash to a clean parent-window path.
+ *
+ * URL scheme (no "edit" segment):
+ *   #/collections/edit/doctorSite                              → /creator/collections/doctorSite/~
+ *   #/collections/edit/doctorSite/dr-amit-sharma               → /creator/collections/doctorSite/~/dr-amit-sharma
+ *   #/collections/edit/doctorSite/dr-amit-sharma/pages/home    → /creator/collections/doctorSite/~/dr-amit-sharma/pages/home
+ *   #/media                                                    → /creator/media
+ */
+function tinaHashToCleanPath(hash: string, tenantId: string, collection: string): string {
+  const inner = hash.replace(/^#\/?/, "");
+
+  // Collection edit routes: collections/edit/<col>[/<tenantId>[/pages/<slug>]]
+  const editMatch = inner.match(
+    /^collections\/edit\/([^/]+)(?:\/([^/]+)(?:\/pages\/([^/?#]+))?)?/
+  );
+  if (editMatch) {
+    const col = editMatch[1];           // e.g. "doctorSite"
+    const tid = editMatch[2];           // e.g. "dr-amit-sharma" or undefined
+    const rawSlug = editMatch[3];       // e.g. "home.json" or undefined
+
+    if (!tid) {
+      // Collection list: no tenant selected
+      return `/creator/collections/${col}/~`;
+    }
+    if (!rawSlug) {
+      // Tenant root: no specific page — preview will show home
+      return `/creator/collections/${col}/~/${tid}`;
+    }
+    const slug = decodeURIComponent(rawSlug).replace(/\.json$/, "");
+    return `/creator/collections/${col}/~/${tid}/pages/${slug}`;
+  }
+
+  // Non-content routes (media, graphql, etc.)
+  return `/creator/${inner || "collections/" + collection + "/~/" + tenantId}`;
+}
+
 export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: CreatorStudioClientProps) {
   const leftRef = useRef<HTMLIFrameElement>(null);
   const rightRef = useRef<HTMLIFrameElement>(null);
@@ -27,6 +100,7 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
   const hashPollTimerRef = useRef<number | null>(null);
   const [uiEditingEnabled, setUiEditingEnabled] = useState(false);
   const [selectedPageSlug, setSelectedPageSlug] = useState(pageSlug);
+  const [showPreview, setShowPreview] = useState(true);
   const overlayRef = useRef<Record<string, string>>({});
   const fieldIndexRef = useRef<Map<string, HTMLInputElement | HTMLTextAreaElement>>(new Map());
   const indexTimerRef = useRef<number | null>(null);
@@ -36,7 +110,13 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
   } | null>(null);
 
   const pageCollection = tenantType === "doctor" ? "doctorSite" : "hospitalSite";
-  const adminEditUrl = `/admin/index.html#/collections/edit/${pageCollection}/${tenantId}/pages/${selectedPageSlug}`;
+
+  // Initial src for the admin iframe — mounted ONCE, user navigates freely inside.
+  // We poll the hash to keep the preview pane in sync.
+  const adminEditUrl = useRef(
+    `/admin/index.html#/collections/edit/${pageCollection}/${tenantId}/pages/${pageSlug}`
+  ).current;
+
   const previewUrl = useMemo(
     () => `/site/${tenantId}/${selectedPageSlug}?studio=1&ui=${uiEditingEnabled ? "1" : "0"}`,
     [tenantId, selectedPageSlug, uiEditingEnabled]
@@ -82,7 +162,6 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
 
 
       fieldIndexRef.current = buildFieldIndex(leftDoc);
-      syncSelectedPageFromTinaEditor(leftFrame, pages, setSelectedPageSlug);
     };
 
     const wireRightPreview = () => {
@@ -165,9 +244,41 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
       if (e.key === "Escape") setSuggestionPopup(null);
     });
 
+    const collection = tenantType === "doctor" ? "doctorSite" : "hospitalSite";
+    let lastPushedPath = window.location.pathname;
+
     hashPollTimerRef.current = window.setInterval(() => {
-      syncSelectedPageFromTinaEditor(leftFrame, pages, setSelectedPageSlug);
-    }, 500);
+      const leftFrame = leftRef.current;
+      if (!leftFrame) return;
+
+      let hash = "";
+      try { hash = leftFrame.contentWindow?.location.hash ?? ""; } catch { return; }
+      if (!hash) return;
+
+      const cleanPath = tinaHashToCleanPath(hash, tenantId, collection);
+      const showPrev = shouldShowPreview(hash, tenantId);
+
+      // Push a new history entry when navigating to a different page,
+      // replace when toggling non-content routes (media, graphql, etc.)
+      if (cleanPath !== lastPushedPath) {
+        if (showPrev) {
+          window.history.pushState(null, "", cleanPath);
+        } else {
+          window.history.replaceState(null, "", cleanPath);
+        }
+        lastPushedPath = cleanPath;
+      }
+
+      // Show/hide preview based on route type
+      setShowPreview(showPrev);
+
+      if (showPrev) {
+        const slug = parsePageSlugFromHash(hash, tenantId);
+        if (slug && pages.includes(slug)) {
+          setSelectedPageSlug((prev) => (prev === slug ? prev : slug));
+        }
+      }
+    }, 400);
     window.addEventListener("message", onPreviewMessage);
 
     return () => {
@@ -285,12 +396,25 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
       <section
         style={{
           display: "grid",
-          gridTemplateColumns: "46% 54%",
+          gridTemplateColumns: showPreview ? "46% 54%" : "100%",
           minHeight: 0,
         }}
       >
-        <iframe key={adminEditUrl} ref={leftRef} title="Tina Editor" src={adminEditUrl} style={frameStyle} />
-        <iframe key={previewUrl} ref={rightRef} title="Live Preview" src={previewUrl} style={frameStyle} />
+        <iframe
+          ref={leftRef}
+          title="Tina Editor"
+          src={adminEditUrl}
+          style={frameStyle}
+        />
+        {showPreview && (
+          <iframe
+            key={previewUrl}
+            ref={rightRef}
+            title="Live Preview"
+            src={previewUrl}
+            style={frameStyle}
+          />
+        )}
       </section>
       {suggestionPopup && (
         <SuggestionPopup
@@ -401,23 +525,6 @@ function collectDraftFromEditor(
   return draft;
 }
 
-function syncSelectedPageFromTinaEditor(
-  leftFrame: HTMLIFrameElement,
-  pages: string[],
-  setSelectedPageSlug: Dispatch<SetStateAction<string>>
-) {
-  let hash = "";
-  try {
-    hash = leftFrame.contentWindow?.location.hash ?? "";
-  } catch (e) {
-    // Cross-origin access denied (e.g. during redirect/auth)
-    return;
-  }
-  const match = hash.match(/\/pages\/([^/?#]+)/);
-  const pageSlug = match?.[1] ? decodeURIComponent(match[1]).replace(/\.json$/, "") : "";
-  if (!pageSlug || !pages.includes(pageSlug)) return;
-  setSelectedPageSlug((current) => (current === pageSlug ? current : pageSlug));
-}
 
 function extractSpecialtyFromEditor(leftDoc: Document): string | undefined {
   const specialtyField = leftDoc.querySelector<HTMLInputElement>("input[name*=\"profile.specialty\"], input[name*=\"specialty\"]");
