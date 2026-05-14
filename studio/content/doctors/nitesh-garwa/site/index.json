@@ -1,0 +1,89 @@
+{
+  "tenantId": "nitesh-garwa",
+  "tenantType": "doctor",
+  "status": "active",
+  "settings": [
+    {
+      "plan": "doctor_starter",
+      "billingCycle": "yearly",
+      "validFrom": "2026-05-11",
+      "validUntil": "2026-06-10T19:10:40.917Z",
+      "graceUntil": "2026-06-25",
+      "paymentStatus": "paid",
+      "_template": "subscription"
+    },
+    {
+      "primary": "localhost:3000",
+      "aliases": [],
+      "_template": "domains"
+    },
+    {
+      "displayName": "Nitesh Garwa",
+      "specialty": "General Practitioner",
+      "degrees": [
+        "MBBS",
+        "MD"
+      ],
+      "registrationNumber": "DMC-88769",
+      "experienceYears": 15,
+      "bio": "Nitesh Garwa is a dedicated general practitioner with 15+ years of experience in preventive care, diagnosis, and treatment of common medical conditions.",
+      "photo": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=900&q=80",
+      "_template": "profile"
+    },
+    {
+      "clinicName": "Nitesh Garwa Clinic",
+      "phone": "+91 99999 99999",
+      "whatsapp": "+919999999999",
+      "email": "clinic@nitesh-garwa.com",
+      "address": "123 Main Road, Near City Hospital, Delhi",
+      "mapUrl": "https://maps.google.com",
+      "_template": "business"
+    },
+    {
+      "themeId": "hospital-standard",
+      "variantPresetId": "doctor-compact",
+      "styleId": "doctor-derma-minimal",
+      "style": {
+        "colors": {
+          "primary": "#0f766e",
+          "secondary": "#2563eb",
+          "accent": "#f59e0b",
+          "background": "#ffffff",
+          "surface": "#f8fafc",
+          "text": "#111827"
+        },
+        "shape": {
+          "radius": "8px"
+        },
+        "typography": {
+          "heading": "Inter, Arial, sans-serif",
+          "body": "Inter, Arial, sans-serif"
+        }
+      },
+      "_template": "presentation"
+    },
+    {
+      "show": true,
+      "navLinks": [
+        "Services",
+        "About",
+        "Contact",
+        "Awards"
+      ],
+      "_template": "header"
+    },
+    {
+      "title": "Nitesh Garwa | General Practitioner",
+      "description": "Book appointments with Nitesh Garwa, experienced general practitioner providing quality healthcare services.",
+      "keywords": [
+        "general practitioner",
+        "doctor",
+        "healthcare",
+        "medical"
+      ],
+      "ogImage": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=1200&q=80",
+      "_template": "seo"
+    }
+  ],
+  "_template": "site"
+}

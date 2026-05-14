@@ -1,43 +1,19 @@
 {
-  "name": "doctor-sites",
-  "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "studio"
   ],
   "scripts": {
-    "dev": "TINA_PUBLIC_IS_LOCAL=true tinacms dev -c \"next dev\"",
-    "build": "next build",
-    "build:tina": "tinacms build && next build",
-    "build:tenants": "npm run build && node scripts/build-tenants.mjs",
-    "deploy:cloudflare": "node scripts/deploy-cloudflare.mjs",
-    "deploy": "npm run build:tenants && npm run deploy:cloudflare",
-    "start": "next start",
-    "lint": "eslint",
-    "migrate:content-folders": "node scripts/migrate-content-to-folders.mjs",
-    "migrate:nested-pages": "node scripts/migrate-to-nested-pages.mjs",
-    "revert:directory-structure": "node scripts/revert-to-directory-structure.mjs",
-    "migrate:split-pages": "node scripts/split-nested-pages.mjs",
-    "migrate:home-site-fields": "node scripts/copy-site-fields-to-home-pages.mjs"
+    "build:tina-packages": "pnpm --dir packages/tinacms run build",
+    "dev": "pnpm --dir studio run dev"
   },
-  "dependencies": {
-    "date-fns": "^2.30.0",
-    "graphql": "15.8.0",
-    "next": "16.2.6",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "tinacms": "file:./packages/tinacms"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@tinacms/cli": "^2.2.6",
-    "@types/node": "^20.19.40",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "babel-plugin-react-compiler": "1.0.0",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.6",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+  "pnpm": {
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "react": "19",
+        "react-dom": "19"
+      }
+    }
   }
 }

@@ -1,0 +1,91 @@
+{
+  "tenantId": "city-care-hospital",
+  "tenantType": "hospital",
+  "status": "trial",
+  "_template": "site",
+  "settings": [
+    {
+      "_template": "subscription",
+      "plan": "hospital_launch",
+      "billingCycle": "monthly",
+      "validFrom": "2026-05-10",
+      "validUntil": "2026-06-09",
+      "graceUntil": "2026-06-16",
+      "paymentStatus": "manual_review"
+    },
+    {
+      "_template": "domains",
+      "primary": "citycarehospital.com",
+      "aliases": [
+        "citycare.yourbrand.in"
+      ]
+    },
+    {
+      "_template": "profile",
+      "displayName": "City Care Hospital",
+      "specialty": "Multi-specialty Hospital",
+      "degrees": [
+        "24/7 Emergency",
+        "Diagnostics",
+        "OPD"
+      ],
+      "registrationNumber": "HSP-77881",
+      "experienceYears": 12,
+      "bio": "A neighborhood hospital with emergency care, OPD consultations, diagnostics, and day-care procedures.",
+      "photo": "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      "_template": "business",
+      "clinicName": "City Care Hospital",
+      "phone": "+91 88888 88888",
+      "whatsapp": "+918888888888",
+      "email": "care@example.com",
+      "address": "45 Ring Road, Bengaluru",
+      "mapUrl": "https://maps.google.com"
+    },
+    {
+      "_template": "presentation",
+      "themeId": "hospital-standard",
+      "variantPresetId": "hospital-standard",
+      "styleId": "hospital-blue-modern",
+      "style": {
+        "colors": {
+          "primary": "#1d4ed8",
+          "secondary": "#047857",
+          "accent": "#dc2626",
+          "background": "#f3f7fb",
+          "surface": "#ffffff",
+          "text": "#172033"
+        },
+        "shape": {
+          "radius": "6px"
+        },
+        "typography": {
+          "heading": "Inter, Arial, sans-serif",
+          "body": "Inter, Arial, sans-serif"
+        }
+      }
+    },
+    {
+      "_template": "header",
+      "show": true,
+      "navLinks": [
+        "Services",
+        "About",
+        "Contact"
+      ]
+    },
+    {
+      "_template": "seo",
+      "title": "City Care Hospital | Multi-specialty Hospital",
+      "description": "Emergency, OPD, diagnostics, and family care.",
+      "keywords": [
+        "hospital",
+        "emergency",
+        "OPD",
+        "diagnostics"
+      ],
+      "ogImage": "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&w=1200&q=80"
+    }
+  ]
+}

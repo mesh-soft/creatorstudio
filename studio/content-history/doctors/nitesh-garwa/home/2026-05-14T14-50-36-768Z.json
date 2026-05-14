@@ -1,0 +1,178 @@
+{
+  "blocks": [
+    {
+      "enabled": true,
+      "navLinks": [
+        "test"
+      ],
+      "_template": "header"
+    },
+    {
+      "enabled": true,
+      "headline": "Expert care you can trust",
+      "subheadline": "Personalized medical care with compassion and expertise for you and your family.",
+      "css": "{\"background\":\"red\"}",
+      "_template": "hero"
+    },
+    {
+      "enabled": true,
+      "kicker": "Book your consultation today.",
+      "title": "What patients can book",
+      "items": [
+        {
+          "title": "General Consultations",
+          "description": "Comprehensive health assessment and treatment planning.",
+          "icon": "stethoscope"
+        },
+        {
+          "title": "Health Checkup",
+          "description": "Preventive health screenings and wellness packages.",
+          "icon": "heart-pulse"
+        },
+        {
+          "title": "Vaccination",
+          "description": "Immunization services for all age groups.",
+          "icon": "syringe"
+        },
+        {
+          "title": "Minor Procedures",
+          "description": "Quick outpatient procedures and wound care.",
+          "icon": "bandage"
+        }
+      ],
+      "css": "{\"background\":\"yellow\"}",
+      "_template": "services"
+    },
+    {
+      "kicker": "Book your consultation today.",
+      "title": "test",
+      "items": [
+        {
+          "src": "/content/doctors/nitesh-garwa/i20_sports.jpeg"
+        },
+        {
+          "src": "/content/doctors/nitesh-garwa/i20_sports2.jpeg"
+        }
+      ],
+      "_template": "gallery"
+    },
+    {
+      "enabled": true,
+      "_template": "awards"
+    },
+    {
+      "enabled": true,
+      "kicker": "Timings",
+      "title": "Clinic availability",
+      "items": [
+        {
+          "day": "Monday",
+          "primary": "10 AM - 2 PM",
+          "secondary": "5 PM - 8 PM"
+        },
+        {
+          "day": "Tuesday",
+          "primary": "10 AM - 2 PM",
+          "secondary": "Closed"
+        },
+        {
+          "day": "Wednesday",
+          "primary": "10 AM - 2 PM",
+          "secondary": "5 PM - 8 PM"
+        },
+        {
+          "day": "Thursday",
+          "primary": "10 AM - 2 PM",
+          "secondary": "Closed"
+        },
+        {
+          "day": "Friday",
+          "primary": "10 AM - 2 PM",
+          "secondary": "5 PM - 8 PM"
+        },
+        {
+          "day": "Saturday",
+          "primary": "10 AM - 1 PM",
+          "secondary": "By appointment"
+        },
+        {
+          "day": "Sunday",
+          "primary": "Closed",
+          "secondary": "Closed"
+        }
+      ],
+      "_template": "timings"
+    },
+    {
+      "enabled": true,
+      "kicker": "FAQs",
+      "title": "Common patient questions",
+      "items": [
+        {
+          "question": "are these possible?",
+          "answer": "no, it has not been done."
+        }
+      ],
+      "_template": "faq"
+    },
+    {
+      "enabled": true,
+      "kicker": "",
+      "title": "",
+      "items": [
+        {
+          "quote": "Dr. Nitesh Garwa is very patient and explains everything clearly. Highly recommended!"
+        },
+        {
+          "quote": "Best doctor in the area. The clinic is clean and the staff is very helpful."
+        },
+        {
+          "quote": "Got my vaccination done here. Quick and professional service."
+        }
+      ],
+      "_template": "testimonials"
+    },
+    {
+      "enabled": true,
+      "items": [
+        {
+          "value": "15+",
+          "label": "Years Experience"
+        },
+        {
+          "value": "5,000+",
+          "label": "Happy Patients"
+        },
+        {
+          "value": "10,000+",
+          "label": "Consultations"
+        }
+      ],
+      "_template": "stats"
+    },
+    {
+      "title": "Ready to book?",
+      "body": "Call or WhatsApp the clinic.",
+      "_template": "cta"
+    }
+  ],
+  "settings": [
+    {
+      "slug": "home",
+      "title": "Home",
+      "path": "/",
+      "isHome": true,
+      "_template": "urlSettings"
+    },
+    {
+      "themeId": "doctor-profile-heavy",
+      "variantPresetId": "doctor-premium",
+      "styleId": "doctor-bright-child",
+      "_template": "presentation"
+    },
+    {
+      "_template": "seo"
+    }
+  ],
+  "_template": "page"
+}
