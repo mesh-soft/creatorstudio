@@ -1,5 +1,5 @@
 import type { Pattern } from '../../stringify';
-import type { Construct, Tokenizer, State } from 'micromark-util-types';
+import type { Construct, Tokenizer, State, Effects } from 'micromark-util-types';
 import { factorySpace } from 'micromark-factory-space';
 import { markdownLineEnding, markdownSpace } from 'micromark-util-character';
 import { codes } from 'micromark-util-symbol/codes';
@@ -46,6 +46,11 @@ export const directiveLeaf: (pattern: Pattern) => Construct = (pattern) => {
   const tokenizeDirectiveLeaf: Tokenizer = function (effects, ook, nnok) {
     // eslint-disable-next-line
     const self = this;
+    const effectEnter = effects.enter.bind(effects);
+    const effectExit = effects.exit.bind(effects);
+    type MicromarkToken = Parameters<Effects['enter']>[0];
+    const tokenEnter = (t: string | MicromarkToken) => effectEnter(t as MicromarkToken);
+    const tokenExit = (t: string | MicromarkToken) => effectExit(t as MicromarkToken);
     let startSequenceIndex = 1;
     let endSequenceIndex = 0;
 
@@ -59,9 +64,9 @@ export const directiveLeaf: (pattern: Pattern) => Construct = (pattern) => {
     const start: State = function (code) {
       const firstCharacter = pattern.start[0];
       if (findCode(firstCharacter) === code) {
-        effects.enter('directiveLeaf');
-        effects.enter('directiveLeafFence');
-        effects.enter('directiveLeafSequence');
+        tokenEnter('directiveLeaf');
+        tokenEnter('directiveLeafFence');
+        tokenEnter('directiveLeafSequence');
         effects.consume(code);
         return sequenceOpen(code);
       }
@@ -80,7 +85,7 @@ export const directiveLeaf: (pattern: Pattern) => Construct = (pattern) => {
         return nok(code);
       }
 
-      effects.exit('directiveLeafSequence');
+      tokenExit('directiveLeafSequence');
       return factorName(code);
     };
     const factorName: State = (code) => {
@@ -119,8 +124,8 @@ export const directiveLeaf: (pattern: Pattern) => Construct = (pattern) => {
       )(code);
     };
     const end: State = function (code) {
-      effects.exit('directiveLeafFence');
-      effects.exit('directiveLeaf');
+      tokenExit('directiveLeafFence');
+      tokenExit('directiveLeaf');
       return ok(code);
     };
 

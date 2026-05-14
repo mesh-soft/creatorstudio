@@ -5,6 +5,7 @@ import type {
   Tokenizer,
   State,
   Token,
+  Effects,
 } from 'micromark-util-types';
 import { ok as assert } from 'uvu/assert';
 import { factorySpace } from 'micromark-factory-space';
@@ -22,6 +23,11 @@ export const directiveContainer: (pattern: Pattern) => Construct = (
   const tokenizeDirectiveContainer: Tokenizer = function (effects, ook, nnok) {
     // eslint-disable-next-line
     const self = this;
+    const effectEnter = effects.enter.bind(effects);
+    const effectExit = effects.exit.bind(effects);
+    type MicromarkToken = Parameters<Effects['enter']>[0];
+    const tokenEnter = (t: string | MicromarkToken) => effectEnter(t as MicromarkToken);
+    const tokenExit = (t: string | MicromarkToken) => effectExit(t as MicromarkToken);
     const tail = self.events[self.events.length - 1];
     const initialSize =
       tail && tail[1].type === types.linePrefix
@@ -45,9 +51,9 @@ export const directiveContainer: (pattern: Pattern) => Construct = (
     const start: State = function (code) {
       const firstCharacter = pattern.start[0];
       if (findCode(firstCharacter) === code) {
-        effects.enter('directiveContainer');
-        effects.enter('directiveContainerFence');
-        effects.enter('directiveContainerSequence');
+        tokenEnter('directiveContainer');
+        tokenEnter('directiveContainerFence');
+        tokenEnter('directiveContainerSequence');
         effects.consume(code);
         return sequenceOpen(code);
       }
@@ -66,7 +72,7 @@ export const directiveContainer: (pattern: Pattern) => Construct = (
         return nok(code);
       }
 
-      effects.exit('directiveContainerSequence');
+      tokenExit('directiveContainerSequence');
       return factorName(code);
     };
     const factorName: State = (code) => {
@@ -122,7 +128,7 @@ export const directiveContainer: (pattern: Pattern) => Construct = (
     };
 
     const openAfter: State = function (code) {
-      effects.exit('directiveContainerFence');
+      tokenExit('directiveContainerFence');
 
       if (code === codes.eof) {
         return afterOpening(code);
@@ -141,7 +147,7 @@ export const directiveContainer: (pattern: Pattern) => Construct = (
     };
 
     const afterOpening: State = function (code) {
-      // effects.exit('directiveContainer')
+      // tokenExit('directiveContainer')
       return nok(code);
     };
 
@@ -150,7 +156,7 @@ export const directiveContainer: (pattern: Pattern) => Construct = (
         return nok(code);
       }
 
-      effects.enter('directiveContainerContent');
+      tokenEnter('directiveContainerContent');
       return lineStart(code);
     };
 
@@ -175,7 +181,7 @@ export const directiveContainer: (pattern: Pattern) => Construct = (
         return nok(code);
       }
 
-      const token = effects.enter(types.chunkDocument, {
+      const token = effects.enter(types.chunkDocument as MicromarkToken, {
         contentType: constants.contentTypeDocument as ContentType,
         previous,
       });
@@ -186,7 +192,7 @@ export const directiveContainer: (pattern: Pattern) => Construct = (
 
     const contentContinue: State = function (code) {
       if (code === codes.eof) {
-        const t = effects.exit(types.chunkDocument);
+        const t = effects.exit(types.chunkDocument as MicromarkToken);
         self.parser.lazy[t.start.line] = false;
         // return after(code)
         return nok(code);
@@ -202,27 +208,33 @@ export const directiveContainer: (pattern: Pattern) => Construct = (
 
     const nonLazyLineAfter: State = function (code) {
       effects.consume(code);
-      const t = effects.exit(types.chunkDocument);
+      const t = effects.exit(types.chunkDocument as MicromarkToken);
       self.parser.lazy[t.start.line] = false;
       return lineStart;
     };
 
     const lineAfter: State = function (code) {
-      const t = effects.exit(types.chunkDocument);
+      const t = effects.exit(types.chunkDocument as MicromarkToken);
       self.parser.lazy[t.start.line] = false;
       return after(code);
     };
 
     const after: State = function (code) {
-      effects.exit('directiveContainerContent');
-      effects.exit('directiveContainer');
+      tokenExit('directiveContainerContent');
+      tokenExit('directiveContainer');
       return ok(code);
     };
 
     const tokenizeClosingFence: Tokenizer = function (effects, ok, nok) {
+      const closeEnter = effects.enter.bind(effects);
+      const closeExit = effects.exit.bind(effects);
+      const closeTokenEnter = (t: string | MicromarkToken) =>
+        closeEnter(t as MicromarkToken);
+      const closeTokenExit = (t: string | MicromarkToken) =>
+        closeExit(t as MicromarkToken);
       const closingPrefixAfter: State = function (code) {
-        effects.enter('directiveContainerFence');
-        effects.enter('directiveContainerSequence');
+        closeTokenEnter('directiveContainerFence');
+        closeTokenEnter('directiveContainerSequence');
         return closingSequence(code);
       };
 
@@ -237,7 +249,7 @@ export const directiveContainer: (pattern: Pattern) => Construct = (
         if (closeStartSequenceIndex < pattern.end.length - 1) {
           return nok(code);
         }
-        effects.exit('directiveContainerSequence');
+        closeTokenExit('directiveContainerSequence');
         return factorySpace(
           effects,
           closingSequenceNameStart,
@@ -289,7 +301,7 @@ export const directiveContainer: (pattern: Pattern) => Construct = (
           return nok;
         }
         if (pattern.end.length - 1 === closeEndSequenceIndex) {
-          effects.exit('directiveContainerFence');
+          closeTokenExit('directiveContainerFence');
           return ok(code);
         }
         const nextCharacter = pattern.end[closeEndSequenceIndex];
@@ -344,9 +356,9 @@ export const directiveContainer: (pattern: Pattern) => Construct = (
 
     const start: State = function (code) {
       assert(markdownLineEnding(code), 'expected eol');
-      effects.enter(types.lineEnding);
+      effects.enter(types.lineEnding as Parameters<Effects['enter']>[0]);
       effects.consume(code);
-      effects.exit(types.lineEnding);
+      effects.exit(types.lineEnding as Parameters<Effects['exit']>[0]);
       return lineStart;
     };
 

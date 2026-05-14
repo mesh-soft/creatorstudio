@@ -1,5 +1,5 @@
 {
-	"name": "tinacms",
+	"name": "tinacms-repo",
 	"private": true,
 	"version": "1.0.0",
 	"workspaces": [
@@ -29,7 +29,7 @@
 		"format": "biome format --write ./packages/ ./examples/"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "catalog:",
+		"@biomejs/biome": "^1.6.0",
 		"@changesets/changelog-github": "catalog:",
 		"@changesets/cli": "catalog:",
 		"@types/jest": "^29.5.14",

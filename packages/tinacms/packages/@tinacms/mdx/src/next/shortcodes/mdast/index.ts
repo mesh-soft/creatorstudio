@@ -293,7 +293,7 @@ export function mdxJsxFromMarkdown({ patterns }: { patterns: Pattern[] }) {
       this.enter(
         {
           type:
-            token.type === 'mdxJsxTextTag'
+            (token.type as string) === 'mdxJsxTextTag'
               ? 'mdxJsxTextElement'
               : 'mdxJsxFlowElement',
           name: tagName || null,
@@ -316,7 +316,7 @@ export function mdxJsxFromMarkdown({ patterns }: { patterns: Pattern[] }) {
       // want to basically unwind it and treat it as a
       // plain string instead.
       if (tag.shouldFallback) {
-        if (token.type === 'mdxJsxFlowTag') {
+        if ((token.type as string) === 'mdxJsxFlowTag') {
           this.enter(
             {
               type: 'paragraph',

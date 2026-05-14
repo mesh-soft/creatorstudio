@@ -220,26 +220,25 @@ export class TinaSchema {
     if (!collection) {
       return undefined;
     }
-    let template: Template<true>;
-
+    let template: Template<true> | undefined;
     const templates = this.getTemplatesForCollectable(collection);
     if (templates.type === 'union') {
       if (templateName) {
-        template = templates.templates.find(
+        const found = templates.templates.find(
           (template) => lastItem(template.namespace) === templateName
         );
-        if (!template) {
+        if (!found) {
           throw new Error(
             `Unable to determine template for item at ${filepath}`
           );
         }
+        template = found;
       } else {
         throw new Error(
           `Unable to determine template for item at ${filepath}, no template name provided for collection with multiple templates`
         );
       }
-    }
-    if (templates.type === 'object') {
+    } else if (templates.type === 'object') {
       template = templates.template;
     }
     if (!template) {

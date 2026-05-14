@@ -27,6 +27,7 @@ import {
   TextFieldPlugin,
   TextareaFieldPlugin,
   ToggleFieldPlugin,
+  CssFieldPlugin,
 } from '@toolkit/fields';
 import type { FieldPlugin } from '@toolkit/form-builder';
 import type { Form } from '@toolkit/forms';
@@ -44,30 +45,6 @@ import { MdOutlinePerson } from 'react-icons/md';
 import { MdOutlineHelpOutline } from 'react-icons/md';
 import type { Client } from '../internalClient';
 import type { TinaAction, TinaState } from './tina-state';
-const DEFAULT_FIELDS = [
-  TextFieldPlugin,
-  TextareaFieldPlugin,
-  ImageFieldPlugin,
-  ColorFieldPlugin,
-  NumberFieldPlugin,
-  ToggleFieldPlugin,
-  SelectFieldPlugin,
-  RadioGroupFieldPlugin,
-  GroupFieldPlugin,
-  GroupListFieldPlugin,
-  ListFieldPlugin,
-  BlocksFieldPlugin,
-  TagsFieldPlugin,
-  DateFieldPlugin,
-  MarkdownFieldPlaceholder,
-  HtmlFieldPlaceholder,
-  CheckboxGroupFieldPlugin,
-  ReferenceFieldPlugin,
-  ButtonToggleFieldPlugin,
-  HiddenFieldPlugin,
-  PasswordFieldPlugin,
-  DisplayOnlyFieldPlugin,
-];
 
 export interface TinaCMSConfig extends CMSConfig {
   sidebar?: SidebarStateOptions | boolean;
@@ -119,8 +96,34 @@ export class TinaCMS extends CMS {
       this.sidebar = new SidebarState(this.events, sidebarConfig);
     }
 
+    const DEFAULT_FIELDS = [
+      TextFieldPlugin,
+      TextareaFieldPlugin,
+      ImageFieldPlugin,
+      ColorFieldPlugin,
+      NumberFieldPlugin,
+      ToggleFieldPlugin,
+      SelectFieldPlugin,
+      RadioGroupFieldPlugin,
+      GroupFieldPlugin,
+      GroupListFieldPlugin,
+      ListFieldPlugin,
+      BlocksFieldPlugin,
+      TagsFieldPlugin,
+      DateFieldPlugin,
+      MarkdownFieldPlaceholder,
+      HtmlFieldPlaceholder,
+      CheckboxGroupFieldPlugin,
+      ReferenceFieldPlugin,
+      ButtonToggleFieldPlugin,
+      HiddenFieldPlugin,
+      PasswordFieldPlugin,
+      DisplayOnlyFieldPlugin,
+      CssFieldPlugin,
+    ];
+
     DEFAULT_FIELDS.forEach((field) => {
-      if (!this.fields.find(field.name)) {
+      if (field && !this.fields.find(field.name)) {
         //@ts-ignore //? Note - Not sure what this is doing
         this.fields.add(field);
       }

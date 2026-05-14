@@ -49,11 +49,11 @@ export const Select: React.FC<SelectProps> = ({
         onChange={input.onChange}
         className={`${selectFieldClasses} ${
           input.value ? 'text-gray-700' : 'text-gray-300'
-        } } ${className}`}
+        } ${className}`}
         {...input}
       >
         {selectOptions ? (
-          selectOptions.map(toProps).map(toComponent)
+          selectOptions.map(toProps).map((opt, i) => toComponent(opt, i))
         ) : (
           <option>{input.value}</option>
         )}
@@ -67,9 +67,9 @@ function toProps(option: Option | string): Option {
   return { value: option, label: option };
 }
 
-function toComponent(option: Option) {
+function toComponent(option: Option, i: number) {
   return (
-    <option key={option.value} value={option.value}>
+    <option key={`${option.value}-${i}`} value={option.value}>
       {option.label}
     </option>
   );

@@ -86,6 +86,14 @@ export type TinaAction =
   | {
       type: 'sidebar:set-loading-state';
       value: boolean;
+    }
+  | {
+      type: 'set-url';
+      value: string;
+    }
+  | {
+      type: 'set-active-css';
+      value: { id: string; css: string };
     };
 
 export interface TinaState {
@@ -106,6 +114,8 @@ export interface TinaState {
   isLoadingContent: boolean;
   quickEditSupported: boolean;
   sidebarDisplayState: 'closed' | 'open' | 'fullscreen';
+  url: string;
+  activeCss: { id: string; css: string } | null;
 }
 
 export const initialState = (cms: TinaCMS): TinaState => {
@@ -118,6 +128,8 @@ export const initialState = (cms: TinaCMS): TinaState => {
     isLoadingContent: false,
     quickEditSupported: false,
     sidebarDisplayState: cms?.sidebar?.defaultState || 'open',
+    url: typeof window !== 'undefined' ? window.location.href : '',
+    activeCss: null,
   };
 };
 
@@ -304,6 +316,12 @@ export function tinaReducer(state: TinaState, action: TinaAction): TinaState {
     }
     case 'sidebar:set-loading-state': {
       return { ...state, isLoadingContent: action.value };
+    }
+    case 'set-url': {
+      return { ...state, url: action.value };
+    }
+    case 'set-active-css': {
+      return { ...state, activeCss: action.value };
     }
     default:
       throw new Error(`Unhandled action ${action.type}`);

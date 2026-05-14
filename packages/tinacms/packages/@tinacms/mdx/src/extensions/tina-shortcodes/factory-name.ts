@@ -19,7 +19,7 @@ export function factoryName(
     const character = patternName[nameIndex];
     if (asciiAlpha(code) && findCode(character) === code) {
       nameIndex++;
-      effects.enter(type);
+      effects.enter(type as Parameters<Effects['enter']>[0]);
       effects.consume(code);
       return name;
     }
@@ -42,7 +42,7 @@ export function factoryName(
       return nok(code);
     }
 
-    effects.exit(type);
+    effects.exit(type as Parameters<Effects['exit']>[0]);
     return self.previous === codes.dash || self.previous === codes.underscore
       ? nok(code)
       : ok(code);

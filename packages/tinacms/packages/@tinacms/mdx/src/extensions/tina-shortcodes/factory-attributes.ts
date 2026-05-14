@@ -28,6 +28,12 @@ export function factoryAttributes(
   attributeValueData: string,
   disallowEol?: boolean
 ) {
+  /** Tina shortcodes use extension-specific token names not declared on micromark's TokenTypeMap. */
+  const enter = (name: string) =>
+    effects.enter(name as Parameters<Effects['enter']>[0]);
+  const exit = (name: string) =>
+    effects.exit(name as Parameters<Effects['exit']>[0]);
+
   let type: string;
   let marker: Code | undefined;
 
@@ -36,7 +42,7 @@ export function factoryAttributes(
   };
 
   const start: State = function (code) {
-    effects.enter(attributesType);
+    enter(attributesType);
     return between(code);
   };
 
@@ -52,16 +58,16 @@ export function factoryAttributes(
     }
 
     if (code === codes.colon || code === codes.underscore || asciiAlpha(code)) {
-      effects.enter(attributeType);
-      effects.enter(attributeNameType);
+      enter(attributeType);
+      enter(attributeNameType);
       effects.consume(code);
       return name;
     }
     // Skip the name, go directly to the value
     if (code === codes.quotationMark || code === codes.apostrophe) {
-      effects.enter(attributeNameType);
-      effects.exit(attributeNameType);
-      effects.enter(attributeType);
+      enter(attributeNameType);
+      exit(attributeNameType);
+      enter(attributeType);
       return valueBefore(code);
     }
 
@@ -77,11 +83,11 @@ export function factoryAttributes(
   };
 
   const shortcutStart: State = function (code) {
-    effects.enter(attributeType);
-    effects.enter(type);
-    effects.enter(type + 'Marker');
+    enter(attributeType);
+    enter(type);
+    enter(type + 'Marker');
     effects.consume(code);
-    effects.exit(type + 'Marker');
+    exit(type + 'Marker');
     return shortcutStartAfter;
   };
 
@@ -102,7 +108,7 @@ export function factoryAttributes(
       return nok(code);
     }
 
-    effects.enter(type + 'Value');
+    enter(type + 'Value');
     effects.consume(code);
     return shortcut;
   };
@@ -126,9 +132,9 @@ export function factoryAttributes(
       code === codes.rightCurlyBrace ||
       markdownLineEndingOrSpace(code)
     ) {
-      effects.exit(type + 'Value');
-      effects.exit(type);
-      effects.exit(attributeType);
+      exit(type + 'Value');
+      exit(type);
+      exit(attributeType);
       return between(code);
     }
 
@@ -148,7 +154,7 @@ export function factoryAttributes(
       return name;
     }
 
-    effects.exit(attributeNameType);
+    exit(attributeNameType);
 
     if (disallowEol && markdownSpace(code)) {
       return factorySpace(effects, nameAfter, types.whitespace)(code);
@@ -163,14 +169,14 @@ export function factoryAttributes(
 
   const nameAfter: State = function (code) {
     if (code === codes.equalsTo) {
-      effects.enter(attributeInitializerType);
+      enter(attributeInitializerType);
       effects.consume(code);
-      effects.exit(attributeInitializerType);
+      exit(attributeInitializerType);
       return valueBefore;
     }
 
     // Attribute w/o value.
-    effects.exit(attributeType);
+    exit(attributeType);
     return between(code);
   };
 
@@ -188,10 +194,10 @@ export function factoryAttributes(
     }
 
     if (code === codes.quotationMark || code === codes.apostrophe) {
-      effects.enter(attributeValueLiteralType);
-      effects.enter(attributeValueMarker);
+      enter(attributeValueLiteralType);
+      enter(attributeValueMarker);
       effects.consume(code);
-      effects.exit(attributeValueMarker);
+      exit(attributeValueMarker);
       marker = code;
       return valueQuotedStart;
     }
@@ -204,8 +210,8 @@ export function factoryAttributes(
       return factoryWhitespace(effects, valueBefore)(code);
     }
 
-    effects.enter(attributeValueType);
-    effects.enter(attributeValueData);
+    enter(attributeValueType);
+    enter(attributeValueData);
     effects.consume(code);
     marker = undefined;
     return valueUnquoted;
@@ -225,9 +231,9 @@ export function factoryAttributes(
     }
 
     if (code === codes.rightCurlyBrace || markdownLineEndingOrSpace(code)) {
-      effects.exit(attributeValueData);
-      effects.exit(attributeValueType);
-      effects.exit(attributeType);
+      exit(attributeValueData);
+      exit(attributeValueType);
+      exit(attributeType);
       return between(code);
     }
 
@@ -237,21 +243,21 @@ export function factoryAttributes(
 
   const valueQuotedStart: State = function (code) {
     if (code === marker) {
-      effects.enter(attributeValueMarker);
+      enter(attributeValueMarker);
       effects.consume(code);
-      effects.exit(attributeValueMarker);
-      effects.exit(attributeValueLiteralType);
-      effects.exit(attributeType);
+      exit(attributeValueMarker);
+      exit(attributeValueLiteralType);
+      exit(attributeType);
       return valueQuotedAfter;
     }
 
-    effects.enter(attributeValueType);
+    enter(attributeValueType);
     return valueQuotedBetween(code);
   };
 
   const valueQuotedBetween: State = function (code) {
     if (code === marker) {
-      effects.exit(attributeValueType);
+      exit(attributeValueType);
       return valueQuotedStart(code);
     }
 
@@ -266,14 +272,14 @@ export function factoryAttributes(
         : factoryWhitespace(effects, valueQuotedBetween)(code);
     }
 
-    effects.enter(attributeValueData);
+    enter(attributeValueData);
     effects.consume(code);
     return valueQuoted;
   };
 
   const valueQuoted: State = function (code) {
     if (code === marker || code === codes.eof || markdownLineEnding(code)) {
-      effects.exit(attributeValueData);
+      exit(attributeValueData);
       return valueQuotedBetween(code);
     }
 
@@ -289,9 +295,9 @@ export function factoryAttributes(
 
   const end: State = function (code) {
     if (!asciiAlpha(code)) {
-      effects.enter(attributesMarkerType);
-      effects.exit(attributesMarkerType);
-      effects.exit(attributesType);
+      enter(attributesMarkerType);
+      exit(attributesMarkerType);
+      exit(attributesType);
       return ok(code);
     }
 

@@ -65,6 +65,11 @@ export function factoryTag(
 ) {
   // eslint-disable-next-line
   const self = this;
+  const effectEnter = effects.enter.bind(effects);
+  const effectExit = effects.exit.bind(effects);
+  type MicromarkToken = Parameters<Effects['enter']>[0];
+  const tokenEnter = (t: string | MicromarkToken) => effectEnter(t as MicromarkToken);
+  const tokenExit = (t: string | MicromarkToken) => effectExit(t as MicromarkToken);
   let returnState: State;
   let marker: NonNullable<Code> | undefined;
   let startPoint: Point | undefined;
@@ -75,11 +80,11 @@ export function factoryTag(
 
   const start: State = function (code) {
     startPoint = self.now();
-    effects.enter(tagType);
-    effects.enter(tagMarkerType);
+    tokenEnter(tagType);
+    tokenEnter(tagMarkerType);
     effects.consume(code);
     if (pattern.start.length === 1) {
-      effects.exit(tagMarkerType);
+      tokenExit(tagMarkerType);
       return afterStart;
     }
     return tagOpenerSequence;
@@ -90,7 +95,7 @@ export function factoryTag(
     if (code === character) {
       effects.consume(code);
       if (pattern.start.length - 1 === tagOpenerIndex) {
-        effects.exit(tagMarkerType);
+        tokenExit(tagMarkerType);
         return afterStart;
       }
       tagOpenerIndex++;
@@ -119,9 +124,9 @@ export function factoryTag(
   const beforeName: State = function (code) {
     // Closing tag.
     if (code === codes.slash) {
-      effects.enter(tagClosingMarkerType);
+      tokenEnter(tagClosingMarkerType);
       effects.consume(code);
-      effects.exit(tagClosingMarkerType);
+      tokenExit(tagClosingMarkerType);
       returnState = beforeClosingTagName;
       return optionalEsWhitespace;
     }
@@ -137,8 +142,8 @@ export function factoryTag(
       idStart(code) &&
       findCode(pattern.name[0]) === code
     ) {
-      effects.enter(tagNameType);
-      effects.enter(tagNamePrimaryType);
+      tokenEnter(tagNameType);
+      tokenEnter(tagNamePrimaryType);
       effects.consume(code);
       return primaryName;
     }
@@ -164,8 +169,8 @@ export function factoryTag(
 
     // Start of a closing tag name.
     if (code !== codes.eof && idStart(code)) {
-      effects.enter(tagNameType);
-      effects.enter(tagNamePrimaryType);
+      tokenEnter(tagNameType);
+      tokenEnter(tagNamePrimaryType);
       effects.consume(code);
       return primaryName;
     }
@@ -207,7 +212,7 @@ export function factoryTag(
       markdownLineEndingOrSpace(code) ||
       unicodeWhitespace(code)
     ) {
-      effects.exit(tagNamePrimaryType);
+      tokenExit(tagNamePrimaryType);
       returnState = afterPrimaryName;
       return optionalEsWhitespace(code);
     }
@@ -228,9 +233,9 @@ export function factoryTag(
     // Start of a member name.
     // eg. <Popover.PopoverButton>
     if (code === codes.dot) {
-      effects.enter(tagNameMemberMarkerType);
+      tokenEnter(tagNameMemberMarkerType);
       effects.consume(code);
-      effects.exit(tagNameMemberMarkerType);
+      tokenExit(tagNameMemberMarkerType);
       returnState = beforeMemberName;
       return optionalEsWhitespace;
     }
@@ -238,9 +243,9 @@ export function factoryTag(
     // Start of a local name.
     // eg. <xml:text>
     if (code === codes.colon) {
-      effects.enter(tagNamePrefixMarkerType);
+      tokenEnter(tagNamePrefixMarkerType);
       effects.consume(code);
-      effects.exit(tagNamePrefixMarkerType);
+      tokenExit(tagNamePrefixMarkerType);
       returnState = beforeLocalName;
       return optionalEsWhitespace;
     }
@@ -255,7 +260,7 @@ export function factoryTag(
         const character = findCode(pattern.end[tagCloserIndex]);
         if (code === character) {
           if (pattern.end.length - 1 === tagCloserIndex) {
-            effects.exit(tagNameType);
+            tokenExit(tagNameType);
             return beforeAttribute(code);
           }
           tagCloserIndex++;
@@ -266,7 +271,7 @@ export function factoryTag(
         return nok;
       };
       if (pattern.end.length === 1) {
-        effects.exit(tagNameType);
+        tokenExit(tagNameType);
         return beforeAttribute(code);
       } else {
         effects.consume(code);
@@ -281,20 +286,20 @@ export function factoryTag(
       code === codes.leftCurlyBrace ||
       (code !== codes.eof && idStart(code))
     ) {
-      effects.exit(tagNameType);
+      tokenExit(tagNameType);
       return beforeAttribute(code);
     }
 
     // shortcut for unkeyed value
     if (code === codes.quotationMark) {
-      effects.exit(tagNameType);
-      effects.enter(tagAttributeType);
-      effects.enter(tagAttributeNameType);
-      effects.enter(tagAttributeNamePrimaryType);
-      effects.exit(tagAttributeNamePrimaryType);
-      effects.exit(tagAttributeNameType);
-      effects.enter(tagAttributeInitializerMarkerType);
-      effects.exit(tagAttributeInitializerMarkerType);
+      tokenExit(tagNameType);
+      tokenEnter(tagAttributeType);
+      tokenEnter(tagAttributeNameType);
+      tokenEnter(tagAttributeNamePrimaryType);
+      tokenExit(tagAttributeNamePrimaryType);
+      tokenExit(tagAttributeNameType);
+      tokenEnter(tagAttributeInitializerMarkerType);
+      tokenExit(tagAttributeInitializerMarkerType);
       return beforeAttributeValue(code);
     }
 
@@ -311,7 +316,7 @@ export function factoryTag(
   const beforeMemberName: State = function (code) {
     // Start of a member name.
     if (code !== codes.eof && idStart(code)) {
-      effects.enter(tagNameMemberType);
+      tokenEnter(tagNameMemberType);
       effects.consume(code);
       return memberName;
     }
@@ -341,7 +346,7 @@ export function factoryTag(
       markdownLineEndingOrSpace(code) ||
       unicodeWhitespace(code)
     ) {
-      effects.exit(tagNameMemberType);
+      tokenExit(tagNameMemberType);
       returnState = afterMemberName;
       return optionalEsWhitespace(code);
     }
@@ -362,9 +367,9 @@ export function factoryTag(
   const afterMemberName: State = function (code) {
     // Start another member name.
     if (code === codes.dot) {
-      effects.enter(tagNameMemberMarkerType);
+      tokenEnter(tagNameMemberMarkerType);
       effects.consume(code);
-      effects.exit(tagNameMemberMarkerType);
+      tokenExit(tagNameMemberMarkerType);
       returnState = beforeMemberName;
       return optionalEsWhitespace;
     }
@@ -376,7 +381,7 @@ export function factoryTag(
       code === codes.leftCurlyBrace ||
       (code !== codes.eof && idStart(code))
     ) {
-      effects.exit(tagNameType);
+      tokenExit(tagNameType);
       return beforeAttribute(code);
     }
 
@@ -393,7 +398,7 @@ export function factoryTag(
   const beforeLocalName: State = function (code) {
     // Start of a local name.
     if (code !== codes.eof && idStart(code)) {
-      effects.enter(tagNameLocalType);
+      tokenEnter(tagNameLocalType);
       effects.consume(code);
       return localName;
     }
@@ -427,7 +432,7 @@ export function factoryTag(
       markdownLineEndingOrSpace(code) ||
       unicodeWhitespace(code)
     ) {
-      effects.exit(tagNameLocalType);
+      tokenExit(tagNameLocalType);
       returnState = afterLocalName;
       return optionalEsWhitespace(code);
     }
@@ -449,11 +454,11 @@ export function factoryTag(
       code === codes.leftCurlyBrace ||
       (code !== codes.eof && idStart(code))
     ) {
-      effects.exit(tagNameType);
+      tokenExit(tagNameType);
       return beforeAttribute(code);
     }
     if (code === findCode(pattern.end)) {
-      effects.exit(tagNameType);
+      tokenExit(tagNameType);
       return beforeAttribute(code);
     }
 
@@ -483,8 +488,8 @@ export function factoryTag(
       };
       if (pattern.end.length === 1) {
         if (pattern.leaf) {
-          effects.enter(tagSelfClosingMarker);
-          effects.exit(tagSelfClosingMarker);
+          tokenEnter(tagSelfClosingMarker);
+          tokenExit(tagSelfClosingMarker);
           returnState = selfClosing;
           return optionalEsWhitespace;
         } else {
@@ -498,8 +503,8 @@ export function factoryTag(
     // TODO: test this against `pattern.end`
     if (code === findCode(pattern.end[pattern.end.length - 1])) {
       if (pattern.leaf) {
-        effects.enter(tagSelfClosingMarker);
-        effects.exit(tagSelfClosingMarker);
+        tokenEnter(tagSelfClosingMarker);
+        tokenExit(tagSelfClosingMarker);
         returnState = selfClosing;
         return optionalEsWhitespace;
       } else {
@@ -534,9 +539,9 @@ export function factoryTag(
 
     // Start of an attribute name.
     if (code !== codes.eof && idStart(code)) {
-      effects.enter(tagAttributeType);
-      effects.enter(tagAttributeNameType);
-      effects.enter(tagAttributeNamePrimaryType);
+      tokenEnter(tagAttributeType);
+      tokenEnter(tagAttributeNameType);
+      tokenEnter(tagAttributeNamePrimaryType);
       effects.consume(code);
       return attributePrimaryName;
     }
@@ -573,7 +578,7 @@ export function factoryTag(
       markdownLineEndingOrSpace(code) ||
       unicodeWhitespace(code)
     ) {
-      effects.exit(tagAttributeNamePrimaryType);
+      tokenExit(tagAttributeNamePrimaryType);
       returnState = afterAttributePrimaryName;
       return optionalEsWhitespace(code);
     }
@@ -590,19 +595,19 @@ export function factoryTag(
   const afterAttributePrimaryName: State = function (code) {
     // Start of a local name.
     if (code === codes.colon) {
-      effects.enter(tagAttributeNamePrefixMarkerType);
+      tokenEnter(tagAttributeNamePrefixMarkerType);
       effects.consume(code);
-      effects.exit(tagAttributeNamePrefixMarkerType);
+      tokenExit(tagAttributeNamePrefixMarkerType);
       returnState = beforeAttributeLocalName;
       return optionalEsWhitespace;
     }
 
     // Start of an attribute value.
     if (code === codes.equalsTo) {
-      effects.exit(tagAttributeNameType);
-      effects.enter(tagAttributeInitializerMarkerType);
+      tokenExit(tagAttributeNameType);
+      tokenEnter(tagAttributeInitializerMarkerType);
       effects.consume(code);
-      effects.exit(tagAttributeInitializerMarkerType);
+      tokenExit(tagAttributeInitializerMarkerType);
       returnState = beforeAttributeValue;
       return optionalEsWhitespace;
     }
@@ -616,8 +621,8 @@ export function factoryTag(
       unicodeWhitespace(code) ||
       (code !== codes.eof && idStart(code))
     ) {
-      effects.exit(tagAttributeNameType);
-      effects.exit(tagAttributeType);
+      tokenExit(tagAttributeNameType);
+      tokenExit(tagAttributeType);
       returnState = beforeAttribute;
       return optionalEsWhitespace(code);
     }
@@ -634,7 +639,7 @@ export function factoryTag(
   const beforeAttributeLocalName: State = function (code) {
     // Start of a local name.
     if (code !== codes.eof && idStart(code)) {
-      effects.enter(tagAttributeNameLocalType);
+      tokenEnter(tagAttributeNameLocalType);
       effects.consume(code);
       return attributeLocalName;
     }
@@ -665,8 +670,8 @@ export function factoryTag(
       markdownLineEndingOrSpace(code) ||
       unicodeWhitespace(code)
     ) {
-      effects.exit(tagAttributeNameLocalType);
-      effects.exit(tagAttributeNameType);
+      tokenExit(tagAttributeNameLocalType);
+      tokenExit(tagAttributeNameType);
       returnState = afterAttributeLocalName;
       return optionalEsWhitespace(code);
     }
@@ -684,9 +689,9 @@ export function factoryTag(
   const afterAttributeLocalName: State = function (code) {
     // Start of an attribute value.
     if (code === codes.equalsTo) {
-      effects.enter(tagAttributeInitializerMarkerType);
+      tokenEnter(tagAttributeInitializerMarkerType);
       effects.consume(code);
-      effects.exit(tagAttributeInitializerMarkerType);
+      tokenExit(tagAttributeInitializerMarkerType);
       returnState = beforeAttributeValue;
       return optionalEsWhitespace;
     }
@@ -698,7 +703,7 @@ export function factoryTag(
       code === codes.leftCurlyBrace ||
       (code !== codes.eof && idStart(code))
     ) {
-      effects.exit(tagAttributeType);
+      tokenExit(tagAttributeType);
       return beforeAttribute(code);
     }
 
@@ -714,10 +719,10 @@ export function factoryTag(
   const beforeAttributeValue: State = function (code) {
     // Start of double- or single quoted value.
     if (code === codes.quotationMark || code === codes.apostrophe) {
-      effects.enter(tagAttributeValueLiteralType);
-      effects.enter(tagAttributeValueLiteralMarkerType);
+      tokenEnter(tagAttributeValueLiteralType);
+      tokenEnter(tagAttributeValueLiteralMarkerType);
       effects.consume(code);
-      effects.exit(tagAttributeValueLiteralMarkerType);
+      tokenExit(tagAttributeValueLiteralMarkerType);
       marker = code;
       return attributeValueQuotedStart;
     }
@@ -754,7 +759,7 @@ export function factoryTag(
   };
 
   const afterAttributeValueExpression: State = function (code) {
-    effects.exit(tagAttributeType);
+    tokenExit(tagAttributeType);
     returnState = beforeAttribute;
     return optionalEsWhitespace(code);
   };
@@ -773,11 +778,11 @@ export function factoryTag(
     }
 
     if (code === marker) {
-      effects.enter(tagAttributeValueLiteralMarkerType);
+      tokenEnter(tagAttributeValueLiteralMarkerType);
       effects.consume(code);
-      effects.exit(tagAttributeValueLiteralMarkerType);
-      effects.exit(tagAttributeValueLiteralType);
-      effects.exit(tagAttributeType);
+      tokenExit(tagAttributeValueLiteralMarkerType);
+      tokenExit(tagAttributeValueLiteralType);
+      tokenExit(tagAttributeType);
       marker = undefined;
       returnState = beforeAttribute;
       return optionalEsWhitespace;
@@ -788,14 +793,14 @@ export function factoryTag(
       return optionalEsWhitespace(code);
     }
 
-    effects.enter(tagAttributeValueLiteralValueType);
+    tokenEnter(tagAttributeValueLiteralValueType);
     return attributeValueQuoted(code);
   };
 
   // In a quoted attribute value.
   const attributeValueQuoted: State = function (code) {
     if (code === codes.eof || code === marker || markdownLineEnding(code)) {
-      effects.exit(tagAttributeValueLiteralValueType);
+      tokenExit(tagAttributeValueLiteralValueType);
       return attributeValueQuotedStart(code);
     }
 
@@ -825,10 +830,10 @@ export function factoryTag(
   // At a `>`.
   const tagEnd: State = function (code) {
     // assert(code === codes.greaterThan, 'expected `>`')
-    effects.enter(tagMarkerType);
+    tokenEnter(tagMarkerType);
     effects.consume(code);
-    effects.exit(tagMarkerType);
-    effects.exit(tagType);
+    tokenExit(tagMarkerType);
+    tokenExit(tagType);
     return ok;
   };
 
@@ -836,9 +841,9 @@ export function factoryTag(
   const optionalEsWhitespace: State = function (code) {
     if (markdownLineEnding(code)) {
       if (allowLazy) {
-        effects.enter(types.lineEnding);
+        tokenEnter(types.lineEnding);
         effects.consume(code);
-        effects.exit(types.lineEnding);
+        tokenExit(types.lineEnding);
         return factorySpace(
           effects,
           optionalEsWhitespace,
@@ -860,7 +865,7 @@ export function factoryTag(
     }
 
     if (markdownSpace(code) || unicodeWhitespace(code)) {
-      effects.enter('esWhitespace');
+      tokenEnter('esWhitespace');
       return optionalEsWhitespaceContinue(code);
     }
 
@@ -873,7 +878,7 @@ export function factoryTag(
       markdownLineEnding(code) ||
       !(markdownSpace(code) || unicodeWhitespace(code))
     ) {
-      effects.exit('esWhitespace');
+      tokenExit('esWhitespace');
       return optionalEsWhitespace(code);
     }
 
@@ -922,9 +927,9 @@ const tokenizeLazyLineEnd: Tokenizer = function (effects, ok, nok) {
 
   const start: State = function (code) {
     assert(markdownLineEnding(code), 'expected eol');
-    effects.enter(types.lineEnding);
+    effects.enter(types.lineEnding as Parameters<Effects['enter']>[0]);
     effects.consume(code);
-    effects.exit(types.lineEnding);
+    effects.exit(types.lineEnding as Parameters<Effects['exit']>[0]);
     return lineStart;
   };
 
