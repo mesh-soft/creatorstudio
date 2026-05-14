@@ -52,30 +52,6 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
       if (!leftDoc) return;
       suppressNestedTinaPreview(leftDoc);
 
-      const scheduleDraftRefresh = () => {
-        console.log("Scheduling Draft Refresh...");
-        if (refreshTimer.current) {
-          window.clearTimeout(refreshTimer.current);
-        }
-        refreshTimer.current = window.setTimeout(() => {
-          console.log("Executing Scheduled Draft Refresh...");
-          const draft = collectDraftFromEditor(leftDoc, overlayRef.current);
-          pushDraftToPreview(rightFrame, draft);
-        }, 180);
-      };
-
-      const scheduleIndexRebuild = () => {
-        if (indexTimerRef.current) window.clearTimeout(indexTimerRef.current);
-        indexTimerRef.current = window.setTimeout(() => {
-          fieldIndexRef.current = buildFieldIndex(leftDoc);
-          reapplyOverlayToEditor(leftDoc, overlayRef.current, fieldIndexRef.current);
-        }, 120);
-      };
-
-      const onInput = (event: Event) => {
-        console.log("Input Detected in Editor (UI Only)", event?.target);
-        scheduleIndexRebuild();
-      };
 
       const onClick = async (event: Event) => {
         const target = event.target as HTMLElement | null;
@@ -101,36 +77,11 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
         setSuggestionPopup({ anchorEl: target, context });
       };
 
-      leftDoc.addEventListener("input", onInput, true);
-      leftDoc.addEventListener("change", onInput, true);
       leftDoc.addEventListener("click", onClick, true);
       leftDoc.addEventListener("focusin", onFocus, true);
 
-      // Capture non-input UI actions like reorder/add/delete blocks in Tina.
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-      let mutationLock = false;
-      observerRef.current = new MutationObserver(() => {
-        if (mutationLock) return;
-        mutationLock = true;
-        
-        // Tina re-renders controlled inputs; re-apply our unsaved overlay.
-        suppressNestedTinaPreview(leftDoc);
-        scheduleIndexRebuild();
-        
-        // Release lock after a brief delay to allow mutations to settle
-        setTimeout(() => { mutationLock = false; }, 50);
-      });
-      observerRef.current.observe(leftDoc.body, {
-        childList: true,
-        subtree: true,
-      });
 
-      // Initial apply in case Tina loads with different state.
       fieldIndexRef.current = buildFieldIndex(leftDoc);
-      reapplyOverlayToEditor(leftDoc, overlayRef.current, fieldIndexRef.current);
-      scheduleDraftRefresh();
       syncSelectedPageFromTinaEditor(leftFrame, pages, setSelectedPageSlug);
     };
 
@@ -150,8 +101,6 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
       };
 
       rightDoc.addEventListener("click", onClick, true);
-      const initialDraft = collectDraftFromEditor(leftDoc, overlayRef.current);
-      pushDraftToPreview(rightFrame, initialDraft);
     };
 
     const onPreviewMessage = (event: MessageEvent) => {
@@ -194,19 +143,19 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
     };
 
     const onActiveCssMessage = (e: MessageEvent) => {
+      const lf = leftRef.current;
+      const rf = rightRef.current;
       if (e.data?.type === 'TINA_ACTIVE_CSS') {
-        const rightFrame = rightRef.current;
-        if (e.source === leftFrame?.contentWindow) {
-          rightFrame?.contentWindow?.postMessage(e.data, '*');
+        if (e.source === lf?.contentWindow) {
+          rf?.contentWindow?.postMessage(e.data, '*');
+        } else if (e.source === rf?.contentWindow) {
+          lf?.contentWindow?.postMessage(e.data, '*');
         }
       }
-      // NEW: Relay state-based draft updates from Tina Admin directly to Preview
-      if (e.data?.type === 'studio:draft-update' && e.data.source === 'tina-state') {
-        const rightFrame = rightRef.current;
-        if (e.source === leftFrame?.contentWindow) {
-          console.log("Relaying state-based draft update to preview");
-          rightFrame?.contentWindow?.postMessage(e.data, '*');
-        }
+      // Relay pure state-driven draft updates from Tina editor -> preview
+      if (e.data?.type === 'studio:draft-update' && e.source === lf?.contentWindow) {
+        console.log('[Studio Relay] draft-update from editor -> preview:', JSON.stringify(e.data.payload).slice(0, 200));
+        rf?.contentWindow?.postMessage(e.data, '*');
       }
     };
     window.addEventListener("message", onActiveCssMessage);
@@ -402,10 +351,14 @@ function setReactInputValue(el: HTMLInputElement | HTMLTextAreaElement, value: s
   el.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
+let lastDraftJson = "";
+
 function pushDraftToPreview(frame: HTMLIFrameElement, draft: Record<string, unknown>) {
-  console.log("PushDraftToPreview Called", !!frame.contentWindow);
   if (!frame.contentWindow) return;
-  console.log("Pushing Draft to Preview:", draft);
+  const draftJson = JSON.stringify(draft);
+  if (draftJson === lastDraftJson) return; // Prevent spamming unchanged data
+  lastDraftJson = draftJson;
+  
   frame.contentWindow.postMessage(
     {
       type: "studio:draft-update",

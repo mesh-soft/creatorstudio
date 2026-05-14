@@ -98,7 +98,16 @@ export function useForm<FormShape = any>(
 
 function createForm(options: FormOptions<any>, handleChange: any): Form {
   const form = new Form(options);
-  form.subscribe(handleChange, { values: true });
+  form.subscribe((state: any) => {
+    handleChange(state);
+    if (typeof window !== 'undefined' && window.parent && window !== window.parent) {
+      window.parent.postMessage({
+        type: 'studio:draft-update',
+        payload: state.values,
+        source: 'tina-state'
+      }, '*');
+    }
+  }, { values: true });
   return form;
 }
 

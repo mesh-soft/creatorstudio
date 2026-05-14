@@ -8,8 +8,8 @@
       "_template": "header"
     },
     {
-      "enabled": true,
-      "headline": "Expert care you can trusts",
+      "enabled": false,
+      "headline": "Expert care you can trustss",
       "subheadline": "Personalized medical care with compassion and expertise for you and your family.",
       "css": "{\"background\":\"blue\"}",
       "_template": "hero"

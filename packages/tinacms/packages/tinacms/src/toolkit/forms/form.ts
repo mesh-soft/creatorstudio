@@ -150,6 +150,26 @@ export class Form<S = any, F extends Field = AnyField> implements Plugin {
         { values: true, ...(options?.extraSubscribeValues || {}) }
       );
     }
+
+    // Live Preview: broadcast state to parent window on every form change.
+    // This is the universal hook point — fires regardless of which code path
+    // creates the form (useForm hook, generateFormCreators, collection pages, etc.)
+    let isFirstBroadcast = true;
+    this.subscribe(
+      (formState) => {
+        if (isFirstBroadcast) {
+          isFirstBroadcast = false;
+          return;
+        }
+        if (typeof window !== 'undefined' && window.parent && window !== window.parent) {
+          window.parent.postMessage(
+            { type: 'studio:draft-update', payload: formState.values, source: 'tina-form' },
+            '*'
+          );
+        }
+      },
+      { values: true }
+    );
   }
 
   /**

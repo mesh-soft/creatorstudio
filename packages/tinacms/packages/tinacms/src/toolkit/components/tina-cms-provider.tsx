@@ -32,38 +32,10 @@ export const TinaCMSProvider: React.FC<TinaCMSProviderProps> = ({
     handleLocationChange();
     window.addEventListener('popstate', handleLocationChange);
 
-    // STATE-BASED SYNC: Subscribe to all form changes and broadcast draft state
-    const broadcastDraft = (values: any) => {
-      if (!values) return;
-      window.parent.postMessage({
-        type: 'studio:draft-update',
-        payload: values,
-        source: 'tina-state'
-      }, '*');
-    };
-
-    // Subscribe to existing forms
-    const unsubscribes: (() => void)[] = [];
-    cms.plugins.all('form').forEach((form: any) => {
-      unsubscribes.push(form.subscribe((state: any) => {
-        broadcastDraft(state.values);
-      }, { values: true }));
-    });
-
-    // Watch for new forms being added (e.g. on navigation)
-    const unsubPlugin = cms.events.subscribe('plugin:add:form', (event: any) => {
-      const form = event.plugin;
-      unsubscribes.push(form.subscribe((state: any) => {
-        broadcastDraft(state.values);
-      }, { values: true }));
-    });
-
     return () => {
       window.removeEventListener('popstate', handleLocationChange);
-      unsubscribes.forEach(unsub => unsub());
-      unsubPlugin();
     };
-  }, [cms, dispatch]);
+  }, [dispatch]);
 
   // Sync active CSS across iframes (Admin -> Parent -> Preview)
   React.useEffect(() => {
