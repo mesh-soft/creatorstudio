@@ -70,6 +70,7 @@ export default async function CollectionEditorPage({ params }: CollectionPathPro
 
   return (
     <CreatorStudioClient
+      key={`${tenantType}:${tenantId}`}
       tenantType={tenantType}
       tenantId={tenantId}
       pageSlug={safePageSlug}

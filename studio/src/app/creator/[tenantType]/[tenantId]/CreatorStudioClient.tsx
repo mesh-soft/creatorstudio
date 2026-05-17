@@ -87,11 +87,27 @@ function tinaHashToCleanPath(hash: string, tenantId: string, collection: string)
     return `/creator/collections/${col}/~/${tid}/pages/${slug}`;
   }
 
+  // Tilde-format routes: collections/<col>/~/<tenantId>[/pages/<slug>]
+  const tildeMatch = inner.match(
+    /^collections\/([^/]+)\/~\/([^/]+)(?:\/pages\/([^/?#]+))?/
+  );
+  if (tildeMatch) {
+    const col = tildeMatch[1];
+    const tid = tildeMatch[2];
+    const rawSlug = tildeMatch[3];
+    if (!rawSlug) {
+      return `/creator/collections/${col}/~/${tid}`;
+    }
+    const slug = decodeURIComponent(rawSlug).replace(/\.json$/, "");
+    return `/creator/collections/${col}/~/${tid}/pages/${slug}`;
+  }
+
   // Non-content routes (media, graphql, etc.)
   return `/creator/${inner || "collections/" + collection + "/~/" + tenantId}`;
 }
 
 export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: CreatorStudioClientProps) {
+  console.log('[Studio] MOUNT/RENDER props:', { tenantType, tenantId, pageSlug });
   const leftRef = useRef<HTMLIFrameElement>(null);
   const rightRef = useRef<HTMLIFrameElement>(null);
   const refreshTimer = useRef<number | null>(null);
@@ -99,7 +115,13 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
   const observerRef = useRef<MutationObserver | null>(null);
   const hashPollTimerRef = useRef<number | null>(null);
   const [uiEditingEnabled, setUiEditingEnabled] = useState(false);
+  const [activeTenantId, setActiveTenantId] = useState(tenantId);
   const [selectedPageSlug, setSelectedPageSlug] = useState(pageSlug);
+  console.log('[Studio] state:', { activeTenantId, selectedPageSlug });
+  const activeTenantIdRef = useRef(activeTenantId);
+  const selectedPageSlugRef = useRef(selectedPageSlug);
+  useEffect(() => { activeTenantIdRef.current = activeTenantId; }, [activeTenantId]);
+  useEffect(() => { selectedPageSlugRef.current = selectedPageSlug; }, [selectedPageSlug]);
   const [showPreview, setShowPreview] = useState(true);
   const overlayRef = useRef<Record<string, string>>({});
   const fieldIndexRef = useRef<Map<string, HTMLInputElement | HTMLTextAreaElement>>(new Map());
@@ -111,18 +133,20 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
 
   const pageCollection = tenantType === "doctor" ? "doctorSite" : "hospitalSite";
 
-  // Initial src for the admin iframe — mounted ONCE, user navigates freely inside.
-  // We poll the hash to keep the preview pane in sync.
+  // Initial src for the admin iframe — user navigates freely inside.
+  // The iframe src is only updated on initial mount to match the URL params.
   const adminEditUrl = useRef(
     `/admin/index.html#/collections/edit/${pageCollection}/${tenantId}/pages/${pageSlug}`
   ).current;
+  console.log('[Studio] adminEditUrl (frozen at mount):', adminEditUrl);
 
   const previewUrl = useMemo(
-    () => `/site/${tenantId}/${selectedPageSlug}?studio=1&ui=${uiEditingEnabled ? "1" : "0"}`,
-    [tenantId, selectedPageSlug, uiEditingEnabled]
+    () => `/site/${activeTenantId}/${selectedPageSlug}?studio=1&ui=${uiEditingEnabled ? "1" : "0"}`,
+    [activeTenantId, selectedPageSlug, uiEditingEnabled]
   );
 
   useEffect(() => {
+    console.log('[Studio] main useEffect running, props:', { tenantType, tenantId, pageSlug });
     const leftFrame = leftRef.current;
     const rightFrame = rightRef.current;
     if (!leftFrame || !rightFrame) return;
@@ -143,7 +167,7 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
 
         if (snapshotInFlight.current) return;
         snapshotInFlight.current = true;
-        await createVersionSnapshot(tenantType, tenantId, pageSlug);
+        await createVersionSnapshot(tenantType, activeTenantIdRef.current, selectedPageSlugRef.current);
         snapshotInFlight.current = false;
       };
 
@@ -256,8 +280,28 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
       try { hash = leftFrame.contentWindow?.location.hash ?? ""; } catch { return; }
       if (!hash) return;
 
-      const cleanPath = tinaHashToCleanPath(hash, tenantId, collection);
-      const showPrev = shouldShowPreview(hash, tenantId);
+      // Extract tenantId dynamically from the hash
+      // Supports two formats:
+      //   edit-format:  #/collections/edit/<col>/<tenantId>[/pages/<slug>]
+      //   tilde-format: #/collections/<col>/~/<tenantId>[/pages/<slug>]
+      const currentActive = activeTenantIdRef.current;
+      let currentTenantId = currentActive;
+      const inner = hash.replace(/^#\/?/, "");
+      const editMatch = inner.match(/^collections\/edit\/([^/]+)\/([^/]+)/);
+      const tildeMatch = inner.match(/^collections\/([^/]+)\/~\/([^/]+)/);
+      const extractedId = (editMatch?.[2] ?? tildeMatch?.[2] ?? "").split("?")[0].split("/")[0];
+      if (extractedId && extractedId !== "pages") {
+        currentTenantId = extractedId;
+        if (currentTenantId !== currentActive) {
+          console.log('[Studio] poll: tenant changed', currentActive, '->', currentTenantId);
+          setActiveTenantId(currentTenantId);
+          activeTenantIdRef.current = currentTenantId;
+        }
+      }
+
+      const cleanPath = tinaHashToCleanPath(hash, currentTenantId, collection);
+      const showPrev = shouldShowPreview(hash, currentTenantId);
+      console.log('[Studio] poll tick | hash:', hash, '| currentTenantId:', currentTenantId, '| showPrev:', showPrev, '| cleanPath:', cleanPath);
 
       // Push a new history entry when navigating to a different page,
       // replace when toggling non-content routes (media, graphql, etc.)
@@ -274,8 +318,8 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
       setShowPreview(showPrev);
 
       if (showPrev) {
-        const slug = parsePageSlugFromHash(hash, tenantId);
-        if (slug && pages.includes(slug)) {
+        const slug = parsePageSlugFromHash(hash, currentTenantId);
+        if (slug) {
           setSelectedPageSlug((prev) => (prev === slug ? prev : slug));
         }
       }
@@ -305,7 +349,7 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
       }
       setSuggestionPopup(null);
     };
-  }, [pages, previewUrl, selectedPageSlug, tenantId, tenantType]);
+  }, [pages, tenantId, tenantType]);
 
   return (
     <main
