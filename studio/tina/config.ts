@@ -30,6 +30,95 @@ const iconOptions = [
   { label: "📺 YouTube", value: "youtube" },
 ];
 
+// ── Shared nav-link templates ────────────────────────────────────────────────
+// Three variants: section scroll, internal page, external URL.
+// Used for navLinks in header and socialLinks in footer.
+const navLinkTemplates = [
+  {
+    name: "sectionLink",
+    label: "Section (scroll to block)",
+    fields: [
+      { type: "string" as const, name: "label", label: "Label" },
+      {
+        type: "string" as const,
+        name: "sectionId",
+        label: "Section",
+        options: [
+          { label: "Hero", value: "hero" },
+          { label: "Profile", value: "profile" },
+          { label: "Services", value: "services" },
+          { label: "Gallery", value: "gallery" },
+          { label: "Timings", value: "timings" },
+          { label: "FAQ", value: "faq" },
+          { label: "Testimonials", value: "testimonials" },
+          { label: "Stats", value: "stats" },
+          { label: "CTA / Contact", value: "cta" },
+          { label: "Awards", value: "awards" },
+        ],
+      },
+    ],
+  },
+  {
+    name: "pageLink",
+    label: "Internal Page",
+    fields: [
+      { type: "string" as const, name: "label", label: "Label" },
+      { type: "string" as const, name: "pageSlug", label: "Page Slug", description: "Slug of another page on this site (e.g. service, about)" },
+    ],
+  },
+  {
+    name: "externalLink",
+    label: "External URL",
+    fields: [
+      { type: "string" as const, name: "label", label: "Label" },
+      { type: "string" as const, name: "url", label: "URL", description: "Full URL including https://" },
+    ],
+  },
+];
+
+function navLinksObjectField(name: string, label: string): any {
+  return {
+    type: "object",
+    name,
+    label,
+    list: true,
+    ui: {
+      itemProps: (item: Record<string, any>) => {
+        const icon = item?._template === "sectionLink" ? "#" : item?._template === "pageLink" ? "→" : "🔗";
+        return { label: item?.label ? `${icon} ${item.label}` : item?._template || "Link" };
+      },
+    },
+    templates: navLinkTemplates,
+  };
+}
+
+function tenantImageField(name: string, label: string, description?: string): any {
+  return {
+    type: "image",
+    name,
+    label,
+    ...(description ? { description } : {}),
+    uploadDir: (formValues: any) => {
+      const breadcrumbs: string[] = formValues?._sys?.breadcrumbs ?? [];
+      const path: string = formValues?._sys?.path ?? formValues?._sys?.relativePath ?? "";
+      const collectionName: string = formValues?._sys?.collection?.name ?? "";
+      let tenantId = breadcrumbs[0] ?? "";
+      let tenantType =
+        collectionName.includes("hospital") || path.includes("/hospitals/") ? "hospitals" : "doctors";
+
+      if (!tenantId && typeof window !== "undefined") {
+        const m = window.location.hash.match(/\/(doctorSite|hospitalSite)\/([^/?#]+)/);
+        if (m) {
+          tenantType = m[1] === "hospitalSite" ? "hospitals" : "doctors";
+          tenantId = m[2];
+        }
+      }
+
+      return tenantId ? `${tenantType}/${tenantId}` : "";
+    },
+  };
+}
+
 const buttonFields: TinaField[] = [
   { type: "string", name: "label", label: "Label" },
   { type: "string", name: "url", label: "URL" },
@@ -137,12 +226,7 @@ const siteFields: TinaField[] = [
           { type: "string", name: "registrationNumber", label: "Registration Number" },
           { type: "number", name: "experienceYears", label: "Experience Years" },
           { type: "string", name: "bio", label: "Bio", ui: { component: "textarea" } },
-          {
-            type: "image",
-            name: "photo",
-            label: "Photo",
-            description: "Upload to Media → content → doctors/hospitals → [tenant] folder",
-          },
+          tenantImageField("photo", "Photo") as TinaField,
         ],
       },
       {
@@ -218,12 +302,12 @@ const siteFields: TinaField[] = [
                 name: "colors",
                 label: "Colors",
                 fields: [
-                  { type: "string", name: "primary", label: "Primary" },
-                  { type: "string", name: "secondary", label: "Secondary" },
-                  { type: "string", name: "accent", label: "Accent" },
-                  { type: "string", name: "background", label: "Background" },
-                  { type: "string", name: "surface", label: "Surface" },
-                  { type: "string", name: "text", label: "Text" },
+                  { type: "string", name: "primary", label: "Primary", ui: { component: "color" } },
+                  { type: "string", name: "secondary", label: "Secondary", ui: { component: "color" } },
+                  { type: "string", name: "accent", label: "Accent", ui: { component: "color" } },
+                  { type: "string", name: "background", label: "Background", ui: { component: "color" } },
+                  { type: "string", name: "surface", label: "Surface", ui: { component: "color" } },
+                  { type: "string", name: "text", label: "Text", ui: { component: "color" } },
                 ],
               },
               {
@@ -250,8 +334,8 @@ const siteFields: TinaField[] = [
         label: "Global Header",
         fields: [
           { type: "boolean", name: "show", label: "Show Header" },
-          { type: "image", name: "logo", label: "Custom Logo" },
-          { type: "string", name: "navLinks", label: "Navigation Links (Label|URL)", list: true },
+          tenantImageField("logo", "Custom Logo") as TinaField,
+          navLinksObjectField("navLinks", "Navigation Links") as TinaField,
         ],
       },
       {
@@ -260,7 +344,7 @@ const siteFields: TinaField[] = [
         fields: [
           { type: "boolean", name: "show", label: "Show Footer" },
           { type: "string", name: "copyright", label: "Copyright Text" },
-          { type: "string", name: "socialLinks", label: "Social Links (Label|URL)", list: true },
+          navLinksObjectField("socialLinks", "Social / Footer Links") as TinaField,
         ],
       },
       {
@@ -270,12 +354,7 @@ const siteFields: TinaField[] = [
           { type: "string", name: "title", label: "Title" },
           { type: "string", name: "description", label: "Description", ui: { component: "textarea" } },
           { type: "string", name: "keywords", label: "Keywords", list: true },
-          {
-            type: "image",
-            name: "ogImage",
-            label: "Open Graph Image",
-            description: "Upload to Media → content → doctors/hospitals → [tenant] folder",
-          },
+          tenantImageField("ogImage", "Open Graph Image") as TinaField,
         ],
       },
     ],
@@ -301,8 +380,8 @@ const pageFields: TinaField[] = [
         name: "header",
         label: "Header",
         fields: [{ type: "boolean", name: "enabled", label: "Enabled", ui: { component: "hidden" } },
-          { type: "image", name: "logo", label: "Logo Override" },
-          { type: "string", name: "navLinks", label: "Custom Links (Label|URL)", list: true },
+          tenantImageField("logo", "Logo Override") as TinaField,
+          navLinksObjectField("navLinks", "Custom Navigation Links") as TinaField,
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
@@ -311,7 +390,7 @@ const pageFields: TinaField[] = [
         label: "Footer",
         fields: [{ type: "boolean", name: "enabled", label: "Enabled", ui: { component: "hidden" } },
           { type: "string", name: "copyright", label: "Copyright Override" },
-          { type: "string", name: "socialLinks", label: "Custom Social Links (Label|URL)", list: true },
+          navLinksObjectField("socialLinks", "Custom Social / Footer Links") as TinaField,
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
@@ -424,7 +503,7 @@ const pageFields: TinaField[] = [
             label: "Gallery",
             list: true,
             fields: [
-              { type: "image", name: "src", label: "Image" },
+              tenantImageField("src", "Image") as TinaField,
               { type: "string", name: "alt", label: "Alt Text" },
             ],
           },
@@ -605,12 +684,7 @@ const pageFields: TinaField[] = [
           { type: "string", name: "title", label: "Title" },
           { type: "string", name: "description", label: "Description", ui: { component: "textarea" } },
           { type: "string", name: "keywords", label: "Keywords", list: true },
-          {
-            type: "image",
-            name: "ogImage",
-            label: "Open Graph Image",
-            description: "Upload to Media → content → doctors/hospitals → [tenant] folder",
-          },
+          tenantImageField("ogImage", "Open Graph Image") as TinaField,
         ],
       },
     ],
@@ -660,6 +734,9 @@ export default defineConfig({
             delete: false,
           },
           router: ({ document }) => {
+            if (typeof window !== 'undefined' && window !== window.parent) {
+              return undefined;
+            }
             const breadcrumbs = document?._sys?.breadcrumbs ?? [];
             const pagesIndex = breadcrumbs.indexOf("pages");
             if (pagesIndex > 0) {
@@ -699,6 +776,9 @@ export default defineConfig({
             delete: false,
           },
           router: ({ document }) => {
+            if (typeof window !== 'undefined' && window !== window.parent) {
+              return undefined;
+            }
             const breadcrumbs = document?._sys?.breadcrumbs ?? [];
             const pagesIndex = breadcrumbs.indexOf("pages");
             if (pagesIndex > 0) {

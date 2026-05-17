@@ -113,6 +113,22 @@ export function SiteRenderer({ tenant, pageSlug = "home", previewLinks = false, 
   );
 }
 
+function withScrollAnchor(key: string, blockId: string, el: React.ReactElement): React.ReactElement {
+  if (blockId === 'header' || blockId === 'footer') {
+    return <React.Fragment key={key}>{el}</React.Fragment>;
+  }
+  return (
+    <React.Fragment key={key}>
+      <span
+        id={blockId}
+        aria-hidden="true"
+        style={{ display: 'block', height: 0, overflow: 'hidden', scrollMarginTop: '80px' }}
+      />
+      {el}
+    </React.Fragment>
+  );
+}
+
 function renderBlocks(
   tenant: Tenant,
   preset: ReturnType<typeof getPreset>,
@@ -135,11 +151,11 @@ function renderBlocks(
       ? (tinaDocument ? tinaField(tinaDocument as any, `blocks.${index}`) : `blocks.${index}`) 
       : undefined;
 
-    switch (activeBlock?._template) {
+    const template = activeBlock?._template;
+    switch (template) {
       case "header":
-        return (
+        return withScrollAnchor(key, "header", (
           <Header
-            key={key}
             tenant={tenant}
             logo={activeBlock?.logo || tenant.header?.logo}
             navLinks={activeBlock?.navLinks || tenant.header?.navLinks}
@@ -147,36 +163,35 @@ function renderBlocks(
             studioMode={studioMode}
             css={activeBlock?.css}
           />
-        );
+        ));
       case "footer":
-        return (
-          <Footer 
-            key={key} 
-            tenant={tenant} 
-            copyright={activeBlock?.copyright || tenant.footer?.copyright} 
-            socialLinks={activeBlock?.socialLinks || tenant.footer?.socialLinks} 
-            sectionField={sectionField} 
-            studioMode={studioMode} 
+        return withScrollAnchor(key, "footer", (
+          <Footer
+            tenant={tenant}
+            copyright={activeBlock?.copyright || tenant.footer?.copyright}
+            socialLinks={activeBlock?.socialLinks || tenant.footer?.socialLinks}
+            sectionField={sectionField}
+            studioMode={studioMode}
             css={activeBlock?.css}
           />
-        );
+        ));
       case "awards":
-        return (
+        return withScrollAnchor(key, "awards", (
           <Awards
-            key={key}
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
             sectionField={sectionField}
             studioMode={studioMode}
           />
-        );
+        ));
       case "hero":
-        return <Hero key={key} tenant={tenant} block={activeBlock} blockIndex={index} variant={preset.hero} sectionField={sectionField} tinaDocument={tinaDocument} studioMode={studioMode} />;
+        return withScrollAnchor(key, "hero", (
+          <Hero tenant={tenant} block={activeBlock} blockIndex={index} variant={preset.hero} sectionField={sectionField} tinaDocument={tinaDocument} studioMode={studioMode} />
+        ));
       case "profile":
-        return (
+        return withScrollAnchor(key, "profile", (
           <Profile
-            key={key}
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
@@ -185,11 +200,10 @@ function renderBlocks(
             tinaDocument={tinaDocument}
             studioMode={studioMode}
           />
-        );
+        ));
       case "services":
-        return (
+        return withScrollAnchor(key, "services", (
           <Services
-            key={key}
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
@@ -198,11 +212,10 @@ function renderBlocks(
             tinaDocument={tinaDocument}
             studioMode={studioMode}
           />
-        );
+        ));
       case "timings":
-        return (
+        return withScrollAnchor(key, "timings", (
           <Timings
-            key={key}
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
@@ -211,11 +224,10 @@ function renderBlocks(
             tinaDocument={tinaDocument}
             studioMode={studioMode}
           />
-        );
+        ));
       case "gallery":
-        return (
+        return withScrollAnchor(key, "gallery", (
           <Gallery
-            key={key}
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
@@ -224,11 +236,10 @@ function renderBlocks(
             tinaDocument={tinaDocument}
             studioMode={studioMode}
           />
-        );
+        ));
       case "faq":
-        return (
+        return withScrollAnchor(key, "faq", (
           <FAQ
-            key={key}
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
@@ -237,11 +248,10 @@ function renderBlocks(
             tinaDocument={tinaDocument}
             studioMode={studioMode}
           />
-        );
+        ));
       case "cta":
-        return (
+        return withScrollAnchor(key, "cta", (
           <CTA
-            key={key}
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
@@ -250,36 +260,52 @@ function renderBlocks(
             tinaDocument={tinaDocument}
             studioMode={studioMode}
           />
-        );
+        ));
       case "testimonials":
-        return (
+        return withScrollAnchor(key, "testimonials", (
           <Testimonials
-            key={key}
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
             sectionField={sectionField}
             studioMode={studioMode}
           />
-        );
+        ));
       case "stats":
-        return (
+        return withScrollAnchor(key, "stats", (
           <Stats
-            key={key}
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
             sectionField={sectionField}
             studioMode={studioMode}
           />
-        );
+        ));
       case "text":
-        return <TextBlock key={key} block={activeBlock} blockIndex={index} sectionField={sectionField} studioMode={studioMode} />;
+        return withScrollAnchor(key, "text", (
+          <TextBlock block={activeBlock} blockIndex={index} sectionField={sectionField} studioMode={studioMode} />
+        ));
       default:
         return null;
     }
   });
 }
+type NavLinkItem =
+  | { _template: 'sectionLink'; label: string; sectionId: string }
+  | { _template: 'pageLink'; label: string; pageSlug: string }
+  | { _template: 'externalLink'; label: string; url: string };
+
+function resolveNavLink(link: string | NavLinkItem): { label: string; href: string } {
+  if (typeof link === 'string') {
+    const [label, url] = link.includes('|') ? link.split('|') : [link, '#'];
+    return { label, href: url };
+  }
+  if (link._template === 'sectionLink') return { label: link.label, href: `#${link.sectionId}` };
+  if (link._template === 'pageLink') return { label: link.label, href: `/${link.pageSlug}` };
+  if (link._template === 'externalLink') return { label: link.label, href: link.url };
+  return { label: '', href: '#' };
+}
+
 function Header({
   tenant,
   logo,
@@ -290,7 +316,7 @@ function Header({
 }: {
   tenant: Tenant;
   logo?: string;
-  navLinks?: string[];
+  navLinks?: (string | NavLinkItem)[];
   sectionField?: string;
   studioMode?: boolean;
   css?: any;
@@ -307,9 +333,9 @@ function Header({
       </div>
       <nav style={{ display: "flex", gap: "24px" }}>
         {links.map((link, i) => {
-          const [label, url] = link.includes("|") ? link.split("|") : [link, "#"];
+          const { label, href } = resolveNavLink(link);
           return (
-            <a key={i} href={url} style={{ fontSize: "14px", fontWeight: 600, color: "var(--site-text)", opacity: 0.8, textDecoration: "none" }}>
+            <a key={i} href={href} style={{ fontSize: "14px", fontWeight: 600, color: "var(--site-text)", opacity: 0.8, textDecoration: "none" }}>
               {label}
             </a>
           );
@@ -329,7 +355,7 @@ function Footer({
 }: {
   tenant: Tenant;
   copyright?: string;
-  socialLinks?: string[];
+  socialLinks?: (string | NavLinkItem)[];
   sectionField?: string;
   studioMode?: boolean;
   css?: any;
@@ -353,9 +379,9 @@ function Footer({
           <h4 style={{ fontSize: "14px", marginBottom: "16px", textTransform: "uppercase", letterSpacing: "1px" }}>Connect</h4>
           <div style={{ display: "flex", gap: "16px" }}>
             {links.map((link, i) => {
-              const [label, url] = link.includes("|") ? link.split("|") : [link, "#"];
+              const { label, href } = resolveNavLink(link);
               return (
-                <a key={i} href={url} style={{ fontSize: "14px", color: "var(--primary)", textDecoration: "none", fontWeight: 500 }}>
+                <a key={i} href={href} style={{ fontSize: "14px", color: "var(--primary)", textDecoration: "none", fontWeight: 500 }}>
                   {label}
                 </a>
               );

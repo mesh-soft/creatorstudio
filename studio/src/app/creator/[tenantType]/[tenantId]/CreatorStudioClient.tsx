@@ -33,6 +33,26 @@ const NON_CONTENT_HASH_PREFIXES = [
  * - No preview: media, graphql, list views, collection root (no tenant selected)
  * - Preview: editing a specific tenant's document/page
  */
+/**
+ * Extract tenantId from any known Tina hash format:
+ *   - #/collections/edit/<col>/<tenantId>[/pages/<slug>]
+ *   - #/collections/<col>/~/<tenantId>[/pages/<slug>]
+ *   - #/collections/<col>/<tenantId>[/pages/<slug>]  (no edit, no tilde)
+ */
+function extractTenantIdFromHash(hash: string): string | null {
+  const inner = hash.replace(/^#\/?/, "");
+  // tilde-format: collections/<col>/~/<tenantId>
+  const tildeM = inner.match(/^collections\/[^/]+\/~\/([^/?#]+)/);
+  if (tildeM?.[1]) return tildeM[1];
+  // edit-format: collections/edit/<col>/<tenantId>
+  const editM = inner.match(/^collections\/edit\/[^/]+\/([^/?#]+)/);
+  if (editM?.[1] && editM[1] !== "pages") return editM[1];
+  // generic: collections/<col>/<tenantId>  (fallback)
+  const genM = inner.match(/^collections\/[^/]+\/([^/?#~]+)/);
+  if (genM?.[1] && genM[1] !== "pages" && genM[1] !== "~") return genM[1];
+  return null;
+}
+
 function shouldShowPreview(hash: string, tenantId: string): boolean {
   if (!hash || hash === "#/" || hash === "#") return false;
   if (NON_CONTENT_HASH_PREFIXES.some((p) => hash.startsWith(p))) return false;
@@ -113,7 +133,7 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
   const refreshTimer = useRef<number | null>(null);
   const snapshotInFlight = useRef(false);
   const observerRef = useRef<MutationObserver | null>(null);
-  const hashPollTimerRef = useRef<number | null>(null);
+  const lastPushedPathRef = useRef(typeof window !== "undefined" ? window.location.pathname : "/");
   const [uiEditingEnabled, setUiEditingEnabled] = useState(false);
   const [activeTenantId, setActiveTenantId] = useState(tenantId);
   const [selectedPageSlug, setSelectedPageSlug] = useState(pageSlug);
@@ -141,7 +161,7 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
   console.log('[Studio] adminEditUrl (frozen at mount):', adminEditUrl);
 
   const previewUrl = useMemo(
-    () => `/site/${activeTenantId}/${selectedPageSlug}?studio=1&ui=${uiEditingEnabled ? "1" : "0"}`,
+    () => `/site/${activeTenantId}/${selectedPageSlug}/preview?studio=1&ui=${uiEditingEnabled ? "1" : "0"}`,
     [activeTenantId, selectedPageSlug, uiEditingEnabled]
   );
 
@@ -223,8 +243,6 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
 
     wireLeftEditor();
     wireRightPreview();
-    if (hashPollTimerRef.current) window.clearInterval(hashPollTimerRef.current);
-
     // Listen for suggestion trigger messages from the injected iframe script
     const onSuggestionMessage = (event: MessageEvent) => {
       const data = event.data as { type: string; fieldName: string } | undefined;
@@ -270,60 +288,92 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
     });
 
     const collection = tenantType === "doctor" ? "doctorSite" : "hospitalSite";
-    let lastPushedPath = window.location.pathname;
 
-    hashPollTimerRef.current = window.setInterval(() => {
-      const leftFrame = leftRef.current;
-      if (!leftFrame) return;
-
+    const processHash = () => {
       let hash = "";
-      try { hash = leftFrame.contentWindow?.location.hash ?? ""; } catch { return; }
+      let pathname = "";
+      try {
+        hash = leftFrame.contentWindow?.location.hash ?? "";
+        pathname = leftFrame.contentWindow?.location.pathname ?? "";
+      } catch { return; }
+
+      // Admin iframe navigated to a site preview URL via ui.router
+      // (window.location.href = "/site/<tenantId>/<pageSlug>/preview")
+      // Redirect it back to the Tina editor and update preview state.
+      if (!hash && pathname && !pathname.startsWith('/admin')) {
+        const previewMatch = pathname.match(/^\/site\/([^/]+)\/([^/]+)\/preview/);
+        if (previewMatch) {
+          const tenantFromPath = previewMatch[1];
+          const slugFromPath = previewMatch[2];
+          let searchStr = "";
+          try { searchStr = leftFrame.contentWindow?.location.search ?? ""; } catch {}
+          const isEditingSite = new URLSearchParams(searchStr).get("editing") === "site";
+          // Update preview state
+          if (tenantFromPath !== activeTenantIdRef.current) {
+            setActiveTenantId(tenantFromPath);
+            activeTenantIdRef.current = tenantFromPath;
+          }
+          const previewSlug = isEditingSite ? "home" : slugFromPath;
+          if (previewSlug !== selectedPageSlugRef.current) {
+            setSelectedPageSlug(previewSlug);
+            selectedPageSlugRef.current = previewSlug;
+          }
+          setShowPreview(true);
+          // Redirect the left iframe back to the Tina editor
+          const col = tenantType === "doctor" ? "doctorSite" : "hospitalSite";
+          const docPath = isEditingSite
+            ? `${tenantFromPath}/site/index`
+            : `${tenantFromPath}/pages/${slugFromPath}`;
+          try {
+            leftFrame.contentWindow?.location.replace(
+              `/admin/index.html#/collections/edit/${col}/${docPath}`
+            );
+          } catch { /* cross-origin, ignore */ }
+        }
+        return;
+      }
+
       if (!hash) return;
 
-      // Extract tenantId dynamically from the hash
-      // Supports two formats:
-      //   edit-format:  #/collections/edit/<col>/<tenantId>[/pages/<slug>]
-      //   tilde-format: #/collections/<col>/~/<tenantId>[/pages/<slug>]
       const currentActive = activeTenantIdRef.current;
-      let currentTenantId = currentActive;
-      const inner = hash.replace(/^#\/?/, "");
-      const editMatch = inner.match(/^collections\/edit\/([^/]+)\/([^/]+)/);
-      const tildeMatch = inner.match(/^collections\/([^/]+)\/~\/([^/]+)/);
-      const extractedId = (editMatch?.[2] ?? tildeMatch?.[2] ?? "").split("?")[0].split("/")[0];
-      if (extractedId && extractedId !== "pages") {
-        currentTenantId = extractedId;
-        if (currentTenantId !== currentActive) {
-          console.log('[Studio] poll: tenant changed', currentActive, '->', currentTenantId);
-          setActiveTenantId(currentTenantId);
-          activeTenantIdRef.current = currentTenantId;
-        }
+      const extractedId = extractTenantIdFromHash(hash);
+      let currentTenantId = extractedId ?? currentActive;
+      if (extractedId && extractedId !== currentActive) {
+        console.log('[Studio] poll: tenant changed', currentActive, '->', extractedId);
+        setActiveTenantId(extractedId);
+        activeTenantIdRef.current = extractedId;
       }
 
       const cleanPath = tinaHashToCleanPath(hash, currentTenantId, collection);
       const showPrev = shouldShowPreview(hash, currentTenantId);
       console.log('[Studio] poll tick | hash:', hash, '| currentTenantId:', currentTenantId, '| showPrev:', showPrev, '| cleanPath:', cleanPath);
 
-      // Push a new history entry when navigating to a different page,
-      // replace when toggling non-content routes (media, graphql, etc.)
-      if (cleanPath !== lastPushedPath) {
-        if (showPrev) {
-          window.history.pushState(null, "", cleanPath);
-        } else {
-          window.history.replaceState(null, "", cleanPath);
-        }
-        lastPushedPath = cleanPath;
+      if (showPrev && cleanPath !== lastPushedPathRef.current) {
+        window.history.pushState(null, "", cleanPath);
+        lastPushedPathRef.current = cleanPath;
       }
 
-      // Show/hide preview based on route type
       setShowPreview(showPrev);
 
       if (showPrev) {
         const slug = parsePageSlugFromHash(hash, currentTenantId);
         if (slug) {
           setSelectedPageSlug((prev) => (prev === slug ? prev : slug));
+          selectedPageSlugRef.current = slug;
         }
       }
-    }, 400);
+    };
+
+    const onRouteChange = (e: MessageEvent) => {
+      if (e.data?.type !== 'tina:route-change') return;
+      if (e.source !== leftFrame.contentWindow) return;
+      processHash();
+    };
+    window.addEventListener('message', onRouteChange);
+    leftFrame.addEventListener("load", processHash);
+
+    processHash();
+
     window.addEventListener("message", onPreviewMessage);
 
     return () => {
@@ -343,10 +393,8 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
         observerRef.current.disconnect();
         observerRef.current = null;
       }
-      if (hashPollTimerRef.current) {
-        window.clearInterval(hashPollTimerRef.current);
-        hashPollTimerRef.current = null;
-      }
+      window.removeEventListener('message', onRouteChange);
+      leftFrame.removeEventListener("load", processHash);
       setSuggestionPopup(null);
     };
   }, [pages, tenantId, tenantType]);
