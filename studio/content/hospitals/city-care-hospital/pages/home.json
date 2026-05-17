@@ -9,7 +9,21 @@
       "_template": "hero",
       "enabled": true,
       "headline": "Care teams, diagnostics, and emergency access in one place",
-      "subheadline": "Multi-specialty OPD, emergency support, lab services, and family health programs."
+      "subheadline": "Multi-specialty OPD, emergency support, lab services, and family health programs.",
+      "buttons": [
+        {
+          "label": "WhatsApp",
+          "url": "https://wa.me/918888888888",
+          "icon": "whatsapp",
+          "variant": "primary"
+        },
+        {
+          "label": "Call Us",
+          "url": "tel:+91 88888 88888",
+          "icon": "phone",
+          "variant": "secondary"
+        }
+      ]
     },
     {
       "_template": "profile",
@@ -101,7 +115,21 @@
       "_template": "cta",
       "enabled": true,
       "title": "Ready to visit?",
-      "body": "Call or WhatsApp the hospital desk."
+      "body": "Call or WhatsApp the hospital desk.",
+      "buttons": [
+        {
+          "label": "WhatsApp",
+          "url": "https://wa.me/918888888888",
+          "icon": "whatsapp",
+          "variant": "primary"
+        },
+        {
+          "label": "Call Us",
+          "url": "tel:+91 88888 88888",
+          "icon": "phone",
+          "variant": "secondary"
+        }
+      ]
     },
     {
       "_template": "awards",

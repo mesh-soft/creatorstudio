@@ -12,7 +12,21 @@
       "headline": "Expert care you can trusts",
       "subheadline": "Personalized medical care with compassion and expertise for you and your family.",
       "css": "{\"background\":\"blue\"}",
-      "_template": "hero"
+      "_template": "hero",
+      "buttons": [
+        {
+          "label": "WhatsApp",
+          "url": "https://wa.me/919999999999",
+          "icon": "whatsapp",
+          "variant": "primary"
+        },
+        {
+          "label": "Call Us",
+          "url": "tel:+91 99999 99999",
+          "icon": "phone",
+          "variant": "secondary"
+        }
+      ]
     },
     {
       "enabled": true,
@@ -154,7 +168,21 @@
     {
       "title": "Ready to book?",
       "body": "Call or WhatsApp the clinic.",
-      "_template": "cta"
+      "_template": "cta",
+      "buttons": [
+        {
+          "label": "WhatsApp",
+          "url": "https://wa.me/919999999999",
+          "icon": "whatsapp",
+          "variant": "primary"
+        },
+        {
+          "label": "Call Us",
+          "url": "tel:+91 99999 99999",
+          "icon": "phone",
+          "variant": "secondary"
+        }
+      ]
     }
   ],
   "settings": [

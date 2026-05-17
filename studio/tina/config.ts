@@ -30,6 +30,21 @@ const iconOptions = [
   { label: "📺 YouTube", value: "youtube" },
 ];
 
+const buttonFields: TinaField[] = [
+  { type: "string", name: "label", label: "Label" },
+  { type: "string", name: "url", label: "URL" },
+  { type: "string", name: "icon", label: "Icon", options: iconOptions },
+  { 
+    type: "string", 
+    name: "variant", 
+    label: "Variant", 
+    options: [
+      { label: "Primary", value: "primary" },
+      { label: "Secondary", value: "secondary" }
+    ] 
+  },
+];
+
 function getTenantSlugFromSiteDocument(document: { _sys?: { breadcrumbs?: string[]; filename?: string } } | undefined) {
   const breadcrumbs = document?._sys?.breadcrumbs ?? [];
   const siteIndex = breadcrumbs.indexOf("site");
@@ -328,17 +343,35 @@ const pageFields: TinaField[] = [
           { type: "string", name: "headline", label: "Headline" },
           { type: "string", name: "subheadline", label: "Subheadline", ui: { component: "textarea" } },
           { 
-            type: "string", 
-            name: "buttonLabel", 
-            label: "Button Label",
-            suggestions: ["Book Appointment", "Contact Us", "View Services", "Get Started"]
+            type: "object", 
+            name: "buttons", 
+            label: "Buttons (Dynamic)", 
+            list: true,
+            ui: {
+              itemProps: (item) => ({ label: item?.label || "Button" })
+            },
+            fields: buttonFields 
           },
-          { type: "string", name: "buttonUrl", label: "Button URL" },
-          { type: "string", name: "buttonIcon", label: "Button Icon", options: iconOptions },
+          { type: "string", name: "buttonLabel", label: "Legacy Button Label (Fallback)", ui: { component: "hidden" } },
+          { type: "string", name: "buttonUrl", label: "Legacy Button URL (Fallback)", ui: { component: "hidden" } },
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } }
         ] 
       },
-      { name: "profile", label: "Profile", fields: [{ type: "boolean", name: "enabled", label: "Enabled" }, { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } }] },
+      { 
+        name: "profile", 
+        label: "Profile", 
+        fields: [
+          { type: "boolean", name: "enabled", label: "Enabled" },
+          { type: "string", name: "kicker", label: "Eyebrow Override" },
+          { type: "string", name: "title", label: "Display Name Override" },
+          { type: "string", name: "body", label: "Bio Override", ui: { component: "textarea" } },
+          { type: "number", name: "experienceYears", label: "Experience Years Override" },
+          { type: "string", name: "experienceLabel", label: "Experience Label Override" },
+          { type: "string", name: "registrationNumber", label: "Registration Number Override" },
+          { type: "string", name: "registrationLabel", label: "Registration Label Override" },
+          { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } }
+        ] 
+      },
       {
         name: "services",
         label: "Services",
@@ -459,9 +492,19 @@ const pageFields: TinaField[] = [
         fields: [{ type: "boolean", name: "enabled", label: "Enabled" },
           { type: "string", name: "title", label: "Title Override" },
           { type: "string", name: "body", label: "Body Override", ui: { component: "textarea" } },
-          { type: "string", name: "buttonLabel", label: "Button Label" },
-          { type: "string", name: "buttonUrl", label: "Button URL" },
-          { type: "string", name: "buttonIcon", label: "Button Icon", options: iconOptions },
+          { 
+            type: "object", 
+            name: "buttons", 
+            label: "Buttons (Dynamic)", 
+            list: true,
+            ui: {
+              itemProps: (item) => ({ label: item?.label || "Button" })
+            },
+            fields: buttonFields 
+          },
+          { type: "string", name: "buttonLabel", label: "Legacy Button Label (Fallback)", ui: { component: "hidden" } },
+          { type: "string", name: "buttonUrl", label: "Legacy Button URL (Fallback)", ui: { component: "hidden" } },
+          { type: "string", name: "buttonIcon", label: "Legacy Button Icon (Fallback)", options: iconOptions, ui: { component: "hidden" } },
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } }
         ],
       },

@@ -19,6 +19,12 @@
   box-sizing: border-box;
 }
 
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
 body {
   margin: 0;
   background: var(--background);
@@ -167,8 +173,8 @@ p {
   gap: 24px;
 }
 
-.services-cards { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-.gallery-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.services-cards, .services { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.gallery, .gallery-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
 
 /* Dashboard UI */
 .preview-header {

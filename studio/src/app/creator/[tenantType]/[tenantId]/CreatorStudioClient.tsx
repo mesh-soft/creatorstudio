@@ -165,14 +165,15 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
     };
 
     const wireRightPreview = () => {
+      console.log("wireRightPreview");
       const rightDoc = rightFrame.contentDocument;
       const leftDoc = leftFrame.contentDocument;
       if (!rightDoc || !leftDoc) return;
 
       const onClick = (event: Event) => {
         const target = event.target as HTMLElement | null;
-        const el = target?.closest("[data-tina-field]") as HTMLElement | null;
-        const field = el?.dataset?.tinaField;
+        const el = (target?.closest("[data-tina-field]") || target?.closest("[data-edit-path]")) as HTMLElement | null;
+        const field = el?.dataset?.tinaField || el?.dataset?.editPath;
         if (!field) return;
         event.preventDefault();
         event.stopPropagation();

@@ -178,6 +178,8 @@ function renderBlocks(
           <Profile
             key={key}
             tenant={tenant}
+            block={activeBlock}
+            blockIndex={index}
             variant={preset.profile}
             sectionField={sectionField}
             tinaDocument={tinaDocument}
@@ -467,12 +469,9 @@ function Hero({
           {block?.subheadline}
         </Text>
         <ButtonGroup 
-          tenant={tenant} 
-          customLabel={block?.buttonLabel} 
-          customUrl={block?.buttonUrl} 
-          customIcon={block?.buttonIcon}
+          buttons={block?.buttons}
           blockIndex={blockIndex} 
-          studioMode={studioMode} 
+          studioMode={studioMode}
         />
       </div>
       <div className="hero-image-wrapper">
@@ -484,12 +483,16 @@ function Hero({
 
 function Profile({
   tenant,
+  block,
+  blockIndex,
   variant,
   sectionField,
   tinaDocument,
   studioMode,
 }: {
   tenant: Tenant;
+  block: any;
+  blockIndex: number;
   variant: string;
   sectionField?: string;
   tinaDocument?: Record<string, unknown>;
@@ -498,11 +501,20 @@ function Profile({
   return (
     <Section className={`block profile profile-${variant}`} sectionField={sectionField} style={block?.css}>
       <div className="profile-info">
-        <Eyebrow>{tenant.tenantType === "doctor" ? "Expertise" : "About Us"}</Eyebrow>
-        <Heading level={2} editPath={studioMode ? "profile.displayName" : undefined}>
-          {tenant.profile.displayName}
+        <Eyebrow editPath={studioMode ? `blocks.${blockIndex}.kicker` : undefined}>
+          {block?.kicker || (tenant.tenantType === "doctor" ? "Expertise" : "About Us")}
+        </Eyebrow>
+        <Heading 
+          level={2} 
+          editPath={studioMode ? `blocks.${blockIndex}.title` : undefined}
+        >
+          {block?.title || tenant.profile.displayName}
         </Heading>
-        <Text editPath={studioMode ? "profile.bio" : undefined}>{tenant.profile.bio}</Text>
+        <Text 
+          editPath={studioMode ? `blocks.${blockIndex}.body` : undefined}
+        >
+          {block?.body || tenant.profile.bio}
+        </Text>
         <div className="chip-row">
           {safeArray(tenant.profile.degrees).map((degree, index) => (
             <span className="chip" key={`${degree}-${index}`}>
@@ -513,11 +525,22 @@ function Profile({
       </div>
       <Card className="profile-card">
         <div className="card-metric">
-          <strong>{tenant.profile.experienceYears}+</strong>
-          <span>Years Experience</span>
+          <strong data-edit-path={studioMode ? `blocks.${blockIndex}.experienceYears` : undefined}>
+            {block?.experienceYears ?? tenant.profile.experienceYears}+
+          </strong>
+          <span data-edit-path={studioMode ? `blocks.${blockIndex}.experienceLabel` : undefined}>
+            {block?.experienceLabel ?? "Years Experience"}
+          </span>
         </div>
         <hr style={{ margin: "16px 0", opacity: 0.1 }} />
-        <small>Registration: {tenant.profile.registrationNumber}</small>
+        <small>
+          <span data-edit-path={studioMode ? `blocks.${blockIndex}.registrationLabel` : undefined}>
+            {block?.registrationLabel ?? "Registration"}: 
+          </span>
+          <span data-edit-path={studioMode ? `blocks.${blockIndex}.registrationNumber` : undefined}>
+            {block?.registrationNumber ?? tenant.profile.registrationNumber}
+          </span>
+        </small>
       </Card>
     </Section>
   );
@@ -614,8 +637,8 @@ function Gallery({
       <BlockTitle kicker={block?.kicker ?? "Gallery"} title={block?.title ?? "Clinic Photos"} />
       <div className={`gallery gallery-${variant}`}>
         {safeArray(block?.items).map((image: any, index: number) => (
-          <div key={`${image?.src ?? "image"}-${index}`} className="gallery-item" style={{ overflow: "hidden", borderRadius: "var(--radius)" }}>
-            <ImagePrimitive src={image.src} alt={image.alt} style={{ transition: "transform 0.5s ease" }} />
+          <div key={`${image?.src ?? "image"}-${index}`} className="gallery-item" style={{ overflow: "hidden", borderRadius: "var(--radius)", aspectRatio: "1 / 1" }}>
+            <ImagePrimitive src={image.src} alt={image.alt} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.5s ease" }} />
           </div>
         ))}
       </div>
@@ -676,15 +699,12 @@ function CTA({
     <Section className={`cta cta-${variant}`} sectionField={sectionField} style={block?.css}>
       <div className="cta-content">
         <Heading level={2} editPath={studioMode ? `blocks.${blockIndex}.title` : undefined}>
-          {block?.title ?? "Ready to book?"}
+          {block?.title || "Ready to book?"}
         </Heading>
         <Text editPath={studioMode ? `blocks.${blockIndex}.body` : undefined}>{block?.body}</Text>
       </div>
       <ButtonGroup 
-        tenant={tenant} 
-        customLabel={block?.buttonLabel} 
-        customUrl={block?.buttonUrl} 
-        customIcon={block?.buttonIcon}
+        buttons={block?.buttons}
         blockIndex={blockIndex} 
         studioMode={studioMode} 
       />
@@ -813,49 +833,32 @@ function ImagePrimitive({ src, alt, className = "", style = {} }: { src: string;
 }
 
 function ButtonGroup({ 
-  tenant, 
-  customLabel, 
-  customUrl,
-  customIcon,
+  buttons,
   blockIndex,
-  studioMode
+  studioMode,
 }: { 
-  tenant: Tenant; 
-  customLabel?: string; 
-  customUrl?: string;
-  customIcon?: string;
+  buttons?: any[];
   blockIndex?: number;
   studioMode?: boolean;
 }) {
-  const whatsapp = tenant.business?.whatsapp?.replace(/\D/g, "") ?? "";
-  const phone = tenant.business?.phone ?? "";
-  const icon = iconFor(customIcon);
+  const displayButtons = safeArray(buttons);
+  
+  if (displayButtons.length === 0) return null;
 
   return (
     <div className="button-row">
-      {(customLabel || icon) && (
+      {displayButtons.map((btn, i) => (
         <a 
-          className="btn primary" 
-          href={customUrl || "#"} 
-          data-edit-path={studioMode && blockIndex !== undefined ? `blocks.${blockIndex}.buttonLabel` : undefined}
+          key={i}
+          className={`btn ${btn.variant === "secondary" ? "secondary" : "primary"}`} 
+          href={btn.url || "#"} 
+          data-edit-path={studioMode && blockIndex !== undefined ? `blocks.${blockIndex}.buttons.${i}.label` : undefined}
           style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
         >
-          {icon && <span className="btn-icon">{icon}</span>}
-          {customLabel}
+          {btn.icon && <span className="btn-icon">{iconFor(btn.icon)}</span>}
+          {btn.label}
         </a>
-      )}
-      {!customLabel && !icon && whatsapp && (
-        <a className="btn primary" href={`https://wa.me/${whatsapp}`} style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
-          <span className="btn-icon">{iconFor("whatsapp")}</span>
-          WhatsApp
-        </a>
-      )}
-      {phone && (
-        <a className="btn secondary" href={`tel:${phone}`} style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
-          <span className="btn-icon">{iconFor("phone")}</span>
-          Call Us
-        </a>
-      )}
+      ))}
     </div>
   );
 }
