@@ -106,79 +106,91 @@ const cssValueSuggestions: Record<string, string[]> = {
   'object-fit': ['fill', 'contain', 'cover', 'none', 'scale-down'],
 };
 
+type Breakpoint = 'base' | 'mobile' | 'tablet';
+
+const BREAKPOINTS: { key: Breakpoint; label: string; hint: string }[] = [
+  { key: 'base', label: 'Base', hint: 'All screen sizes' },
+  { key: 'mobile', label: 'Mobile', hint: '≤ 767 px' },
+  { key: 'tablet', label: 'Tablet', hint: '768 – 1023 px' },
+];
+
+/** Detect whether a parsed CSS value is using the new breakpoint format */
+function isBreakpointFormat(obj: Record<string, any>): boolean {
+  return 'base' in obj || 'mobile' in obj || 'tablet' in obj;
+}
+
+/** Migrate old flat format → breakpoint format */
+function migrateToBreakpointFormat(flat: Record<string, any>): Record<Breakpoint, Record<string, string>> {
+  return { base: { ...flat }, mobile: {}, tablet: {} };
+}
+
 export const CssEditor = wrapFieldsWithMeta(({ input, field }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [isRaw, setIsRaw] = React.useState(false);
   const [search, setSearch] = React.useState('');
+  const [activeBreakpoint, setActiveBreakpoint] = React.useState<Breakpoint>('base');
   const cms = useCMS();
-  
-  const value = React.useMemo(() => {
-    if (typeof input.value === 'string') {
-      try {
-        return JSON.parse(input.value);
-      } catch (e) {
-        return {};
-      }
+
+  const value = React.useMemo((): Record<Breakpoint, Record<string, string>> => {
+    const raw = typeof input.value === 'string'
+      ? (() => { try { return JSON.parse(input.value); } catch { return {}; } })()
+      : (input.value || {});
+    if (isBreakpointFormat(raw)) {
+      return { base: raw.base || {}, mobile: raw.mobile || {}, tablet: raw.tablet || {} };
     }
-    return input.value || {};
+    // Old flat format — migrate transparently
+    return migrateToBreakpointFormat(raw);
   }, [input.value]);
 
   const { dispatch } = React.useContext(CMSContext);
 
   React.useEffect(() => {
     if (isOpen) {
-      dispatch({ 
-        type: 'set-active-css', 
-        value: { id: input.name, css: JSON.stringify(value) } 
+      dispatch({
+        type: 'set-active-css',
+        value: { id: input.name, css: JSON.stringify(value) }
       });
     } else {
       dispatch({ type: 'set-active-css', value: null });
     }
   }, [value, isOpen, input.name, dispatch]);
 
-  const properties = Object.entries(value);
+  const bpValue = value[activeBreakpoint] || {};
+  const properties = Object.entries(bpValue);
+
+  const save = (next: Record<Breakpoint, Record<string, string>>) => {
+    input.onChange(next);
+    dispatch({ type: 'set-active-css', value: { id: input.name, css: JSON.stringify(next) } });
+  };
 
   const addProperty = (prop: string) => {
-    if (prop && !value[prop]) {
-      const newValue = { ...value, [prop]: '' };
-      input.onChange(newValue);
+    if (prop && !bpValue[prop]) {
+      save({ ...value, [activeBreakpoint]: { ...bpValue, [prop]: '' } });
       setSearch('');
-      dispatch({ 
-        type: 'set-active-css', 
-        value: { id: input.name, css: JSON.stringify(newValue) } 
-      });
     }
   };
 
   const removeProperty = (prop: string) => {
-    const newValue = { ...value };
-    delete newValue[prop];
-    input.onChange(newValue);
-    dispatch({ 
-      type: 'set-active-css', 
-      value: { id: input.name, css: JSON.stringify(newValue) } 
-    });
+    const next = { ...bpValue };
+    delete next[prop];
+    save({ ...value, [activeBreakpoint]: next });
   };
 
   const updateValue = (prop: string, val: string) => {
-    const newValue = { ...value, [prop]: val };
-    input.onChange(newValue);
-    dispatch({ 
-      type: 'set-active-css', 
-      value: { id: input.name, css: JSON.stringify(newValue) } 
-    });
+    save({ ...value, [activeBreakpoint]: { ...bpValue, [prop]: val } });
   };
 
   const updateRaw = (raw: string) => {
     try {
       const parsed = JSON.parse(raw);
-      input.onChange(parsed);
-      dispatch({ 
-        type: 'set-active-css', 
-        value: { id: input.name, css: JSON.stringify(parsed) } 
-      });
+      // Accept either flat (migrate) or breakpoint format
+      if (isBreakpointFormat(parsed)) {
+        save({ base: parsed.base || {}, mobile: parsed.mobile || {}, tablet: parsed.tablet || {} });
+      } else {
+        save(migrateToBreakpointFormat(parsed));
+      }
     } catch (e) {
-      // If it's not valid JSON, we just keep it as is for now or handle it
+      // Keep current value if JSON is invalid
     }
   };
 
@@ -194,12 +206,22 @@ export const CssEditor = wrapFieldsWithMeta(({ input, field }) => {
   const isImageProp = (prop: string) => 
     prop.toLowerCase().includes('image') || prop.toLowerCase().includes('icon');
 
+const isColorProp = (prop: string) =>
+  prop === 'color' || prop === 'background' || prop === 'background-color' ||
+  prop.endsWith('-color') || prop === 'fill' || prop === 'stroke' ||
+  prop === 'outline' || prop === 'border';
+
+const isValidHex = (v: string) => /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(v);
+
   const filteredProperties = Array.from(new Set(cssProperties)).filter(p => 
     p.toLowerCase().includes(search.toLowerCase()) && !value[p]
   ).slice(0, 10);
 
-  const cssSummary = properties.length > 0
-    ? properties.map(([k, v]) => `${k}:${v}`).join('; ')
+  const totalCount = Object.values(value).reduce((n, bp) => n + Object.keys(bp).length, 0);
+  const cssSummary = totalCount > 0
+    ? Object.entries(value)
+        .flatMap(([bp, props]) => Object.entries(props).map(([k, v]) => bp === 'base' ? `${k}:${v}` : `@${bp} ${k}:${v}`))
+        .join('; ')
     : 'No overrides';
 
   return (
@@ -219,7 +241,7 @@ export const CssEditor = wrapFieldsWithMeta(({ input, field }) => {
         }}
       >
         <div style={{ fontWeight: 'bold', marginBottom: '2px', fontSize: '12px' }}>
-          CSS Overrides ({properties.length})
+          CSS Overrides ({totalCount})
         </div>
         <div style={{ 
           opacity: 0.6, 
@@ -244,6 +266,40 @@ export const CssEditor = wrapFieldsWithMeta(({ input, field }) => {
               </div>
             </ModalHeader>
             <ModalBody>
+              {/* Breakpoint tabs */}
+              <div style={{ display: 'flex', gap: '4px', marginBottom: '16px', borderBottom: '2px solid #e2e8f0', paddingBottom: '0' }}>
+                {BREAKPOINTS.map((bp) => {
+                  const count = Object.keys(value[bp.key] || {}).length;
+                  const isActive = activeBreakpoint === bp.key;
+                  return (
+                    <button
+                      key={bp.key}
+                      onClick={() => { setActiveBreakpoint(bp.key); setSearch(''); }}
+                      title={bp.hint}
+                      style={{
+                        padding: '6px 14px',
+                        fontSize: '12px',
+                        fontWeight: isActive ? 700 : 400,
+                        color: isActive ? '#2563eb' : '#64748b',
+                        background: 'none',
+                        border: 'none',
+                        borderBottom: isActive ? '2px solid #2563eb' : '2px solid transparent',
+                        marginBottom: '-2px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      {bp.label}
+                      {count > 0 && (
+                        <span style={{ background: '#dbeafe', color: '#1d4ed8', borderRadius: '10px', padding: '1px 6px', fontSize: '10px', fontWeight: 700 }}>{count}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
               {isRaw ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', height: '100%' }}>
                   <textarea
@@ -421,6 +477,23 @@ export const CssEditor = wrapFieldsWithMeta(({ input, field }) => {
                               >
                                 <MdImage size={16} />
                               </button>
+                            )}
+                            {isColorProp(prop) && (
+                              <input
+                                type="color"
+                                value={isValidHex(val as string) ? val as string : '#000000'}
+                                onChange={(e) => updateValue(prop, e.target.value)}
+                                title="Pick color"
+                                style={{
+                                  width: '32px',
+                                  height: '28px',
+                                  padding: '2px',
+                                  cursor: 'pointer',
+                                  border: '1px solid #cbd5e1',
+                                  borderRadius: '4px',
+                                  flexShrink: 0,
+                                }}
+                              />
                             )}
                           </div>
                           <div style={{ display: 'flex', justifyContent: 'center' }}>

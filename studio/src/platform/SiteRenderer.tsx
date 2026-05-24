@@ -861,35 +861,42 @@ function Section({
     return `tina-${sectionField.replace(/\./g, "-")}`;
   }, [sectionField, reactId]);
 
-  const parsedStyle = useMemo(() => {
+  const { baseStyle, cssBlock } = useMemo(() => {
+    let raw: Record<string, any> = {};
     if (typeof style === "string") {
-      try {
-        return JSON.parse(style);
-      } catch (e) {
-        return {};
-      }
+      try { raw = JSON.parse(style); } catch { raw = {}; }
+    } else if (style && typeof style === "object") {
+      raw = style as Record<string, any>;
     }
-    return style;
-  }, [style]);
 
-  const cssRules = useMemo(() => {
-    if (!parsedStyle || typeof parsedStyle !== "object" || Object.keys(parsedStyle).length === 0) {
-      return null;
-    }
-    return Object.entries(parsedStyle)
-      .filter(([_, v]) => v !== null && v !== undefined && v !== "")
-      .map(([k, v]) => `${k.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)}: ${v} !important;`)
-      .join(" ");
-  }, [parsedStyle]);
+    // Detect new breakpoint format vs legacy flat format
+    const isBreakpoint = "base" in raw || "mobile" in raw || "tablet" in raw;
+    const base: Record<string, string> = isBreakpoint ? (raw.base || {}) : raw;
+    const mobile: Record<string, string> = isBreakpoint ? (raw.mobile || {}) : {};
+    const tablet: Record<string, string> = isBreakpoint ? (raw.tablet || {}) : {};
+
+    const toCssDecls = (obj: Record<string, string>) =>
+      Object.entries(obj)
+        .filter(([, v]) => v !== null && v !== undefined && v !== "")
+        .map(([k, v]) => `${k.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)}: ${v} !important;`)
+        .join(" ");
+
+    const baseDecls = toCssDecls(base);
+    const mobileDecls = toCssDecls(mobile);
+    const tabletDecls = toCssDecls(tablet);
+
+    const parts: string[] = [];
+    if (baseDecls) parts.push(`#${sectionId} { ${baseDecls} }`);
+    if (mobileDecls) parts.push(`@media (max-width: 767px) { #${sectionId} { ${mobileDecls} } }`);
+    if (tabletDecls) parts.push(`@media (min-width: 768px) and (max-width: 1023px) { #${sectionId} { ${tabletDecls} } }`);
+
+    return { baseStyle: base, cssBlock: parts.length > 0 ? parts.join("\n") : null };
+  }, [style, sectionId]);
 
   return (
-    <Tag id={sectionId} className={className} data-tina-field={sectionField} style={parsedStyle}>
-      {cssRules && (
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `#${sectionId} { ${cssRules} }`,
-          }}
-        />
+    <Tag id={sectionId} className={className} data-tina-field={sectionField} style={baseStyle}>
+      {cssBlock && (
+        <style dangerouslySetInnerHTML={{ __html: cssBlock }} />
       )}
       {children}
     </Tag>
