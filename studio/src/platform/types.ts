@@ -77,6 +77,13 @@ export type TenantBlock =
       enabled?: boolean;
       heading?: string;
       body?: string;
+    }
+  | {
+      _template: "whatsapp";
+      enabled?: boolean;
+      phone?: string;
+      message?: string;
+      label?: string;
     };
 
 export type Presentation = {

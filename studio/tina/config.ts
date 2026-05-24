@@ -603,6 +603,16 @@ const pageFields: TinaField[] = [
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
+      {
+        name: "whatsapp",
+        label: "WhatsApp Floating Button",
+        fields: [
+          { type: "boolean", name: "enabled", label: "Enabled" },
+          { type: "string", name: "phone", label: "WhatsApp Number", description: "Include country code, e.g. 919876543210 (no + or spaces)" },
+          { type: "string", name: "message", label: "Pre-filled Message", description: "Opens WhatsApp with this message pre-typed" },
+          { type: "string", name: "label", label: "Tooltip Label", description: "Shown on hover (e.g. 'Chat with us')" },
+        ],
+      },
     ],
   },
   {

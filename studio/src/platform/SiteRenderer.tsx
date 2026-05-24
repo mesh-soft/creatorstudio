@@ -348,6 +348,12 @@ function renderBlocks(
         return withScrollAnchor(key, "text", (
           <TextBlock block={activeBlock} blockIndex={index} sectionField={sectionField} studioMode={studioMode} />
         ));
+      case "whatsapp":
+        return (
+          <React.Fragment key={key}>
+            <WhatsAppButton block={activeBlock} tenant={tenant} sectionField={sectionField} />
+          </React.Fragment>
+        );
       default:
         return null;
     }
@@ -963,6 +969,62 @@ function ButtonGroup({
         </a>
       ))}
     </div>
+  );
+}
+
+function WhatsAppButton({
+  block,
+  tenant,
+  sectionField,
+}: {
+  block: any;
+  tenant: Tenant;
+  sectionField?: string;
+}) {
+  const phone = block?.phone || tenant.business?.whatsapp?.replace(/\D/g, "");
+  if (!phone) return null;
+
+  const message = block?.message || `Hi Dr. ${tenant.profile.displayName}, I'd like to book an appointment.`;
+  const label = block?.label || "Chat on WhatsApp";
+  const href = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-tina-field={sectionField}
+      title={label}
+      style={{
+        position: "fixed",
+        bottom: "24px",
+        right: "24px",
+        zIndex: 9999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "56px",
+        height: "56px",
+        borderRadius: "50%",
+        background: "#25D366",
+        color: "#fff",
+        boxShadow: "0 4px 16px rgba(0,0,0,0.25)",
+        textDecoration: "none",
+        fontSize: "28px",
+        lineHeight: 1,
+        transition: "transform 0.15s ease, box-shadow 0.15s ease",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.1)";
+        (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 6px 20px rgba(0,0,0,0.3)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
+        (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 4px 16px rgba(0,0,0,0.25)";
+      }}
+    >
+      💬
+    </a>
   );
 }
 
