@@ -379,7 +379,7 @@ const pageFields: TinaField[] = [
       {
         name: "header",
         label: "Header",
-        fields: [{ type: "boolean", name: "enabled", label: "Enabled", ui: { component: "hidden" } },
+        fields: [{ type: "boolean", name: "enabled", label: "Enabled" },
           tenantImageField("logo", "Logo Override") as TinaField,
           navLinksObjectField("navLinks", "Custom Navigation Links") as TinaField,
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
@@ -388,7 +388,7 @@ const pageFields: TinaField[] = [
       {
         name: "footer",
         label: "Footer",
-        fields: [{ type: "boolean", name: "enabled", label: "Enabled", ui: { component: "hidden" } },
+        fields: [{ type: "boolean", name: "enabled", label: "Enabled" },
           { type: "string", name: "copyright", label: "Copyright Override" },
           navLinksObjectField("socialLinks", "Custom Social / Footer Links") as TinaField,
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
