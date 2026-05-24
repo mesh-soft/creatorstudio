@@ -708,6 +708,49 @@ const pageFields: TinaField[] = [
   },
 ];
 
+const pageDefaultItem = {
+  blocks: [
+    { _template: "header", enabled: true },
+    {
+      _template: "hero",
+      enabled: true,
+      headline: "Your Name Here",
+      subheadline: "Expert care tailored to your needs.",
+      buttons: [
+        { label: "Book Appointment", url: "#cta", icon: "calendar", variant: "primary" },
+        { label: "WhatsApp", url: "#", icon: "whatsapp", variant: "secondary" },
+      ],
+    },
+    {
+      _template: "services",
+      enabled: true,
+      kicker: "What We Offer",
+      title: "Our Services",
+      items: [
+        { title: "Consultation", description: "Expert diagnosis and personalised advice.", icon: "users" },
+        { title: "Treatment", description: "Evidence-based, patient-centred care plans.", icon: "activity" },
+        { title: "Follow-up", description: "Ongoing support through your recovery.", icon: "check" },
+      ],
+    },
+    {
+      _template: "cta",
+      enabled: true,
+      title: "Ready to book?",
+      body: "Get in touch today to schedule your appointment.",
+      buttons: [
+        { label: "Call Now", url: "tel:", icon: "phone", variant: "primary" },
+        { label: "WhatsApp", url: "https://wa.me/", icon: "whatsapp", variant: "secondary" },
+      ],
+    },
+    { _template: "footer", enabled: true },
+  ],
+  settings: [
+    { _template: "urlSettings", slug: "new-page", title: "New Page", path: "new-page", isHome: false },
+    { _template: "presentation" },
+    { _template: "seo" },
+  ],
+};
+
 export default defineConfig({
   branch,
   clientId: process.env.NEXT_PUBLIC_TINA_CLIENT_ID,
@@ -743,6 +786,7 @@ export default defineConfig({
             name: "page",
             label: "Page",
             fields: pageFields,
+            ui: { defaultItem: pageDefaultItem },
           },
         ],
         ui: {
@@ -785,6 +829,7 @@ export default defineConfig({
             name: "page",
             label: "Page",
             fields: pageFields,
+            ui: { defaultItem: pageDefaultItem },
           },
         ],
         ui: {
