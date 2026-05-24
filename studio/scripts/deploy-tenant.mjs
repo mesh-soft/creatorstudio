@@ -157,7 +157,66 @@ async function assembleSite(id, type) {
     if (await exists(src)) await fs.copyFile(src, path.join(tenantDistDir, asset)).catch(() => {});
   }
 
+  // Generate sitemap.xml from page slugs
+  await generateSitemap(id, type, tenantDistDir);
+
   return tenantDistDir;
+}
+
+async function generateSitemap(id, type, tenantDistDir) {
+  const pagesDir = path.join(contentDir, type + 's', id, 'pages');
+  const siteJson = path.join(contentDir, type + 's', id, 'site', 'index.json');
+
+  let domain = `${id}.surge.sh`;
+  try {
+    const siteData = JSON.parse(await fs.readFile(siteJson, 'utf-8'));
+    const settings = Array.isArray(siteData.settings) ? siteData.settings : [];
+    const domainBlock = settings.find(s => s._template === 'domains');
+    if (domainBlock?.primary) domain = domainBlock.primary;
+  } catch { /* use default */ }
+
+  const baseUrl = domain.startsWith('http') ? domain.replace(/\/$/, '') : `https://${domain}`;
+  const urls = [];
+
+  if (await exists(pagesDir)) {
+    const entries = await fs.readdir(pagesDir);
+    for (const file of entries) {
+      if (!file.endsWith('.json')) continue;
+      const slug = file.replace(/\.json$/, '');
+      try {
+        const pageData = JSON.parse(await fs.readFile(path.join(pagesDir, file), 'utf-8'));
+        const urlSettings = Array.isArray(pageData.settings)
+          ? pageData.settings.find(s => s._template === 'urlSettings')
+          : undefined;
+        const isHome = urlSettings?.isHome ?? slug === 'home';
+        const pagePath = isHome ? '' : (urlSettings?.path ?? slug);
+        urls.push({ loc: `${baseUrl}/${pagePath}`.replace(/\/+$/, ''), isHome });
+      } catch {
+        urls.push({ loc: `${baseUrl}/${slug}`, isHome: slug === 'home' });
+      }
+    }
+  }
+
+  // Home page first
+  urls.sort((a, b) => (b.isHome ? 1 : 0) - (a.isHome ? 1 : 0));
+
+  const now = new Date().toISOString().split('T')[0];
+  const xml = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ...urls.map(({ loc, isHome }) => [
+      '  <url>',
+      `    <loc>${loc}</loc>`,
+      `    <lastmod>${now}</lastmod>`,
+      `    <changefreq>${isHome ? 'weekly' : 'monthly'}</changefreq>`,
+      `    <priority>${isHome ? '1.0' : '0.8'}</priority>`,
+      '  </url>',
+    ].join('\n')),
+    '</urlset>',
+  ].join('\n');
+
+  await fs.writeFile(path.join(tenantDistDir, 'sitemap.xml'), xml, 'utf-8');
+  console.log(`   ✓ sitemap.xml (${urls.length} URL${urls.length !== 1 ? 's' : ''})`);
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -200,9 +259,10 @@ async function main() {
   }
 
   // Deploy
-  console.log(`\n📤 Deploying to Surge.sh...`);
-  execSync(`surge "${tenantDistDir}"`, { stdio: 'inherit', cwd: rootDir });
-  console.log(`\n✅ Deployed ${tenantId}`);
+  const domain = `${tenantId}.surge.sh`;
+  console.log(`\n📤 Deploying to Surge.sh (${domain})...`);
+  execSync(`surge "${tenantDistDir}" "${domain}"`, { stdio: 'inherit', cwd: rootDir });
+  console.log(`\n✅ Deployed ${tenantId} → https://${domain}`);
 }
 
 main().catch((err) => { console.error(err); process.exit(1); });
