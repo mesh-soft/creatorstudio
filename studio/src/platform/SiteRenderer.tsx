@@ -619,11 +619,9 @@ function Profile({
         >
           {block?.title || tenant.profile.displayName}
         </Heading>
-        <Text 
-          editPath={studioMode ? `blocks.${blockIndex}.body` : undefined}
-        >
+        <MarkdownText editPath={studioMode ? `blocks.${blockIndex}.body` : undefined}>
           {block?.body || tenant.profile.bio}
-        </Text>
+        </MarkdownText>
         <div className="chip-row">
           {safeArray(tenant.profile.degrees).map((degree, index) => (
             <span className="chip" key={`${degree}-${index}`}>
@@ -680,7 +678,7 @@ function Services({
           <Card key={`${service?.title ?? "service"}-${index}`} className="service-card">
             <span className="icon">{iconFor(service.icon)}</span>
             <h3 data-edit-path={studioMode ? `blocks.${blockIndex}.items.${index}.title` : undefined}>{service.title}</h3>
-            <Text editPath={studioMode ? `blocks.${blockIndex}.items.${index}.description` : undefined}>{service.description}</Text>
+            <MarkdownText editPath={studioMode ? `blocks.${blockIndex}.items.${index}.description` : undefined}>{service.description}</MarkdownText>
           </Card>
         ))}
       </div>
@@ -779,7 +777,7 @@ function FAQ({
         {safeArray(block?.items).map((faq: any, index: number) => (
           <Card key={`${faq?.question ?? "faq"}-${index}`} className="faq-card">
             <h3 data-edit-path={studioMode ? `blocks.${blockIndex}.items.${index}.question` : undefined}>{faq.question}</h3>
-            <Text editPath={studioMode ? `blocks.${blockIndex}.items.${index}.answer` : undefined}>{faq.answer}</Text>
+            <MarkdownText editPath={studioMode ? `blocks.${blockIndex}.items.${index}.answer` : undefined}>{faq.answer}</MarkdownText>
           </Card>
         ))}
       </div>
@@ -810,12 +808,12 @@ function CTA({
         <Heading level={2} editPath={studioMode ? `blocks.${blockIndex}.title` : undefined}>
           {block?.title || "Ready to book?"}
         </Heading>
-        <Text editPath={studioMode ? `blocks.${blockIndex}.body` : undefined}>{block?.body}</Text>
+        <MarkdownText editPath={studioMode ? `blocks.${blockIndex}.body` : undefined}>{block?.body}</MarkdownText>
       </div>
-      <ButtonGroup 
+      <ButtonGroup
         buttons={block?.buttons}
-        blockIndex={blockIndex} 
-        studioMode={studioMode} 
+        blockIndex={blockIndex}
+        studioMode={studioMode}
       />
     </Section>
   );
@@ -827,7 +825,7 @@ function TextBlock({ block, blockIndex, sectionField, studioMode }: { block: any
   return (
     <Section className="block text-block" sectionField={sectionField} style={block?.css}>
       {block?.heading ? <Heading level={2} editPath={studioMode ? `blocks.${blockIndex}.heading` : undefined}>{block?.heading}</Heading> : null}
-      {block?.body ? <Text editPath={studioMode ? `blocks.${blockIndex}.body` : undefined}>{block?.body}</Text> : null}
+      {block?.body ? <MarkdownText editPath={studioMode ? `blocks.${blockIndex}.body` : undefined}>{block?.body}</MarkdownText> : null}
     </Section>
   );
 }
@@ -1030,6 +1028,67 @@ function WhatsAppButton({
 
 function safeArray<T>(value: T[] | undefined): T[] {
   return Array.isArray(value) ? value : [];
+}
+
+/**
+ * Minimal safe markdown renderer for body/bio content.
+ * Supports: **bold**, *italic*, [link](url), newlines, and - list items.
+ * No external deps; XSS-safe (sanitises href, escapes HTML in text nodes).
+ */
+function MarkdownText({ children, editPath, style }: { children?: string; editPath?: string; style?: React.CSSProperties }) {
+  if (!children) return null;
+
+  const html = parseMarkdown(children);
+  return (
+    <div
+      data-edit-path={editPath}
+      style={{ fontFamily: "var(--body)", lineHeight: 1.7, ...style }}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function safehref(url: string): string {
+  const trimmed = url.trim();
+  if (/^javascript:/i.test(trimmed)) return "#";
+  return trimmed;
+}
+
+function parseMarkdown(text: string): string {
+  const paragraphs = text.split(/\n{2,}/);
+
+  return paragraphs
+    .map((para) => {
+      const lines = para.split("\n");
+      const listItems = lines.filter((l) => /^[-*]\s/.test(l));
+
+      if (listItems.length === lines.length) {
+        const lis = lines
+          .map((l) => `<li>${inlineMarkdown(l.replace(/^[-*]\s/, ""))}</li>`)
+          .join("");
+        return `<ul style="padding-left:1.4em;margin:0.5em 0">${lis}</ul>`;
+      }
+
+      const content = lines.map(inlineMarkdown).join("<br>");
+      return `<p style="margin:0 0 0.75em">${content}</p>`;
+    })
+    .join("");
+}
+
+function inlineMarkdown(text: string): string {
+  return escapeHtml(text)
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    .replace(/_(.+?)_/g, "<em>$1</em>")
+    .replace(/\[(.+?)\]\((.+?)\)/g, (_, label, url) => `<a href="${escapeHtml(safehref(url))}" style="color:var(--primary)">${label}</a>`);
 }
 
 function iconFor(icon?: string) {
