@@ -532,24 +532,32 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
               boxSizing: "border-box",
             }}
           >
-            <iframe
-              key={previewUrl}
-              ref={rightRef}
-              title="Live Preview"
-              src={previewUrl}
+            {/* Wrap in a container whose CSS width sets the visual device frame,
+                but the iframe itself is always 100% of that container so its
+                internal viewport (and media queries) match the chosen breakpoint. */}
+            <div
               style={{
-                ...frameStyle,
                 width:
                   previewViewport === "mobile"
                     ? "375px"
                     : previewViewport === "tablet"
                     ? "768px"
                     : "100%",
+                height: "100%",
                 flexShrink: 0,
                 borderRadius: previewViewport !== "desktop" ? "12px" : "0",
                 boxShadow: previewViewport !== "desktop" ? "0 0 0 1px #334155, 0 8px 32px rgba(0,0,0,0.4)" : "none",
+                overflow: "hidden",
               }}
-            />
+            >
+              <iframe
+                key={previewUrl}
+                ref={rightRef}
+                title="Live Preview"
+                src={previewUrl}
+                style={{ ...frameStyle, width: "100%" }}
+              />
+            </div>
           </div>
         )}
       </section>
