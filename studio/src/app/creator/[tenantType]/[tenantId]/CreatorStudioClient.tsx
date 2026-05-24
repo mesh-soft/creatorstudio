@@ -149,6 +149,7 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
     anchorEl: HTMLElement;
     context: SuggestionContext;
   } | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const pageCollection = tenantType === "doctor" ? "doctorSite" : "hospitalSite";
 
@@ -446,6 +447,22 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
           >
             📁 Media
           </a>
+          <button
+            onClick={() => setHistoryOpen((o) => !o)}
+            title="Version history for this page"
+            style={{
+              padding: "6px 12px",
+              background: historyOpen ? "#7c3aed" : "#4c1d95",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              fontSize: "12px",
+              fontWeight: 500,
+              cursor: "pointer",
+            }}
+          >
+            🕓 History
+          </button>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#e2e8f0" }}>
             <span>Page</span>
             <select
@@ -572,6 +589,18 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
             setSuggestionPopup(null);
           }}
           onClose={() => setSuggestionPopup(null)}
+        />
+      )}
+      {historyOpen && (
+        <VersionHistoryPanel
+          tenantType={tenantType}
+          tenantId={activeTenantId}
+          pageSlug={selectedPageSlug}
+          onClose={() => setHistoryOpen(false)}
+          onRestored={() => {
+            setHistoryOpen(false);
+            rightRef.current?.contentWindow?.location.reload();
+          }}
         />
       )}
     </main>
@@ -1045,6 +1074,144 @@ function cssEscape(value: string) {
     return CSS.escape(value);
   }
   return value.replace(/(["\\#.:,[\]])/g, "\\$1");
+}
+
+type SnapshotEntry = {
+  timestamp: string;
+  pageSlug: string;
+  checksum: string;
+  file: string;
+};
+
+function VersionHistoryPanel({
+  tenantType,
+  tenantId,
+  pageSlug,
+  onClose,
+  onRestored,
+}: {
+  tenantType: "doctor" | "hospital";
+  tenantId: string;
+  pageSlug: string;
+  onClose: () => void;
+  onRestored: () => void;
+}) {
+  const [entries, setEntries] = useState<SnapshotEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [restoring, setRestoring] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    fetch(`/api/content/snapshot?tenantType=${tenantType}&tenantSlug=${tenantId}&pageSlug=${pageSlug}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.ok) setEntries(data.entries);
+        else setError(data.message ?? "Failed to load history");
+      })
+      .catch(() => setError("Network error"))
+      .finally(() => setLoading(false));
+  }, [tenantType, tenantId, pageSlug]);
+
+  const restore = async (timestamp: string) => {
+    if (!confirm(`Restore snapshot from ${formatTimestamp(timestamp)}? The current page content will be overwritten.`)) return;
+    setRestoring(timestamp);
+    try {
+      const res = await fetch("/api/content/snapshot", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tenantType, tenantSlug: tenantId, pageSlug, timestamp }),
+      });
+      const data = await res.json();
+      if (data.ok) onRestored();
+      else setError(data.message ?? "Restore failed");
+    } catch {
+      setError("Network error during restore");
+    } finally {
+      setRestoring(null);
+    }
+  };
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: "56px",
+        right: 0,
+        bottom: 0,
+        width: "320px",
+        background: "#0f172a",
+        borderLeft: "1px solid #1e293b",
+        zIndex: 100,
+        display: "flex",
+        flexDirection: "column",
+        fontFamily: "Inter, Arial, sans-serif",
+        color: "#e2e8f0",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", borderBottom: "1px solid #1e293b" }}>
+        <strong style={{ fontSize: "13px" }}>Version History — {pageSlug}</strong>
+        <button
+          onClick={onClose}
+          style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: "16px", lineHeight: 1 }}
+        >
+          ✕
+        </button>
+      </div>
+      <div style={{ flex: 1, overflow: "auto", padding: "8px" }}>
+        {loading && <p style={{ padding: "16px", color: "#64748b", fontSize: "12px" }}>Loading…</p>}
+        {error && <p style={{ padding: "16px", color: "#f87171", fontSize: "12px" }}>{error}</p>}
+        {!loading && !error && entries.length === 0 && (
+          <p style={{ padding: "16px", color: "#64748b", fontSize: "12px" }}>No snapshots yet. Save the page to create the first version.</p>
+        )}
+        {entries.map((entry) => (
+          <div
+            key={entry.timestamp}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "10px 12px",
+              borderRadius: "6px",
+              marginBottom: "4px",
+              background: "#1e293b",
+              fontSize: "12px",
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: 600, color: "#e2e8f0" }}>{formatTimestamp(entry.timestamp)}</div>
+              <div style={{ color: "#64748b", marginTop: "2px" }}>sha: {entry.checksum.slice(0, 8)}</div>
+            </div>
+            <button
+              onClick={() => restore(entry.timestamp)}
+              disabled={restoring === entry.timestamp}
+              style={{
+                padding: "4px 10px",
+                background: restoring === entry.timestamp ? "#334155" : "#7c3aed",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                fontSize: "11px",
+                cursor: "pointer",
+                fontWeight: 600,
+              }}
+            >
+              {restoring === entry.timestamp ? "…" : "Restore"}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function formatTimestamp(ts: string): string {
+  try {
+    return new Date(ts.replace(/-(\d{2})-(\d{2})-(\d{3})Z$/, ":$1:$2.$3Z")).toLocaleString();
+  } catch {
+    return ts;
+  }
 }
 
 const frameStyle: CSSProperties = {

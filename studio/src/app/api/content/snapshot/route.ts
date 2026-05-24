@@ -68,6 +68,53 @@ type HistoryIndex = {
   }>;
 };
 
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const tenantType = searchParams.get("tenantType") as "doctor" | "hospital" | null;
+  const tenantSlug = searchParams.get("tenantSlug");
+  const pageSlug = searchParams.get("pageSlug");
+
+  if (!tenantType || !tenantSlug) {
+    return NextResponse.json({ ok: false, message: "tenantType and tenantSlug are required" }, { status: 400 });
+  }
+
+  const folder = tenantType === "doctor" ? "doctors" : "hospitals";
+  const historyRoot = path.join(process.cwd(), "content-history", folder, tenantSlug);
+  const historyIndexFile = path.join(historyRoot, "history-index.json");
+  const index = await readHistoryIndex(historyIndexFile);
+
+  const entries = pageSlug
+    ? index.entries.filter((e) => e.pageSlug === pageSlug)
+    : index.entries;
+
+  return NextResponse.json({ ok: true, entries: entries.slice().reverse() });
+}
+
+export async function PUT(request: Request) {
+  const body = (await request.json()) as SnapshotPayload & { timestamp?: string };
+  const { tenantType, tenantSlug, pageSlug, timestamp } = body;
+
+  if (!tenantType || !tenantSlug || !pageSlug || !timestamp) {
+    return NextResponse.json(
+      { ok: false, message: "tenantType, tenantSlug, pageSlug and timestamp are required" },
+      { status: 400 }
+    );
+  }
+
+  const folder = tenantType === "doctor" ? "doctors" : "hospitals";
+  const historyDir = path.join(process.cwd(), "content-history", folder, tenantSlug, pageSlug);
+  const snapshotFile = path.join(historyDir, `${timestamp}.json`);
+  const targetFile = path.join(process.cwd(), "content", folder, tenantSlug, "pages", `${pageSlug}.json`);
+
+  try {
+    const content = await fs.readFile(snapshotFile, "utf8");
+    await fs.writeFile(targetFile, content, "utf8");
+    return NextResponse.json({ ok: true, restored: timestamp });
+  } catch {
+    return NextResponse.json({ ok: false, message: "Snapshot file not found or could not be restored" }, { status: 404 });
+  }
+}
+
 async function readHistoryIndex(file: string): Promise<HistoryIndex> {
   try {
     const raw = await fs.readFile(file, "utf8");
