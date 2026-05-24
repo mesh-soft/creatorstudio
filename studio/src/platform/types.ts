@@ -19,6 +19,8 @@ export type TenantBlock =
       enabled?: boolean;
       headline?: string;
       subheadline?: string;
+      photo?: string;
+      buttons?: Array<{ label: string; url: string; icon?: string; variant?: "primary" | "secondary" }>;
     }
   | {
       _template: "profile";

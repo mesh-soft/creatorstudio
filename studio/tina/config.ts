@@ -415,21 +415,22 @@ const pageFields: TinaField[] = [
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
-      { 
-        name: "hero", 
-        label: "Hero", 
+      {
+        name: "hero",
+        label: "Hero",
         fields: [{ type: "boolean", name: "enabled", label: "Enabled" },
           { type: "string", name: "headline", label: "Headline" },
           { type: "string", name: "subheadline", label: "Subheadline", ui: { component: "textarea" } },
-          { 
-            type: "object", 
-            name: "buttons", 
-            label: "Buttons (Dynamic)", 
+          tenantImageField("photo", "Hero Image", "Overrides the profile photo for this block") as TinaField,
+          {
+            type: "object",
+            name: "buttons",
+            label: "Buttons",
             list: true,
             ui: {
               itemProps: (item) => ({ label: item?.label || "Button" })
             },
-            fields: buttonFields 
+            fields: buttonFields
           },
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } }
         ]

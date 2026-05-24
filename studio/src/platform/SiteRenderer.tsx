@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { tinaField } from "tinacms/dist/react";
 import { getPreset, getThemeBlocks, stylePresets } from "./catalog";
@@ -321,26 +321,40 @@ function Header({
   studioMode?: boolean;
   css?: any;
 }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const displayLogo = logo || tenant.profile.photo;
   const links = Array.isArray(navLinks) && navLinks.length > 0 ? navLinks : ["Services", "About", "Contact"];
 
   return (
     <Section tag="header" className="site-header" sectionField={sectionField} style={css}>
-      <div style={{ padding: "20px 40px", borderBottom: "1px solid rgba(0,0,0,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <img src={displayLogo} alt="Logo" style={{ height: "40px", width: "40px", borderRadius: "50%", objectFit: "cover" }} />
-        <strong style={{ fontSize: "18px" }}>{tenant.profile.displayName}</strong>
-      </div>
-      <nav style={{ display: "flex", gap: "24px" }}>
-        {links.map((link, i) => {
-          const { label, href } = resolveNavLink(link);
-          return (
-            <a key={i} href={href} style={{ fontSize: "14px", fontWeight: 600, color: "var(--site-text)", opacity: 0.8, textDecoration: "none" }}>
-              {label}
-            </a>
-          );
-        })}
-      </nav>
+      <div className="header-inner">
+        <div className="header-brand">
+          <img src={displayLogo} alt="Logo" style={{ height: "40px", width: "40px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+          <strong style={{ fontSize: "18px" }}>{tenant.profile.displayName}</strong>
+        </div>
+        <button
+          className="hamburger-btn"
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+        >
+          {menuOpen ? "✕" : "☰"}
+        </button>
+        <nav className={`header-nav${menuOpen ? " open" : ""}`}>
+          {links.map((link, i) => {
+            const { label, href } = resolveNavLink(link);
+            return (
+              <a
+                key={i}
+                href={href}
+                onClick={() => setMenuOpen(false)}
+                style={{ fontSize: "14px", fontWeight: 600, color: "var(--site-text)", opacity: 0.8, textDecoration: "none" }}
+              >
+                {label}
+              </a>
+            );
+          })}
+        </nav>
       </div>
     </Section>
   );
@@ -501,7 +515,7 @@ function Hero({
         />
       </div>
       <div className="hero-image-wrapper">
-        <ImagePrimitive src={tenant.profile.photo} alt={tenant.profile.displayName} className="hero-photo" />
+        <ImagePrimitive src={block?.photo || tenant.profile.photo} alt={tenant.profile.displayName} className="hero-photo" />
       </div>
     </Section>
   );
