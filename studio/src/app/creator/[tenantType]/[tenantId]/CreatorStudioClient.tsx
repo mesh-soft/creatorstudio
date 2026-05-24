@@ -127,7 +127,6 @@ function tinaHashToCleanPath(hash: string, tenantId: string, collection: string)
 }
 
 export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: CreatorStudioClientProps) {
-  console.log('[Studio] MOUNT/RENDER props:', { tenantType, tenantId, pageSlug });
   const leftRef = useRef<HTMLIFrameElement>(null);
   const rightRef = useRef<HTMLIFrameElement>(null);
   const refreshTimer = useRef<number | null>(null);
@@ -137,12 +136,12 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
   const [uiEditingEnabled, setUiEditingEnabled] = useState(false);
   const [activeTenantId, setActiveTenantId] = useState(tenantId);
   const [selectedPageSlug, setSelectedPageSlug] = useState(pageSlug);
-  console.log('[Studio] state:', { activeTenantId, selectedPageSlug });
   const activeTenantIdRef = useRef(activeTenantId);
   const selectedPageSlugRef = useRef(selectedPageSlug);
   useEffect(() => { activeTenantIdRef.current = activeTenantId; }, [activeTenantId]);
   useEffect(() => { selectedPageSlugRef.current = selectedPageSlug; }, [selectedPageSlug]);
   const [showPreview, setShowPreview] = useState(true);
+  const [previewViewport, setPreviewViewport] = useState<"mobile" | "tablet" | "desktop">("desktop");
   const overlayRef = useRef<Record<string, string>>({});
   const fieldIndexRef = useRef<Map<string, HTMLInputElement | HTMLTextAreaElement>>(new Map());
   const indexTimerRef = useRef<number | null>(null);
@@ -158,7 +157,6 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
   const adminEditUrl = useRef(
     `/admin/index.html#/collections/edit/${pageCollection}/${tenantId}/pages/${pageSlug}`
   ).current;
-  console.log('[Studio] adminEditUrl (frozen at mount):', adminEditUrl);
 
   const previewUrl = useMemo(
     () => `/site/${activeTenantId}/${selectedPageSlug}/preview?studio=1&ui=${uiEditingEnabled ? "1" : "0"}`,
@@ -166,7 +164,6 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
   );
 
   useEffect(() => {
-    console.log('[Studio] main useEffect running, props:', { tenantType, tenantId, pageSlug });
     const leftFrame = leftRef.current;
     const rightFrame = rightRef.current;
     if (!leftFrame || !rightFrame) return;
@@ -209,7 +206,6 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
     };
 
     const wireRightPreview = () => {
-      console.log("wireRightPreview");
       const rightDoc = rightFrame.contentDocument;
       const leftDoc = leftFrame.contentDocument;
       if (!rightDoc || !leftDoc) return;
@@ -274,9 +270,7 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
           lf?.contentWindow?.postMessage(e.data, '*');
         }
       }
-      // Relay pure state-driven draft updates from Tina editor -> preview
       if (e.data?.type === 'studio:draft-update' && e.source === lf?.contentWindow) {
-        console.log('[Studio Relay] draft-update from editor -> preview:', JSON.stringify(e.data.payload).slice(0, 200));
         rf?.contentWindow?.postMessage(e.data, '*');
       }
     };
@@ -339,14 +333,12 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
       const extractedId = extractTenantIdFromHash(hash);
       let currentTenantId = extractedId ?? currentActive;
       if (extractedId && extractedId !== currentActive) {
-        console.log('[Studio] poll: tenant changed', currentActive, '->', extractedId);
         setActiveTenantId(extractedId);
         activeTenantIdRef.current = extractedId;
       }
 
       const cleanPath = tinaHashToCleanPath(hash, currentTenantId, collection);
       const showPrev = shouldShowPreview(hash, currentTenantId);
-      console.log('[Studio] poll tick | hash:', hash, '| currentTenantId:', currentTenantId, '| showPrev:', showPrev, '| cleanPath:', cleanPath);
 
       if (showPrev && cleanPath !== lastPushedPathRef.current) {
         window.history.pushState(null, "", cleanPath);
@@ -471,13 +463,41 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
               ))}
             </select>
           </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "4px", background: "#1e293b", borderRadius: "8px", padding: "3px" }}>
+            {(["mobile", "tablet", "desktop"] as const).map((vp) => {
+              const icons: Record<string, string> = { mobile: "📱", tablet: "⬜", desktop: "🖥️" };
+              const labels: Record<string, string> = { mobile: "375", tablet: "768", desktop: "Full" };
+              return (
+                <button
+                  key={vp}
+                  onClick={() => setPreviewViewport(vp)}
+                  title={`${vp[0].toUpperCase()}${vp.slice(1)} preview`}
+                  style={{
+                    padding: "4px 8px",
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    color: previewViewport === vp ? "#0f172a" : "#94a3b8",
+                    background: previewViewport === vp ? "#e2e8f0" : "transparent",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  {icons[vp]} {labels[vp]}
+                </button>
+              );
+            })}
+          </div>
           <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#e2e8f0" }}>
             <input
               type="checkbox"
               checked={uiEditingEnabled}
               onChange={(e) => setUiEditingEnabled(e.target.checked)}
             />
-            Enable UI editing (experimental)
+            UI edit
           </label>
           <div style={{ fontSize: "12px", color: "#94a3b8" }}>
             Type/reorder on left {"->"} right hot updates. Click Save {"->"} snapshot old JSON + write new JSON.
@@ -500,13 +520,37 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
           style={frameStyle}
         />
         {showPreview && (
-          <iframe
-            key={previewUrl}
-            ref={rightRef}
-            title="Live Preview"
-            src={previewUrl}
-            style={frameStyle}
-          />
+          <div
+            style={{
+              background: "#1e293b",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "flex-start",
+              overflow: "auto",
+              height: "100%",
+              padding: 0,
+              boxSizing: "border-box",
+            }}
+          >
+            <iframe
+              key={previewUrl}
+              ref={rightRef}
+              title="Live Preview"
+              src={previewUrl}
+              style={{
+                ...frameStyle,
+                width:
+                  previewViewport === "mobile"
+                    ? "375px"
+                    : previewViewport === "tablet"
+                    ? "768px"
+                    : "100%",
+                flexShrink: 0,
+                borderRadius: previewViewport !== "desktop" ? "12px" : "0",
+                boxShadow: previewViewport !== "desktop" ? "0 0 0 1px #334155, 0 8px 32px rgba(0,0,0,0.4)" : "none",
+              }}
+            />
+          </div>
         )}
       </section>
       {suggestionPopup && (
@@ -593,7 +637,6 @@ function collectDraftFromEditor(
   const fields = leftDoc.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
     "input[name], textarea[name], select[name]"
   );
-  console.log("collectDraftFromEditor found fields:", fields.length);
 
   fields.forEach((field) => {
     if (field.disabled) return;
