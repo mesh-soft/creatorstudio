@@ -39,6 +39,25 @@ const defaultStyle = {
   },
 };
 
+const SYSTEM_FONTS = new Set([
+  "inter", "system-ui", "sans-serif", "serif", "monospace",
+  "-apple-system", "blinkmacsystemfont", "segoe ui", "helvetica neue",
+  "arial", "verdana", "georgia",
+]);
+
+function buildGoogleFontsUrl(heading: string, body: string): string | null {
+  const families = [...new Set([heading, body])]
+    .flatMap(f => f.split(","))
+    .map(f => f.trim().replace(/["']/g, ""))
+    .filter(f => f && !SYSTEM_FONTS.has(f.toLowerCase()));
+
+  if (families.length === 0) return null;
+  const params = families
+    .map(f => `family=${encodeURIComponent(f)}:ital,wght@0,400;0,600;0,700;1,400`)
+    .join("&");
+  return `https://fonts.googleapis.com/css2?${params}&display=swap`;
+}
+
 export function SiteRenderer({ tenant, pageSlug = "home", previewLinks = false, tinaDocument, studioMode = false }: SiteRendererProps) {
   const preset = getPreset(tenant);
   const styleId = tenant.presentation?.styleId;
@@ -73,8 +92,17 @@ export function SiteRenderer({ tenant, pageSlug = "home", previewLinks = false, 
   const hasPageFooter = pageBlocks.some(b => b._template === "footer" && b.enabled !== false);
   const showGlobalFooter = !hasPageFooter && tenant.footer != null && (tenant.footer?.show ?? true);
 
+  const googleFontsUrl = buildGoogleFontsUrl(typography.heading, typography.body);
+
   return (
     <main className={`site-shell ${tenant.tenantType}`} style={cssVars}>
+      {googleFontsUrl && (
+        <>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          <link rel="stylesheet" href={googleFontsUrl} />
+        </>
+      )}
       {previewLinks ? <PreviewHeader tenant={tenant} /> : null}
       <article className="tenant-site">
         <SubscriptionBar tenant={tenant} />
