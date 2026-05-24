@@ -7,7 +7,9 @@ export const SITE_SETTING_KEYS = [
   "business",
   "presentation",
   "header",
+  "footer",
   "seo",
+  "analytics",
 ] as const;
 
 export type SiteSettingKey = (typeof SITE_SETTING_KEYS)[number];

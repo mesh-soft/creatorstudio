@@ -160,6 +160,11 @@ export type TenantSite = {
     };
   };
   seo: SEO;
+  analytics?: {
+    gaMeasurementId?: string;
+    gtmContainerId?: string;
+    metaPixelId?: string;
+  };
   header?: {
     show?: boolean;
     logo?: string;

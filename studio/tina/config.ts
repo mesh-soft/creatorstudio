@@ -168,8 +168,8 @@ const siteFields: TinaField[] = [
     list: true,
     ui: {
       disableDrag: true,
-      min: 8,
-      max: 8,
+      min: 9,
+      max: 9,
       itemProps: (item) => {
         const t = item?._template as string | undefined;
         const labels: Record<string, string> = {
@@ -181,6 +181,7 @@ const siteFields: TinaField[] = [
           header: "Global Header",
           footer: "Global Footer",
           seo: "SEO",
+          analytics: "Analytics",
         };
         return { label: t && labels[t] ? labels[t] : t ?? "Site setting" };
       },
@@ -193,6 +194,7 @@ const siteFields: TinaField[] = [
         { _template: "header" },
         { _template: "footer" },
         { _template: "seo" },
+        { _template: "analytics" },
       ],
     },
     templates: [
@@ -355,6 +357,15 @@ const siteFields: TinaField[] = [
           { type: "string", name: "description", label: "Description", ui: { component: "textarea" } },
           { type: "string", name: "keywords", label: "Keywords", list: true },
           tenantImageField("ogImage", "Open Graph Image") as TinaField,
+        ],
+      },
+      {
+        name: "analytics",
+        label: "Analytics",
+        fields: [
+          { type: "string", name: "gaMeasurementId", label: "Google Analytics Measurement ID", description: "e.g. G-XXXXXXXXXX" },
+          { type: "string", name: "gtmContainerId", label: "Google Tag Manager Container ID", description: "e.g. GTM-XXXXXXX" },
+          { type: "string", name: "metaPixelId", label: "Meta Pixel ID", description: "Facebook/Instagram ad tracking pixel" },
         ],
       },
     ],
