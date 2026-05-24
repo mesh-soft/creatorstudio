@@ -431,10 +431,8 @@ const pageFields: TinaField[] = [
             },
             fields: buttonFields 
           },
-          { type: "string", name: "buttonLabel", label: "Legacy Button Label (Fallback)", ui: { component: "hidden" } },
-          { type: "string", name: "buttonUrl", label: "Legacy Button URL (Fallback)", ui: { component: "hidden" } },
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } }
-        ] 
+        ]
       },
       { 
         name: "profile", 
@@ -581,9 +579,6 @@ const pageFields: TinaField[] = [
             },
             fields: buttonFields 
           },
-          { type: "string", name: "buttonLabel", label: "Legacy Button Label (Fallback)", ui: { component: "hidden" } },
-          { type: "string", name: "buttonUrl", label: "Legacy Button URL (Fallback)", ui: { component: "hidden" } },
-          { type: "string", name: "buttonIcon", label: "Legacy Button Icon (Fallback)", options: iconOptions, ui: { component: "hidden" } },
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } }
         ],
       },
