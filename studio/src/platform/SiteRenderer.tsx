@@ -225,6 +225,7 @@ function renderBlocks(
             sectionField={sectionField}
             studioMode={studioMode}
             css={activeBlock?.css}
+            backgroundImage={activeBlock?.backgroundImage}
           />
         ));
       case "footer":
@@ -236,6 +237,7 @@ function renderBlocks(
             sectionField={sectionField}
             studioMode={studioMode}
             css={activeBlock?.css}
+            backgroundImage={activeBlock?.backgroundImage}
           />
         ));
       case "awards":
@@ -244,6 +246,7 @@ function renderBlocks(
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
+            variant={activeBlock?.variant || ""}
             sectionField={sectionField}
             studioMode={studioMode}
           />
@@ -330,6 +333,7 @@ function renderBlocks(
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
+            variant={activeBlock?.variant || ""}
             sectionField={sectionField}
             studioMode={studioMode}
           />
@@ -340,13 +344,14 @@ function renderBlocks(
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
+            variant={activeBlock?.variant || ""}
             sectionField={sectionField}
             studioMode={studioMode}
           />
         ));
       case "text":
         return withScrollAnchor(key, "text", (
-          <TextBlock block={activeBlock} blockIndex={index} sectionField={sectionField} studioMode={studioMode} />
+          <TextBlock block={activeBlock} blockIndex={index} variant={activeBlock?.variant || ""} sectionField={sectionField} studioMode={studioMode} />
         ));
       case "whatsapp":
         return (
@@ -382,6 +387,7 @@ function Header({
   sectionField,
   studioMode,
   css,
+  backgroundImage,
 }: {
   tenant: Tenant;
   logo?: string;
@@ -389,13 +395,14 @@ function Header({
   sectionField?: string;
   studioMode?: boolean;
   css?: any;
+  backgroundImage?: string;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const displayLogo = logo || tenant.profile.photo;
   const links = Array.isArray(navLinks) && navLinks.length > 0 ? navLinks : ["Services", "About", "Contact"];
 
   return (
-    <Section tag="header" className="site-header" sectionField={sectionField} style={css}>
+    <Section tag="header" className="site-header" sectionField={sectionField} style={css} backgroundImage={backgroundImage}>
       <div className="header-inner">
         <div className="header-brand">
           <img src={displayLogo} alt="Logo" style={{ height: "40px", width: "40px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
@@ -435,6 +442,7 @@ function Footer({
   sectionField,
   studioMode,
   css,
+  backgroundImage,
 }: {
   tenant: Tenant;
   copyright?: string;
@@ -442,12 +450,13 @@ function Footer({
   sectionField?: string;
   studioMode?: boolean;
   css?: any;
+  backgroundImage?: string;
 }) {
   const displayCopyright = copyright || `© ${new Date().getFullYear()} ${tenant.profile.displayName}. All rights reserved.`;
   const links = Array.isArray(socialLinks) && socialLinks.length > 0 ? socialLinks : ["Facebook|#", "Twitter|#", "Instagram|#"];
 
   return (
-    <Section tag="footer" className="site-footer" sectionField={sectionField} style={css}>
+    <Section tag="footer" className="site-footer" sectionField={sectionField} style={css} backgroundImage={backgroundImage}>
       <div style={{ padding: "40px", borderTop: "1px solid rgba(0,0,0,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
       <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: "40px" }}>
         <div style={{ maxWidth: "300px" }}>
@@ -484,12 +493,14 @@ function Awards({
   tenant,
   block,
   blockIndex,
+  variant,
   sectionField,
   studioMode,
 }: {
   tenant: Tenant;
   block: any;
   blockIndex: number;
+  variant?: string;
   sectionField?: string;
   studioMode?: boolean;
 }) {
@@ -499,7 +510,7 @@ function Awards({
   ];
 
   return (
-    <Section className="block awards-section" sectionField={sectionField} style={block?.css}>
+    <Section className={`block awards-section${variant ? ` awards-${variant}` : ""}`} sectionField={sectionField} style={block?.css} backgroundImage={block?.backgroundImage}>
       <BlockTitle kicker={block?.kicker ?? "Recognition"} title={block?.title ?? "Awards & Achievements"} />
       <div className="awards-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px" }}>
         {awards.map((award: any, i: number) => (
@@ -558,7 +569,7 @@ function Hero({
   studioMode?: boolean;
 }) {
   return (
-    <Section className={`hero hero-${variant}`} sectionField={sectionField} style={block?.css}>
+    <Section className={`hero hero-${variant}`} sectionField={sectionField} style={block?.css} backgroundImage={block?.backgroundImage}>
       <div className="hero-content">
         <Eyebrow
           field={tinaDocument ? siteAwareTinaField(tinaDocument, "profile.specialty") : undefined}
@@ -608,7 +619,7 @@ function Profile({
   studioMode?: boolean;
 }) {
   return (
-    <Section className={`block profile profile-${variant}`} sectionField={sectionField} style={block?.css}>
+    <Section className={`block profile profile-${variant}`} sectionField={sectionField} style={block?.css} backgroundImage={block?.backgroundImage}>
       <div className="profile-info">
         <Eyebrow editPath={studioMode ? `blocks.${blockIndex}.kicker` : undefined}>
           {block?.kicker || (tenant.tenantType === "doctor" ? "Expertise" : "About Us")}
@@ -671,7 +682,7 @@ function Services({
   studioMode?: boolean;
 }) {
   return (
-    <Section className="block" sectionField={sectionField} style={block?.css}>
+    <Section className="block" sectionField={sectionField} style={block?.css} backgroundImage={block?.backgroundImage}>
       <BlockTitle kicker={block?.kicker ?? "Services"} title={block?.title ?? "What We Offer"} />
       <div className={`services services-${variant}`}>
         {safeArray(block?.items).map((service: any, index: number) => (
@@ -704,7 +715,7 @@ function Timings({
   studioMode?: boolean;
 }) {
   return (
-    <Section className="block" sectionField={sectionField} style={block?.css}>
+    <Section className="block" sectionField={sectionField} style={block?.css} backgroundImage={block?.backgroundImage}>
       <BlockTitle kicker={block?.kicker ?? "Schedule"} title={block?.title ?? "Visiting Hours"} />
       <div className={`timings timings-${variant}`}>
         {safeArray(block?.items).map((timing: any, index: number) => (
@@ -740,7 +751,7 @@ function Gallery({
   studioMode?: boolean;
 }) {
   return (
-    <Section className="block" sectionField={sectionField} style={block?.css}>
+    <Section className="block" sectionField={sectionField} style={block?.css} backgroundImage={block?.backgroundImage}>
       <BlockTitle kicker={block?.kicker ?? "Gallery"} title={block?.title ?? "Clinic Photos"} />
       <div className={`gallery gallery-${variant}`}>
         {safeArray(block?.items).map((image: any, index: number) => (
@@ -771,7 +782,7 @@ function FAQ({
   studioMode?: boolean;
 }) {
   return (
-    <Section className="block" sectionField={sectionField} style={block?.css}>
+    <Section className="block" sectionField={sectionField} style={block?.css} backgroundImage={block?.backgroundImage}>
       <BlockTitle kicker={block?.kicker ?? "FAQ"} title={block?.title ?? "Frequently Asked Questions"} />
       <div className={`faq faq-${variant}`}>
         {safeArray(block?.items).map((faq: any, index: number) => (
@@ -803,7 +814,7 @@ function CTA({
   studioMode?: boolean;
 }) {
   return (
-    <Section className={`cta cta-${variant}`} sectionField={sectionField} style={block?.css}>
+    <Section className={`cta cta-${variant}`} sectionField={sectionField} style={block?.css} backgroundImage={block?.backgroundImage}>
       <div className="cta-content">
         <Heading level={2} editPath={studioMode ? `blocks.${blockIndex}.title` : undefined}>
           {block?.title || "Ready to book?"}
@@ -819,11 +830,11 @@ function CTA({
   );
 }
 
-function TextBlock({ block, blockIndex, sectionField, studioMode }: { block: any; blockIndex: number; sectionField?: string; studioMode?: boolean }) {
+function TextBlock({ block, blockIndex, variant, sectionField, studioMode }: { block: any; blockIndex: number; variant?: string; sectionField?: string; studioMode?: boolean }) {
   if (!block?.heading && !block?.body) return null;
 
   return (
-    <Section className="block text-block" sectionField={sectionField} style={block?.css}>
+    <Section className={`block text-block${variant ? ` text-${variant}` : ""}`} sectionField={sectionField} style={block?.css} backgroundImage={block?.backgroundImage}>
       {block?.heading ? <Heading level={2} editPath={studioMode ? `blocks.${blockIndex}.heading` : undefined}>{block?.heading}</Heading> : null}
       {block?.body ? <MarkdownText editPath={studioMode ? `blocks.${blockIndex}.body` : undefined}>{block?.body}</MarkdownText> : null}
     </Section>
@@ -845,15 +856,17 @@ function Section({
   children,
   sectionField,
   style,
+  backgroundImage,
 }: {
   tag?: any;
   className?: string;
   children: ReactNode;
   sectionField?: string;
   style?: any;
+  backgroundImage?: string;
 }) {
-  const reactId = typeof React !== "undefined" && (React as any).useId 
-    ? (React as any).useId() 
+  const reactId = typeof React !== "undefined" && (React as any).useId
+    ? (React as any).useId()
     : useMemo(() => `s-${Math.random().toString(36).substring(2, 6)}`, []);
 
   const sectionId = useMemo(() => {
@@ -861,7 +874,7 @@ function Section({
     return `tina-${sectionField.replace(/\./g, "-")}`;
   }, [sectionField, reactId]);
 
-  const { baseStyle, cssBlock } = useMemo(() => {
+  const { finalStyle, cssBlock } = useMemo(() => {
     let raw: Record<string, any> = {};
     if (typeof style === "string") {
       try { raw = JSON.parse(style); } catch { raw = {}; }
@@ -890,11 +903,15 @@ function Section({
     if (mobileDecls) parts.push(`@media (max-width: 767px) { #${sectionId} { ${mobileDecls} } }`);
     if (tabletDecls) parts.push(`@media (min-width: 768px) and (max-width: 1023px) { #${sectionId} { ${tabletDecls} } }`);
 
-    return { baseStyle: base, cssBlock: parts.length > 0 ? parts.join("\n") : null };
-  }, [style, sectionId]);
+    const resolvedStyle = backgroundImage
+      ? { ...base, backgroundImage: `url("${backgroundImage}")`, backgroundSize: "cover", backgroundPosition: "center" }
+      : base;
+
+    return { finalStyle: resolvedStyle, cssBlock: parts.length > 0 ? parts.join("\n") : null };
+  }, [style, sectionId, backgroundImage]);
 
   return (
-    <Tag id={sectionId} className={className} data-tina-field={sectionField} style={baseStyle}>
+    <Tag id={sectionId} className={className} data-tina-field={sectionField} style={finalStyle}>
       {cssBlock && (
         <style dangerouslySetInnerHTML={{ __html: cssBlock }} />
       )}
@@ -1128,12 +1145,14 @@ function Testimonials({
   tenant,
   block,
   blockIndex,
+  variant,
   sectionField,
   studioMode,
 }: {
   tenant: Tenant;
   block: any;
   blockIndex: number;
+  variant?: string;
   sectionField?: string;
   studioMode?: boolean;
 }) {
@@ -1141,7 +1160,7 @@ function Testimonials({
   if (testimonials.length === 0) return null;
 
   return (
-    <Section className="block testimonials-section" sectionField={sectionField} style={block?.css}>
+    <Section className={`block testimonials-section${variant ? ` testimonials-${variant}` : ""}`} sectionField={sectionField} style={block?.css} backgroundImage={block?.backgroundImage}>
       <BlockTitle kicker={block?.kicker ?? "Testimonials"} title={block?.title ?? "What our patients say"} />
       <div className="testimonials-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
         {testimonials.map((t: any, i: number) => (
@@ -1161,12 +1180,14 @@ function Stats({
   tenant,
   block,
   blockIndex,
+  variant,
   sectionField,
   studioMode,
 }: {
   tenant: Tenant;
   block: any;
   blockIndex: number;
+  variant?: string;
   sectionField?: string;
   studioMode?: boolean;
 }) {
@@ -1174,15 +1195,11 @@ function Stats({
   if (stats.length === 0) return null;
 
   return (
-    <Section 
-      className="block stats-section" 
-      sectionField={sectionField} 
-      style={{ 
-        background: "var(--primary)", 
-        color: "white", 
-        borderRadius: "var(--radius)",
-        ...block?.css // Merge with overrides
-      }}
+    <Section
+      className={`block stats-section${variant ? ` stats-${variant}` : ""}`}
+      sectionField={sectionField}
+      style={block?.css}
+      backgroundImage={block?.backgroundImage}
     >
       <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-around", gap: "24px", textAlign: "center" }}>
         {stats.map((s: any, i: number) => (

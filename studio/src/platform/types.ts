@@ -6,13 +6,26 @@ export type TenantBlock =
       enabled?: boolean;
       logo?: string;
       navLinks?: string[];
+      backgroundImage?: string;
+      css?: string;
+    }
+  | {
+      _template: "footer";
+      enabled?: boolean;
+      copyright?: string;
+      socialLinks?: string[];
+      backgroundImage?: string;
+      css?: string;
     }
   | {
       _template: "awards";
       enabled?: boolean;
       kicker?: string;
       title?: string;
-      items?: Array<{ title: string; year: string; organization: string }>;
+      items?: Array<{ title: string; year: string; organization: string; icon?: string }>;
+      variant?: string;
+      backgroundImage?: string;
+      css?: string;
     }
   | {
       _template: "hero";
@@ -22,11 +35,22 @@ export type TenantBlock =
       photo?: string;
       buttons?: Array<{ label: string; url: string; icon?: string; variant?: "primary" | "secondary" }>;
       variant?: string;
+      backgroundImage?: string;
+      css?: string;
     }
   | {
       _template: "profile";
       enabled?: boolean;
+      kicker?: string;
+      title?: string;
+      body?: string;
+      experienceYears?: number;
+      experienceLabel?: string;
+      registrationNumber?: string;
+      registrationLabel?: string;
       variant?: string;
+      backgroundImage?: string;
+      css?: string;
     }
   | {
       _template: "services";
@@ -35,6 +59,8 @@ export type TenantBlock =
       title?: string;
       items?: Array<{ title: string; description: string; icon?: string }>;
       variant?: string;
+      backgroundImage?: string;
+      css?: string;
     }
   | {
       _template: "timings";
@@ -43,6 +69,8 @@ export type TenantBlock =
       title?: string;
       items?: Array<{ day: string; primary: string; secondary: string }>;
       variant?: string;
+      backgroundImage?: string;
+      css?: string;
     }
   | {
       _template: "gallery";
@@ -51,6 +79,8 @@ export type TenantBlock =
       title?: string;
       items?: Array<{ src: string; alt: string }>;
       variant?: string;
+      backgroundImage?: string;
+      css?: string;
     }
   | {
       _template: "faq";
@@ -59,6 +89,8 @@ export type TenantBlock =
       title?: string;
       items?: Array<{ question: string; answer: string }>;
       variant?: string;
+      backgroundImage?: string;
+      css?: string;
     }
   | {
       _template: "testimonials";
@@ -66,24 +98,36 @@ export type TenantBlock =
       kicker?: string;
       title?: string;
       items?: Array<{ quote: string; author: string }>;
+      variant?: string;
+      backgroundImage?: string;
+      css?: string;
     }
   | {
       _template: "stats";
       enabled?: boolean;
       items?: Array<{ value: string; label: string }>;
+      variant?: string;
+      backgroundImage?: string;
+      css?: string;
     }
   | {
       _template: "cta";
       enabled?: boolean;
       title?: string;
       body?: string;
+      buttons?: Array<{ label: string; url: string; icon?: string; variant?: "primary" | "secondary" }>;
       variant?: string;
+      backgroundImage?: string;
+      css?: string;
     }
   | {
       _template: "text";
       enabled?: boolean;
       heading?: string;
       body?: string;
+      variant?: string;
+      backgroundImage?: string;
+      css?: string;
     }
   | {
       _template: "whatsapp";

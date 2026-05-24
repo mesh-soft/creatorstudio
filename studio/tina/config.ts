@@ -438,6 +438,34 @@ const variantOptions: Record<string, { label: string; value: string }[]> = {
     { label: "Booking panel", value: "booking-panel" },
     { label: "Emergency", value: "emergency" },
   ],
+  awards: [
+    { label: "Site default", value: "" },
+    { label: "Grid cards", value: "grid" },
+    { label: "Timeline", value: "timeline" },
+    { label: "Showcase list", value: "list" },
+    { label: "Minimal", value: "minimal" },
+  ],
+  testimonials: [
+    { label: "Site default", value: "" },
+    { label: "Cards grid", value: "grid" },
+    { label: "Carousel", value: "carousel" },
+    { label: "Quotes list", value: "list" },
+    { label: "Masonry", value: "masonry" },
+  ],
+  stats: [
+    { label: "Site default", value: "" },
+    { label: "Horizontal band", value: "band" },
+    { label: "Cards grid", value: "grid" },
+    { label: "Large numbers", value: "large" },
+    { label: "Compact row", value: "compact" },
+  ],
+  text: [
+    { label: "Site default", value: "" },
+    { label: "Centered", value: "centered" },
+    { label: "Two column", value: "two-column" },
+    { label: "Wide", value: "wide" },
+    { label: "Boxed", value: "boxed" },
+  ],
 };
 
 function variantField(blockType: keyof typeof variantOptions): TinaField {
@@ -471,6 +499,7 @@ const pageFields: TinaField[] = [
         fields: [{ type: "boolean", name: "enabled", label: "Enabled" },
           tenantImageField("logo", "Logo Override") as TinaField,
           navLinksObjectField("navLinks", "Custom Navigation Links") as TinaField,
+          tenantImageField("backgroundImage", "Background Image", "Optional background image for this section") as TinaField,
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
@@ -480,6 +509,7 @@ const pageFields: TinaField[] = [
         fields: [{ type: "boolean", name: "enabled", label: "Enabled" },
           { type: "string", name: "copyright", label: "Copyright Override" },
           navLinksObjectField("socialLinks", "Custom Social / Footer Links") as TinaField,
+          tenantImageField("backgroundImage", "Background Image", "Optional background image for this section") as TinaField,
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
@@ -501,6 +531,8 @@ const pageFields: TinaField[] = [
               { type: "string", name: "icon", label: "Icon", options: iconOptions },
             ],
           },
+          variantField("awards"),
+          tenantImageField("backgroundImage", "Background Image", "Optional background image for this section") as TinaField,
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
@@ -522,10 +554,11 @@ const pageFields: TinaField[] = [
             fields: buttonFields
           },
           variantField("hero"),
+          tenantImageField("backgroundImage", "Background Image", "Optional background image for this section") as TinaField,
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } }
         ]
       },
-      { 
+      {
         name: "profile", 
         label: "Profile", 
         fields: [
@@ -538,6 +571,7 @@ const pageFields: TinaField[] = [
           { type: "string", name: "registrationNumber", label: "Registration Number Override" },
           { type: "string", name: "registrationLabel", label: "Registration Label Override" },
           variantField("profile"),
+          tenantImageField("backgroundImage", "Background Image", "Optional background image for this section") as TinaField,
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } }
         ]
       },
@@ -559,6 +593,7 @@ const pageFields: TinaField[] = [
             ],
           },
           variantField("services"),
+          tenantImageField("backgroundImage", "Background Image", "Optional background image for this section") as TinaField,
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
@@ -580,6 +615,7 @@ const pageFields: TinaField[] = [
             ],
           },
           variantField("timings"),
+          tenantImageField("backgroundImage", "Background Image", "Optional background image for this section") as TinaField,
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
@@ -600,6 +636,7 @@ const pageFields: TinaField[] = [
             ],
           },
           variantField("gallery"),
+          tenantImageField("backgroundImage", "Background Image", "Optional background image for this section") as TinaField,
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
@@ -620,6 +657,7 @@ const pageFields: TinaField[] = [
             ],
           },
           variantField("faq"),
+          tenantImageField("backgroundImage", "Background Image", "Optional background image for this section") as TinaField,
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
@@ -639,6 +677,8 @@ const pageFields: TinaField[] = [
               { type: "string", name: "author", label: "Author" },
             ],
           },
+          variantField("testimonials"),
+          tenantImageField("backgroundImage", "Background Image", "Optional background image for this section") as TinaField,
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
@@ -656,6 +696,8 @@ const pageFields: TinaField[] = [
               { type: "string", name: "label", label: "Label" },
             ],
           },
+          variantField("stats"),
+          tenantImageField("backgroundImage", "Background Image", "Optional background image for this section") as TinaField,
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
@@ -676,6 +718,7 @@ const pageFields: TinaField[] = [
             fields: buttonFields
           },
           variantField("cta"),
+          tenantImageField("backgroundImage", "Background Image", "Optional background image for this section") as TinaField,
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } }
         ],
       },
@@ -685,6 +728,8 @@ const pageFields: TinaField[] = [
         fields: [{ type: "boolean", name: "enabled", label: "Enabled" },
           { type: "string", name: "heading", label: "Heading" },
           { type: "string", name: "body", label: "Body", ui: { component: "textarea" } },
+          variantField("text"),
+          tenantImageField("backgroundImage", "Background Image", "Optional background image for this section") as TinaField,
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
