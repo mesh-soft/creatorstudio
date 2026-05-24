@@ -250,7 +250,7 @@ function renderBlocks(
         ));
       case "hero":
         return withScrollAnchor(key, "hero", (
-          <Hero tenant={tenant} block={activeBlock} blockIndex={index} variant={preset.hero} sectionField={sectionField} tinaDocument={tinaDocument} studioMode={studioMode} />
+          <Hero tenant={tenant} block={activeBlock} blockIndex={index} variant={activeBlock?.variant || preset.hero} sectionField={sectionField} tinaDocument={tinaDocument} studioMode={studioMode} />
         ));
       case "profile":
         return withScrollAnchor(key, "profile", (
@@ -258,7 +258,7 @@ function renderBlocks(
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
-            variant={preset.profile}
+            variant={activeBlock?.variant || preset.profile}
             sectionField={sectionField}
             tinaDocument={tinaDocument}
             studioMode={studioMode}
@@ -270,7 +270,7 @@ function renderBlocks(
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
-            variant={preset.services}
+            variant={activeBlock?.variant || preset.services}
             sectionField={sectionField}
             tinaDocument={tinaDocument}
             studioMode={studioMode}
@@ -282,7 +282,7 @@ function renderBlocks(
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
-            variant={preset.timings}
+            variant={activeBlock?.variant || preset.timings}
             sectionField={sectionField}
             tinaDocument={tinaDocument}
             studioMode={studioMode}
@@ -294,7 +294,7 @@ function renderBlocks(
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
-            variant={preset.gallery}
+            variant={activeBlock?.variant || preset.gallery}
             sectionField={sectionField}
             tinaDocument={tinaDocument}
             studioMode={studioMode}
@@ -306,7 +306,7 @@ function renderBlocks(
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
-            variant={preset.faq}
+            variant={activeBlock?.variant || preset.faq}
             sectionField={sectionField}
             tinaDocument={tinaDocument}
             studioMode={studioMode}
@@ -318,7 +318,7 @@ function renderBlocks(
             tenant={tenant}
             block={activeBlock}
             blockIndex={index}
-            variant={preset.cta}
+            variant={activeBlock?.variant || preset.cta}
             sectionField={sectionField}
             tinaDocument={tinaDocument}
             studioMode={studioMode}

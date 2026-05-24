@@ -372,6 +372,84 @@ const siteFields: TinaField[] = [
   },
 ];
 
+// Per-block variant options — collected from all variantPresets in catalog.ts.
+// Empty string = "use site preset" (the default).
+const variantOptions: Record<string, { label: string; value: string }[]> = {
+  hero: [
+    { label: "Site default", value: "" },
+    { label: "Split (image + text)", value: "split" },
+    { label: "Centered", value: "centered" },
+    { label: "Compact", value: "compact" },
+    { label: "Profile card", value: "profile-card" },
+    { label: "Credential", value: "credential" },
+    { label: "Hospital", value: "hospital" },
+    { label: "Emergency", value: "emergency" },
+    { label: "Specialty", value: "specialty" },
+    { label: "Community", value: "community" },
+    { label: "Network", value: "network" },
+  ],
+  profile: [
+    { label: "Site default", value: "" },
+    { label: "Credentials", value: "credentials" },
+    { label: "Editorial", value: "editorial" },
+    { label: "Timeline", value: "timeline" },
+    { label: "Overview", value: "overview" },
+    { label: "Leadership", value: "leadership" },
+  ],
+  services: [
+    { label: "Site default", value: "" },
+    { label: "Cards", value: "cards" },
+    { label: "List", value: "list" },
+    { label: "Compact", value: "compact" },
+    { label: "Featured", value: "featured" },
+    { label: "Treatment grid", value: "treatment-grid" },
+    { label: "Departments", value: "departments" },
+    { label: "Programs", value: "programs" },
+  ],
+  timings: [
+    { label: "Site default", value: "" },
+    { label: "Table", value: "table" },
+    { label: "List", value: "list" },
+    { label: "Chips", value: "chips" },
+    { label: "Cards", value: "cards" },
+    { label: "Emergency", value: "emergency" },
+  ],
+  gallery: [
+    { label: "Site default", value: "" },
+    { label: "Grid", value: "grid" },
+    { label: "Showcase", value: "showcase" },
+    { label: "Strip", value: "strip" },
+    { label: "Facility", value: "facility" },
+  ],
+  faq: [
+    { label: "Site default", value: "" },
+    { label: "Accordion", value: "accordion" },
+    { label: "List", value: "list" },
+    { label: "Two column", value: "two-column" },
+    { label: "Checklist", value: "checklist" },
+    { label: "Search", value: "search" },
+  ],
+  cta: [
+    { label: "Site default", value: "" },
+    { label: "Banner", value: "banner" },
+    { label: "Inline", value: "inline" },
+    { label: "Sticky", value: "sticky" },
+    { label: "Floating", value: "floating" },
+    { label: "Booking panel", value: "booking-panel" },
+    { label: "Emergency", value: "emergency" },
+  ],
+};
+
+function variantField(blockType: keyof typeof variantOptions): TinaField {
+  return {
+    type: "string",
+    name: "variant",
+    label: "Layout Variant",
+    description: "Overrides the site-level variant preset for this block only.",
+    options: variantOptions[blockType],
+  } as TinaField;
+}
+
 const pageFields: TinaField[] = [
   {
     type: "object",
@@ -443,6 +521,7 @@ const pageFields: TinaField[] = [
             },
             fields: buttonFields
           },
+          variantField("hero"),
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } }
         ]
       },
@@ -458,8 +537,9 @@ const pageFields: TinaField[] = [
           { type: "string", name: "experienceLabel", label: "Experience Label Override" },
           { type: "string", name: "registrationNumber", label: "Registration Number Override" },
           { type: "string", name: "registrationLabel", label: "Registration Label Override" },
+          variantField("profile"),
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } }
-        ] 
+        ]
       },
       {
         name: "services",
@@ -478,6 +558,7 @@ const pageFields: TinaField[] = [
               { type: "string", name: "icon", label: "Icon", options: iconOptions },
             ],
           },
+          variantField("services"),
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
@@ -498,6 +579,7 @@ const pageFields: TinaField[] = [
               { type: "string", name: "secondary", label: "Secondary Slot" },
             ],
           },
+          variantField("timings"),
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
@@ -517,6 +599,7 @@ const pageFields: TinaField[] = [
               { type: "string", name: "alt", label: "Alt Text" },
             ],
           },
+          variantField("gallery"),
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
@@ -536,6 +619,7 @@ const pageFields: TinaField[] = [
               { type: "string", name: "answer", label: "Answer", ui: { component: "textarea" } },
             ],
           },
+          variantField("faq"),
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
@@ -581,16 +665,17 @@ const pageFields: TinaField[] = [
         fields: [{ type: "boolean", name: "enabled", label: "Enabled" },
           { type: "string", name: "title", label: "Title Override" },
           { type: "string", name: "body", label: "Body Override", ui: { component: "textarea" } },
-          { 
-            type: "object", 
-            name: "buttons", 
-            label: "Buttons (Dynamic)", 
+          {
+            type: "object",
+            name: "buttons",
+            label: "Buttons",
             list: true,
             ui: {
               itemProps: (item) => ({ label: item?.label || "Button" })
             },
-            fields: buttonFields 
+            fields: buttonFields
           },
+          variantField("cta"),
           { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } }
         ],
       },

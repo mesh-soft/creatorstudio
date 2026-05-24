@@ -21,10 +21,12 @@ export type TenantBlock =
       subheadline?: string;
       photo?: string;
       buttons?: Array<{ label: string; url: string; icon?: string; variant?: "primary" | "secondary" }>;
+      variant?: string;
     }
   | {
       _template: "profile";
       enabled?: boolean;
+      variant?: string;
     }
   | {
       _template: "services";
@@ -32,6 +34,7 @@ export type TenantBlock =
       kicker?: string;
       title?: string;
       items?: Array<{ title: string; description: string; icon?: string }>;
+      variant?: string;
     }
   | {
       _template: "timings";
@@ -39,6 +42,7 @@ export type TenantBlock =
       kicker?: string;
       title?: string;
       items?: Array<{ day: string; primary: string; secondary: string }>;
+      variant?: string;
     }
   | {
       _template: "gallery";
@@ -46,6 +50,7 @@ export type TenantBlock =
       kicker?: string;
       title?: string;
       items?: Array<{ src: string; alt: string }>;
+      variant?: string;
     }
   | {
       _template: "faq";
@@ -53,6 +58,7 @@ export type TenantBlock =
       kicker?: string;
       title?: string;
       items?: Array<{ question: string; answer: string }>;
+      variant?: string;
     }
   | {
       _template: "testimonials";
@@ -71,6 +77,7 @@ export type TenantBlock =
       enabled?: boolean;
       title?: string;
       body?: string;
+      variant?: string;
     }
   | {
       _template: "text";
