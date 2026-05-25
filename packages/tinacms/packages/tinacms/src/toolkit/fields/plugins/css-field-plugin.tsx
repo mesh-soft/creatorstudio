@@ -180,18 +180,30 @@ export const CssEditor = wrapFieldsWithMeta(({ input, field }) => {
     save({ ...value, [activeBreakpoint]: { ...bpValue, [prop]: val } });
   };
 
-  const updateRaw = (raw: string) => {
-    try {
-      const parsed = JSON.parse(raw);
-      // Accept either flat (migrate) or breakpoint format
-      if (isBreakpointFormat(parsed)) {
-        save({ base: parsed.base || {}, mobile: parsed.mobile || {}, tablet: parsed.tablet || {} });
-      } else {
-        save(migrateToBreakpointFormat(parsed));
-      }
-    } catch (e) {
-      // Keep current value if JSON is invalid
+  /** Convert a breakpoint CSS map to plain CSS text (one prop:val; per line). */
+  const toCssText = (obj: Record<string, string>): string =>
+    Object.entries(obj)
+      .map(([k, v]) => `${k}: ${v};`)
+      .join('\n');
+
+  /** Parse plain CSS text back to a property map. */
+  const fromCssText = (text: string): Record<string, string> => {
+    const result: Record<string, string> = {};
+    for (const line of text.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('/*')) continue;
+      const colon = trimmed.indexOf(':');
+      if (colon < 0) continue;
+      const key = trimmed.slice(0, colon).trim();
+      const val = trimmed.slice(colon + 1).replace(/;$/, '').trim();
+      if (key) result[key] = val;
     }
+    return result;
+  };
+
+  const updateRaw = (text: string) => {
+    const parsed = fromCssText(text);
+    save({ ...value, [activeBreakpoint]: parsed });
   };
 
   const openMediaManager = (prop: string) => {
@@ -261,7 +273,7 @@ const isValidHex = (v: string) => /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(v);
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', paddingRight: '40px' }}>
                 <span>CSS Property Editor</span>
                 <Button size="small" onClick={() => setIsRaw(!isRaw)}>
-                  {isRaw ? 'Structured View' : 'Raw JSON View'}
+                  {isRaw ? 'Structured View' : 'Raw CSS'}
                 </Button>
               </div>
             </ModalHeader>
@@ -303,8 +315,9 @@ const isValidHex = (v: string) => /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(v);
               {isRaw ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', height: '100%' }}>
                   <textarea
-                    value={JSON.stringify(value, null, 2)}
+                    value={toCssText(bpValue)}
                     onChange={(e) => updateRaw(e.target.value)}
+                    placeholder={`background-color: #f5f5f5;\npadding: 20px;\ncolor: red;`}
                     style={{
                       width: '100%',
                       height: '400px',
@@ -317,7 +330,7 @@ const isValidHex = (v: string) => /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(v);
                     }}
                   />
                   <p style={{ fontSize: '11px', color: '#64748b' }}>
-                    Note: Changes are only applied if the JSON is valid.
+                    One property per line: <code>property: value;</code> — editing the <strong>{activeBreakpoint}</strong> breakpoint.
                   </p>
                 </div>
               ) : (
@@ -519,7 +532,7 @@ const isValidHex = (v: string) => /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(v);
               )}
 
               <div style={{ marginTop: '20px', padding: '12px', background: '#eff6ff', borderRadius: '8px', fontSize: '11px', color: '#1d4ed8', border: '1px solid #dbeafe' }}>
-                <strong>Pro Tip:</strong> Use <code>@apply</code> for Tailwind classes, <code>var(--name)</code> for theme variables, or use the <strong>Raw JSON View</strong> to copy-paste complex styles.
+                <strong>Pro Tip:</strong> Use <code>var(--primary)</code>, <code>var(--site-bg)</code> etc. for theme colours. Switch to <strong>Raw CSS</strong> to paste multiple properties at once.
               </div>
             </ModalBody>
             <ModalActions>

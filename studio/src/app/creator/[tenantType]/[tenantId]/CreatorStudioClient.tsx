@@ -12,6 +12,35 @@ type CreatorStudioClientProps = {
   pageSlug: string;
   pages: string[];
 };
+
+// ── Viewport preview icons ───────────────────────────────────────────────────
+const MobileIcon = () => (
+  <svg width="12" height="14" viewBox="0 0 12 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="1" y="0.5" width="10" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
+    <circle cx="6" cy="11.5" r="0.7" fill="currentColor"/>
+  </svg>
+);
+const TabletIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="0.5" y="1" width="13" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
+    <circle cx="11.5" cy="7" r="0.7" fill="currentColor"/>
+    <line x1="2" y1="3" x2="2" y2="11" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round"/>
+  </svg>
+);
+const DesktopIcon = () => (
+  <svg width="16" height="14" viewBox="0 0 16 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="0.5" y="0.5" width="15" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
+    <line x1="5" y1="13" x2="11" y2="13" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+    <line x1="8" y1="10.5" x2="8" y2="13" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+  </svg>
+);
+const MediaIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="0.5" y="0.5" width="13" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
+    <circle cx="4.5" cy="4.5" r="1.5" stroke="currentColor" strokeWidth="1"/>
+    <path d="M0.5 9.5L4 6L6.5 8.5L9.5 5.5L13.5 9.5" stroke="currentColor" strokeWidth="1" strokeLinejoin="round"/>
+  </svg>
+);
 type InlineEditMessage = {
   type: "studio:inline-edit";
   path: string;
@@ -436,16 +465,19 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
             target="_blank"
             title={`Upload images to: content/${tenantType}s/${tenantId}/`}
             style={{
-              padding: "6px 12px",
+              padding: "6px 10px",
               background: "#10b981",
               color: "white",
               textDecoration: "none",
               borderRadius: "6px",
               fontSize: "12px",
               fontWeight: 500,
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
             }}
           >
-            📁 Media
+            <MediaIcon /> Media
           </a>
           <button
             onClick={() => setHistoryOpen((o) => !o)}
@@ -482,7 +514,6 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "4px", background: "#1e293b", borderRadius: "8px", padding: "3px" }}>
             {(["mobile", "tablet", "desktop"] as const).map((vp) => {
-              const icons: Record<string, string> = { mobile: "📱", tablet: "⬜", desktop: "🖥️" };
               const labels: Record<string, string> = { mobile: "375", tablet: "768", desktop: "Full" };
               return (
                 <button
@@ -503,7 +534,10 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
                     gap: "4px",
                   }}
                 >
-                  {icons[vp]} {labels[vp]}
+                  {vp === "mobile" && <MobileIcon />}
+                  {vp === "tablet" && <TabletIcon />}
+                  {vp === "desktop" && <DesktopIcon />}
+                  {labels[vp]}
                 </button>
               );
             })}
@@ -516,10 +550,23 @@ export function CreatorStudioClient({ tenantType, tenantId, pageSlug, pages }: C
             />
             UI edit
           </label>
-          <div style={{ fontSize: "12px", color: "#94a3b8" }}>
-            Type/reorder on left {"->"} right hot updates. Click Save {"->"} snapshot old JSON + write new JSON.
-            <span style={{ marginLeft: "12px", color: "#60a5fa" }}>Ctrl+Space</span> for suggestions.
-          </div>
+          <span
+            title="Press Ctrl+Space inside any text field for AI catchphrase suggestions"
+            style={{
+              fontSize: "11px",
+              color: "#60a5fa",
+              background: "#1e3a5f",
+              border: "1px solid #2563eb55",
+              borderRadius: "4px",
+              padding: "2px 7px",
+              fontFamily: "ui-monospace, monospace",
+              cursor: "default",
+              userSelect: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            ⌃Space
+          </span>
         </div>
       </header>
 
@@ -785,6 +832,20 @@ function suppressNestedTinaPreview(leftDoc: Document) {
       iframe[src*="/creator/"] {
         display: none !important;
       }
+
+      /* ── Creator Studio: compact field layout ─────────────────────── */
+      /* Reduce per-field bottom margin (FieldWrapper mb-5) */
+      .mb-5.px-2 { margin-bottom: 4px !important; }
+      /* Reduce label bottom margin */
+      label.mb-2 { margin-bottom: 1px !important; }
+      /* Shrink field description text */
+      .italic.font-light.text-gray-400 { font-size: 10px !important; padding-top: 0 !important; }
+      /* Tighten expanded block content padding */
+      .p-4.bg-gray-50 { padding: 8px 12px !important; }
+      /* Block item header click area */
+      .p-2.flex-1.min-w-0 { padding: 5px 8px !important; }
+      /* Group field inner padding */
+      .pt-4.pb-4 { padding-top: 6px !important; padding-bottom: 6px !important; }
     `;
     leftDoc.head.appendChild(style);
   }

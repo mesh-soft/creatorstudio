@@ -41,11 +41,8 @@ export function LivePreviewClient({ initialTenant }: LivePreviewClientProps) {
       const data = event.data;
       if (!data || typeof data !== "object") return;
 
-      console.log("Preview Frame Received Message:", data.type);
-
       // Handle draft updates
       if (data.type === "studio:draft-update") {
-        console.log("Handling Draft Update Payload:", data.payload);
         setTenant((previous) => {
           const merged = deepMerge(previous, data.payload) as Tenant & { settings?: any[] };
           
@@ -74,7 +71,6 @@ export function LivePreviewClient({ initialTenant }: LivePreviewClientProps) {
       
       // Handle active CSS sync
       if (data.type === "TINA_ACTIVE_CSS") {
-        console.log("Handling Active CSS Sync:", data.value);
         setActiveCss(data.value);
       }
     };

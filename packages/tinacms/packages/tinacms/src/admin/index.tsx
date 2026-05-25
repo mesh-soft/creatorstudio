@@ -11,9 +11,11 @@ import {
 } from '@tinacms/toolkit';
 import React, { useState, useEffect } from 'react';
 import {
+  Navigate,
   Route,
   HashRouter as Router,
   Routes,
+  useLocation,
   useNavigate,
   useParams,
 } from 'react-router-dom';
@@ -113,6 +115,66 @@ const PostHogTracker = ({ cms }: { cms: TinaCMS }) => {
         posthog.capture(TinaCMSStartedEvent, eventProperties);
       }
     });
+  }, [cms]);
+
+  return null;
+};
+
+/**
+ * Posts the current hash to the parent window whenever the route changes.
+ * Allows embedding apps to react to Tina navigation without polling.
+ */
+const RouteReporter = () => {
+  const location = useLocation();
+  React.useEffect(() => {
+    if (window !== window.parent) {
+      window.parent.postMessage(
+        { type: 'tina:route-change', hash: window.location.hash },
+        '*'
+      );
+    }
+  }, [location.pathname, location.search, location.hash]);
+  return null;
+};
+
+/**
+ * Polls the active TinaCMS form values every 500 ms and posts a
+ * studio:draft-update message to the parent window so the live preview
+ * pane reflects unsaved changes immediately (including image fields whose
+ * values live in React state rather than DOM inputs).
+ */
+const FormReporter = () => {
+  const cms = useCMS();
+  React.useEffect(() => {
+    if (window === window.parent) return; // Only active when embedded in an iframe
+
+    let prevJson = '';
+
+    const report = () => {
+      try {
+        const all: any[] = (cms as any).forms?.all?.() ?? [];
+        if (!all.length) return;
+
+        // Use the first (active) form; its finalForm wraps final-form.
+        const form = all[0];
+        const values =
+          form?.finalForm?.getState?.()?.values ??
+          form?.getState?.()?.values ??
+          form?.values;
+        if (!values) return;
+
+        const json = JSON.stringify(values);
+        if (json === prevJson) return; // No change — skip postMessage
+        prevJson = json;
+
+        window.parent.postMessage({ type: 'studio:draft-update', payload: values }, '*');
+      } catch {
+        // Silently ignore errors (form may not be ready yet)
+      }
+    };
+
+    const id = setInterval(report, 500);
+    return () => clearInterval(id);
   }, [cms]);
 
   return null;
@@ -309,6 +371,8 @@ export const TinaAdmin = ({
               <PostHogTracker cms={cms} />
               <CheckSchema schemaJson={schemaJson}>
                 <Router>
+                  <RouteReporter />
+                  <FormReporter />
                   {/* @ts-ignore */}
                   <SetPreviewFlag preview={preview} cms={cms} />
                   <Routes>
@@ -402,15 +466,7 @@ export const TinaAdmin = ({
                     />
                     <Route
                       path='/'
-                      element={
-                        <MaybeRedirectToPreview
-                          redirect={!!preview && hasRouter}
-                        >
-                          <DefaultWrapper cms={cms}>
-                            <DashboardPage />
-                          </DefaultWrapper>
-                        </MaybeRedirectToPreview>
-                      }
+                      element={<Navigate to='collections/doctorSite' replace />}
                     />
                   </Routes>
                 </Router>

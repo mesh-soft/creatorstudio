@@ -28,6 +28,7 @@ import {
   TextareaFieldPlugin,
   ToggleFieldPlugin,
   CssFieldPlugin,
+  RichtextFieldPlugin,
 } from '@toolkit/fields';
 import type { FieldPlugin } from '@toolkit/form-builder';
 import type { Form } from '@toolkit/forms';
@@ -120,6 +121,7 @@ export class TinaCMS extends CMS {
       PasswordFieldPlugin,
       DisplayOnlyFieldPlugin,
       CssFieldPlugin,
+      RichtextFieldPlugin,
     ];
 
     DEFAULT_FIELDS.forEach((field) => {

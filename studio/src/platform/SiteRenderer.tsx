@@ -1055,14 +1055,20 @@ function safeArray<T>(value: T[] | undefined): T[] {
 }
 
 /**
- * Minimal safe markdown renderer for body/bio content.
- * Supports: **bold**, *italic*, [link](url), newlines, and - list items.
- * No external deps; XSS-safe (sanitises href, escapes HTML in text nodes).
+ * Renders body/description/bio content.
+ *
+ * Supports two storage formats:
+ *  - HTML string (from the richtext WYSIWYG editor) — used directly.
+ *  - Plain text / markdown — converted via parseMarkdown().
+ *
+ * HTML detection: if the trimmed value starts with a tag (e.g. "<p", "<h2",
+ * "<ul", "<strong") it is treated as HTML; otherwise as markdown/plain text.
  */
 function MarkdownText({ children, editPath, style }: { children?: string; editPath?: string; style?: React.CSSProperties }) {
   if (!children) return null;
 
-  const html = parseMarkdown(children);
+  const isHtml = /^<[a-zA-Z]/.test(children.trim());
+  const html = isHtml ? children : parseMarkdown(children);
   return (
     <div
       data-edit-path={editPath}

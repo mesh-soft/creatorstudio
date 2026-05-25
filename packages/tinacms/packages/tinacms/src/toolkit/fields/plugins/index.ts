@@ -20,3 +20,4 @@ export * from './hidden-field-plugin';
 export * from './password-field-plugin';
 export * from './display-only-field-plugin';
 export * from './css-field-plugin';
+export * from './richtext-field-plugin';
