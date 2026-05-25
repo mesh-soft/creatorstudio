@@ -16,7 +16,7 @@ import type {
 } from '@toolkit/fields/field-events';
 import { BlockSelector } from './block-selector';
 import { BlockSelectorBig } from './block-selector-big';
-import { BiPencil, BiChevronRight, BiChevronDown, BiShow, BiHide } from 'react-icons/bi';
+import { BiPencil, BiChevronRight, BiChevronDown, BiShow, BiHide, BiSliderAlt } from 'react-icons/bi';
 import { FieldsBuilder } from '@toolkit/form-builder';
 import { EmptyList, ListFieldMeta, ListPanel } from '../list-field-meta';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -326,44 +326,58 @@ const BlockListItem = ({
             const hasBothTabs = presentationFields.length > 0;
 
             return (
-              <div className="border-t border-gray-100 bg-gray-50 rounded-b">
-                {/* Tab bar — only shown when there are presentation fields */}
+              <div style={{ borderTop: '1px solid #e2e8f0', background: '#f8fafc', borderRadius: '0 0 6px 6px' }}>
+                {/* Segmented control — only shown when presentation fields exist */}
                 {hasBothTabs && (
-                  <div style={{
-                    display: 'flex',
-                    borderBottom: '1px solid #e2e8f0',
-                    background: '#f1f5f9',
-                  }}>
-                    {(['content', 'presentation'] as const).map(tab => {
-                      const isActive = activeTab === tab;
-                      return (
-                        <button
-                          key={tab}
-                          type="button"
-                          onClick={() => setActiveTab(tab)}
-                          style={{
-                            flex: 1,
-                            padding: '7px 0',
-                            fontSize: '11px',
-                            fontWeight: isActive ? 700 : 500,
-                            color: isActive ? '#2563eb' : '#64748b',
-                            background: isActive ? '#ffffff' : 'transparent',
-                            border: 'none',
-                            borderBottom: isActive ? '2px solid #2563eb' : '2px solid transparent',
-                            cursor: 'pointer',
-                            textTransform: 'capitalize',
-                            letterSpacing: '0.03em',
-                          }}
-                        >
-                          {tab}
-                        </button>
-                      );
-                    })}
+                  <div style={{ padding: '10px 14px 0' }}>
+                    <div style={{
+                      display: 'inline-flex',
+                      background: '#e2e8f0',
+                      borderRadius: '8px',
+                      padding: '2px',
+                      gap: '1px',
+                    }}>
+                      {([
+                        { id: 'content',      label: 'Content',      Icon: BiPencil     },
+                        { id: 'presentation', label: 'Presentation',  Icon: BiSliderAlt  },
+                      ] as const).map(({ id, label, Icon }) => {
+                        const isActive = activeTab === id;
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={() => setActiveTab(id)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              padding: '5px 13px',
+                              fontSize: '11px',
+                              fontWeight: isActive ? 600 : 400,
+                              color: isActive ? '#1e293b' : '#64748b',
+                              background: isActive ? '#ffffff' : 'transparent',
+                              border: 'none',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              boxShadow: isActive
+                                ? '0 1px 3px rgba(0,0,0,0.12), 0 1px 1px rgba(0,0,0,0.06)'
+                                : 'none',
+                              transition: 'background 0.12s ease, box-shadow 0.12s ease, color 0.12s ease',
+                              whiteSpace: 'nowrap',
+                              userSelect: 'none',
+                            }}
+                          >
+                            <Icon size={11} style={{ opacity: isActive ? 0.9 : 0.5, flexShrink: 0 }} />
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
 
-                {/* Tab content */}
-                <div className="p-4">
+                {/* Fields for active tab */}
+                <div style={{ padding: '12px 4px 4px' }}>
                   <FieldsBuilder
                     form={tinaForm}
                     fields={activeTab === 'content' || !hasBothTabs ? contentFields : presentationFields}
