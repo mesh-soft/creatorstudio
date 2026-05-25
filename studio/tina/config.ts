@@ -1,5 +1,6 @@
 import { defineConfig } from "tinacms";
 import type { TinaField } from "tinacms";
+import { ICON_OPTIONS } from "../src/lib/icons";
 
 const branch =
   process.env.GITHUB_BRANCH ||
@@ -7,28 +8,8 @@ const branch =
   process.env.HEAD ||
   "main";
 
-const iconOptions = [
-  { label: "None", value: "" },
-  { label: "♡ Heart", value: "heart" },
-  { label: "∿ Activity", value: "activity" },
-  { label: "⌖ Scan", value: "scan" },
-  { label: "+ Cross", value: "cross" },
-  { label: "◎ Users", value: "users" },
-  { label: "📞 Phone", value: "phone" },
-  { label: "💬 WhatsApp", value: "whatsapp" },
-  { label: "📍 Map", value: "map" },
-  { label: "✉ Email", value: "email" },
-  { label: "📅 Calendar", value: "calendar" },
-  { label: "🕒 Clock", value: "clock" },
-  { label: "🏆 Award", value: "award" },
-  { label: "⭐ Star", value: "star" },
-  { label: "✓ Check", value: "check" },
-  { label: "👤 Facebook", value: "facebook" },
-  { label: "🐦 Twitter", value: "twitter" },
-  { label: "📸 Instagram", value: "instagram" },
-  { label: "🔗 LinkedIn", value: "linkedin" },
-  { label: "📺 YouTube", value: "youtube" },
-];
+// Icon options are sourced from the shared icon library (src/lib/icons.tsx)
+const iconOptions = ICON_OPTIONS;
 
 // ── Shared nav-link templates ────────────────────────────────────────────────
 // Three variants: section scroll, internal page, external URL.
@@ -94,10 +75,14 @@ function navLinksObjectField(name: string, label: string): any {
 
 function tenantImageField(name: string, label: string, description?: string): any {
   return {
-    type: "image",
+    type: "string",   // stored as a URL string; 'shared-image' plugin handles upload
     name,
     label,
     ...(description ? { description } : {}),
+    ui: {
+      component: "shared-image",
+    },
+    // Keep uploadDir for backwards compat (used by the upload tab inside SharedImageField)
     uploadDir: (formValues: any) => {
       const breadcrumbs: string[] = formValues?._sys?.breadcrumbs ?? [];
       const path: string = formValues?._sys?.path ?? formValues?._sys?.relativePath ?? "";
@@ -741,6 +726,25 @@ const pageFields: TinaField[] = [
           { type: "string", name: "phone", label: "WhatsApp Number", description: "Include country code, e.g. 919876543210 (no + or spaces)" },
           { type: "string", name: "message", label: "Pre-filled Message", description: "Opens WhatsApp with this message pre-typed" },
           { type: "string", name: "label", label: "Tooltip Label", description: "Shown on hover (e.g. 'Chat with us')" },
+        ],
+      },
+      {
+        name: "location",
+        label: "Location / Map",
+        fields: [
+          { type: "boolean", name: "enabled", label: "Enabled" },
+          { type: "string", name: "kicker", label: "Kicker", description: "Small label above the title (e.g. 'Find Us')" },
+          { type: "string", name: "title", label: "Title", description: "Section heading (e.g. 'Our Clinic Location')" },
+          {
+            type: "string",
+            name: "mapUrl",
+            label: "Google Maps URL or Coordinates",
+            description: "Paste any Google Maps link — or enter lat,lng directly (e.g. 12.9716,77.5946)",
+          },
+          { type: "number", name: "height", label: "Map Height (px)", description: "Height of the map iframe in pixels. Default: 400" },
+          { type: "string", name: "variant", label: "Variant" },
+          tenantImageField("backgroundImage", "Background Image"),
+          { type: "string", name: "css", label: "CSS Overrides", ui: { component: "css" } },
         ],
       },
     ],

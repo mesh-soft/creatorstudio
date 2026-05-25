@@ -34,7 +34,7 @@
           "variant": "secondary"
         }
       ],
-      "variant": "compact",
+      "variant": "centered",
       "backgroundImage": "",
       "css": "{\"base\":{\"background-color\":\"#d03535\"},\"mobile\":{},\"tablet\":{}}",
       "_template": "hero"

@@ -29,6 +29,7 @@ import {
   ToggleFieldPlugin,
   CssFieldPlugin,
   RichtextFieldPlugin,
+  SharedImageFieldPlugin,
 } from '@toolkit/fields';
 import type { FieldPlugin } from '@toolkit/form-builder';
 import type { Form } from '@toolkit/forms';
@@ -122,6 +123,7 @@ export class TinaCMS extends CMS {
       DisplayOnlyFieldPlugin,
       CssFieldPlugin,
       RichtextFieldPlugin,
+      SharedImageFieldPlugin,
     ];
 
     DEFAULT_FIELDS.forEach((field) => {

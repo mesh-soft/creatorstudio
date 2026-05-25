@@ -135,6 +135,17 @@ export type TenantBlock =
       phone?: string;
       message?: string;
       label?: string;
+    }
+  | {
+      _template: "location";
+      enabled?: boolean;
+      kicker?: string;
+      title?: string;
+      mapUrl?: string;
+      height?: number;
+      variant?: string;
+      backgroundImage?: string;
+      css?: string;
     };
 
 export type Presentation = {

@@ -1,11 +1,39 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useRef, useMemo, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { tinaField } from "tinacms/dist/react";
 import { getPreset, getThemeBlocks, stylePresets } from "./catalog";
 import type { Tenant, TenantBlock } from "./types";
 import { toSiteSettingsPathFromFlat } from "./siteSettingsNormalize";
+import { iconElement } from "../lib/icons";
+
+// ── Smooth scroll ────────────────────────────────────────────────────────────
+
+function easeInOutCubic(t: number): number {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+/**
+ * Animate scroll to `target` element over `duration` ms.
+ * Accounts for the sticky header height via `scrollMarginTop` or a 80px default.
+ */
+function smoothScrollTo(target: HTMLElement, duration = 680): void {
+  const headerOffset = 80;
+  const targetY = target.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+  const startY = window.pageYOffset;
+  const distance = targetY - startY;
+  const startTime = performance.now();
+
+  function step(now: number) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    window.scrollTo(0, startY + distance * easeInOutCubic(progress));
+    if (progress < 1) requestAnimationFrame(step);
+  }
+
+  requestAnimationFrame(step);
+}
 
 type SiteRendererProps = {
   tenant: Tenant;
@@ -59,6 +87,29 @@ function buildGoogleFontsUrl(heading: string, body: string): string | null {
 }
 
 export function SiteRenderer({ tenant, pageSlug = "home", previewLinks = false, tinaDocument, studioMode = false }: SiteRendererProps) {
+  const containerRef = useRef<HTMLElement>(null);
+
+  // Intercept all anchor clicks inside the site shell and animate scroll.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const handleClick = (e: MouseEvent) => {
+      const anchor = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="#"]');
+      if (!anchor) return;
+      const hash = anchor.getAttribute("href");
+      if (!hash || hash === "#") return;
+      const id = hash.slice(1);
+      const target = document.getElementById(id);
+      if (!target) return;
+      e.preventDefault();
+      smoothScrollTo(target);
+    };
+
+    el.addEventListener("click", handleClick);
+    return () => el.removeEventListener("click", handleClick);
+  }, []);
+
   const preset = getPreset(tenant);
   const styleId = tenant.presentation?.styleId;
   const catalogStyle = styleId ? stylePresets[styleId] : undefined;
@@ -96,7 +147,7 @@ export function SiteRenderer({ tenant, pageSlug = "home", previewLinks = false, 
   const analytics = tenant.analytics;
 
   return (
-    <main className={`site-shell ${tenant.tenantType}`} style={cssVars}>
+    <main ref={containerRef} className={`site-shell ${tenant.tenantType}`} style={cssVars}>
       {googleFontsUrl && (
         <>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -359,6 +410,10 @@ function renderBlocks(
             <WhatsAppButton block={activeBlock} tenant={tenant} sectionField={sectionField} />
           </React.Fragment>
         );
+      case "location":
+        return withScrollAnchor(key, "location", (
+          <LocationBlock block={activeBlock} blockIndex={index} sectionField={sectionField} />
+        ));
       default:
         return null;
     }
@@ -841,6 +896,114 @@ function TextBlock({ block, blockIndex, variant, sectionField, studioMode }: { b
   );
 }
 
+// ── Location / Map block ─────────────────────────────────────────────────────
+
+/**
+ * Convert any Google Maps URL or "lat,lng" string into an embeddable iframe src.
+ *
+ * Handles:
+ *   • "12.9716,77.5946"                                  lat,lng
+ *   • https://www.google.com/maps/place/.../@lat,lng,...  standard share URL
+ *   • https://maps.google.com/?q=lat,lng                  query param URL
+ *   • https://maps.google.com/maps?...&output=embed       already an embed URL
+ *   • Anything else is passed as a query string (best-effort)
+ */
+function toGoogleEmbedUrl(input: string): string {
+  if (!input) return "";
+
+  const trimmed = input.trim();
+
+  // Already an embed URL
+  if (trimmed.includes("output=embed")) return trimmed;
+
+  // Plain "lat,lng"
+  if (/^-?\d+\.?\d*,\s*-?\d+\.?\d*$/.test(trimmed)) {
+    return `https://maps.google.com/maps?q=${trimmed}&output=embed&z=15`;
+  }
+
+  // Google Maps share URL containing @lat,lng
+  const atMatch = trimmed.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (atMatch) {
+    return `https://maps.google.com/maps?q=${atMatch[1]},${atMatch[2]}&output=embed&z=15`;
+  }
+
+  // URL with ?q= param
+  try {
+    const url = new URL(trimmed);
+    const q = url.searchParams.get("q");
+    if (q) return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed&z=15`;
+  } catch {
+    // not a valid URL — fall through
+  }
+
+  // Fallback: treat the whole string as a query
+  return `https://maps.google.com/maps?q=${encodeURIComponent(trimmed)}&output=embed&z=15`;
+}
+
+function LocationBlock({
+  block,
+  blockIndex,
+  sectionField,
+}: {
+  block: any;
+  blockIndex: number;
+  sectionField?: string;
+}) {
+  const embedSrc = toGoogleEmbedUrl(block?.mapUrl || "");
+  const mapHeight = block?.height || 400;
+
+  return (
+    <Section
+      className="block location-block"
+      sectionField={sectionField}
+      style={block?.css}
+      backgroundImage={block?.backgroundImage}
+    >
+      {(block?.kicker || block?.title) && (
+        <BlockTitle kicker={block?.kicker || ""} title={block?.title || ""} />
+      )}
+      {embedSrc ? (
+        <div
+          style={{
+            width: "100%",
+            borderRadius: "12px",
+            overflow: "hidden",
+            boxShadow: "0 2px 16px rgba(0,0,0,0.10)",
+            marginTop: block?.kicker || block?.title ? "24px" : "0",
+          }}
+        >
+          <iframe
+            title={block?.title || "Location Map"}
+            src={embedSrc}
+            width="100%"
+            height={mapHeight}
+            style={{ border: 0, display: "block" }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
+      ) : (
+        <div
+          style={{
+            width: "100%",
+            height: `${mapHeight}px`,
+            background: "#f1f5f9",
+            borderRadius: "12px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#94a3b8",
+            fontSize: "14px",
+          }}
+        >
+          Paste a Google Maps URL or lat,lng in the editor to show the map
+        </div>
+      )}
+    </Section>
+  );
+}
+
 function BlockTitle({ kicker, title }: { kicker: string; title: string }) {
   return (
     <div className="block-title">
@@ -1121,30 +1284,8 @@ function inlineMarkdown(text: string): string {
     .replace(/\[(.+?)\]\((.+?)\)/g, (_, label, url) => `<a href="${escapeHtml(safehref(url))}" style="color:var(--primary)">${label}</a>`);
 }
 
-function iconFor(icon?: string) {
-  const icons: Record<string, string> = {
-    heart: "♡",
-    activity: "∿",
-    scan: "⌖",
-    cross: "+",
-    users: "◎",
-    phone: "📞",
-    whatsapp: "💬",
-    map: "📍",
-    email: "✉",
-    calendar: "📅",
-    clock: "🕒",
-    award: "🏆",
-    star: "⭐",
-    check: "✓",
-    facebook: "fb",
-    twitter: "tw",
-    instagram: "ig",
-    linkedin: "in",
-    youtube: "yt",
-  };
-
-  return icons[icon ?? ""] ?? "";
+function iconFor(icon?: string): React.ReactElement | null {
+  return iconElement(icon, { width: "1.1em", height: "1.1em" });
 }
 
 function Testimonials({

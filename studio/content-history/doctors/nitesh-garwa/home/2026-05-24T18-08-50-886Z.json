@@ -34,9 +34,8 @@
           "variant": "secondary"
         }
       ],
-      "variant": "compact",
-      "backgroundImage": "",
-      "css": "{\"base\":{\"background-color\":\"#d03535\"},\"mobile\":{},\"tablet\":{}}",
+      "backgroundImage": "/content/doctors/nitesh-garwa/i20_sports2.jpeg",
+      "css": "{\"background-color\":\"red\"}",
       "_template": "hero"
     },
     {
@@ -65,7 +64,7 @@
           "icon": "bandage"
         }
       ],
-      "css": "{\"base\":{\"background\":\"#f0e5e5\"},\"mobile\":{},\"tablet\":{}}",
+      "css": "{\"background\":\"#3904\"}",
       "_template": "services"
     },
     {
@@ -80,7 +79,6 @@
           "src": "/content/doctors/nitesh-garwa/WhatsApp Image 2026-05-12 at 8.40.20 PM (1).jpeg"
         }
       ],
-      "backgroundImage": "/content/doctors/nitesh-garwa/i20_sports.jpeg",
       "css": "{\"background\":\"#0604\"}",
       "_template": "gallery"
     },
