@@ -9,7 +9,13 @@ type SnapshotPayload = {
   pageSlug?: string;
 };
 
+// Snapshots require a writable local filesystem — skip in cloud environments.
+const IS_READONLY_ENV = Boolean(process.env.VERCEL || process.env.SNAPSHOT_DISABLED);
+
 export async function POST(request: Request) {
+  if (IS_READONLY_ENV) {
+    return NextResponse.json({ ok: false, skipped: true, reason: "read-only environment" });
+  }
   const body = (await request.json()) as SnapshotPayload;
   const tenantType = body.tenantType;
   const tenantSlug = body.tenantSlug;
@@ -69,6 +75,9 @@ type HistoryIndex = {
 };
 
 export async function GET(request: Request) {
+  if (IS_READONLY_ENV) {
+    return NextResponse.json({ ok: true, entries: [] });
+  }
   const { searchParams } = new URL(request.url);
   const tenantType = searchParams.get("tenantType") as "doctor" | "hospital" | null;
   const tenantSlug = searchParams.get("tenantSlug");
@@ -91,6 +100,9 @@ export async function GET(request: Request) {
 }
 
 export async function PUT(request: Request) {
+  if (IS_READONLY_ENV) {
+    return NextResponse.json({ ok: false, skipped: true, reason: "read-only environment" });
+  }
   const body = (await request.json()) as SnapshotPayload & { timestamp?: string };
   const { tenantType, tenantSlug, pageSlug, timestamp } = body;
 
