@@ -214,6 +214,9 @@ const Toggle = ({ enabled, onClick }: { enabled: boolean; onClick: (e: any) => v
   );
 };
 
+/** Field names that belong to the Presentation tab. */
+const PRESENTATION_FIELDS = new Set(['variant', 'backgroundImage', 'css']);
+
 const BlockListItem = ({
   label,
   tinaForm,
@@ -227,6 +230,7 @@ const BlockListItem = ({
 }: BlockListItemProps) => {
   const cms = useCMS();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [activeTab, setActiveTab] = useState<'content' | 'presentation'>('content');
 
   const removeItem = React.useCallback(() => {
     tinaForm.mutators.remove(field.name, index);
@@ -304,19 +308,70 @@ const BlockListItem = ({
             </div>
           </ItemHeader>
           
-          {isExpanded && template.fields && (
-            <div className="p-4 border-t border-gray-100 bg-gray-50 rounded-b">
-              <FieldsBuilder
-                form={tinaForm}
-                fields={template.fields
-                  .filter(f => f.name !== 'enabled')
-                  .map(f => ({
-                    ...f,
-                    name: `${field.name}.${index}.${f.name}`
-                  }))}
-              />
-            </div>
-          )}
+          {isExpanded && template.fields && (() => {
+            const allFields = template.fields
+              .filter(f => f.name !== 'enabled')
+              .map(f => ({ ...f, name: `${field.name}.${index}.${f.name}` }));
+
+            const contentFields = allFields.filter(f => {
+              // Strip the block prefix back to the bare field name for the check
+              const bareName = f.name.split('.').pop() ?? '';
+              return !PRESENTATION_FIELDS.has(bareName);
+            });
+            const presentationFields = allFields.filter(f => {
+              const bareName = f.name.split('.').pop() ?? '';
+              return PRESENTATION_FIELDS.has(bareName);
+            });
+
+            const hasBothTabs = presentationFields.length > 0;
+
+            return (
+              <div className="border-t border-gray-100 bg-gray-50 rounded-b">
+                {/* Tab bar — only shown when there are presentation fields */}
+                {hasBothTabs && (
+                  <div style={{
+                    display: 'flex',
+                    borderBottom: '1px solid #e2e8f0',
+                    background: '#f1f5f9',
+                  }}>
+                    {(['content', 'presentation'] as const).map(tab => {
+                      const isActive = activeTab === tab;
+                      return (
+                        <button
+                          key={tab}
+                          type="button"
+                          onClick={() => setActiveTab(tab)}
+                          style={{
+                            flex: 1,
+                            padding: '7px 0',
+                            fontSize: '11px',
+                            fontWeight: isActive ? 700 : 500,
+                            color: isActive ? '#2563eb' : '#64748b',
+                            background: isActive ? '#ffffff' : 'transparent',
+                            border: 'none',
+                            borderBottom: isActive ? '2px solid #2563eb' : '2px solid transparent',
+                            cursor: 'pointer',
+                            textTransform: 'capitalize',
+                            letterSpacing: '0.03em',
+                          }}
+                        >
+                          {tab}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Tab content */}
+                <div className="p-4">
+                  <FieldsBuilder
+                    form={tinaForm}
+                    fields={activeTab === 'content' || !hasBothTabs ? contentFields : presentationFields}
+                  />
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
     </Draggable>

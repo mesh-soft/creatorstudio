@@ -832,20 +832,6 @@ function suppressNestedTinaPreview(leftDoc: Document) {
       iframe[src*="/creator/"] {
         display: none !important;
       }
-
-      /* ── Creator Studio: compact field layout ─────────────────────── */
-      /* Reduce per-field bottom margin (FieldWrapper mb-5) */
-      .mb-5.px-2 { margin-bottom: 4px !important; }
-      /* Reduce label bottom margin */
-      label.mb-2 { margin-bottom: 1px !important; }
-      /* Shrink field description text */
-      .italic.font-light.text-gray-400 { font-size: 10px !important; padding-top: 0 !important; }
-      /* Tighten expanded block content padding */
-      .p-4.bg-gray-50 { padding: 8px 12px !important; }
-      /* Block item header click area */
-      .p-2.flex-1.min-w-0 { padding: 5px 8px !important; }
-      /* Group field inner padding */
-      .pt-4.pb-4 { padding-top: 6px !important; padding-bottom: 6px !important; }
     `;
     leftDoc.head.appendChild(style);
   }
