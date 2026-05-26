@@ -41,15 +41,19 @@ export function LivePreviewClient({ initialTenant }: LivePreviewClientProps) {
       const data = event.data;
       if (!data || typeof data !== "object") return;
 
-      // Handle draft updates
+      // Handle draft updates — use shallow spread so deleted array items
+      // (e.g. removed nav links) are not re-injected by deepMerge's mergeArrays.
+      // The payload from BlockEditor is always the full site+page state.
       if (data.type === "studio:draft-update") {
         setTenant((previous) => {
-          const merged = deepMerge(previous, data.payload) as Tenant & { settings?: any[] };
-          
-          // Flatten settings array to root on the fly for the renderer
-          const urlSettings = Array.isArray(merged.settings) ? merged.settings.find(s => s._template === "urlSettings") : undefined;
-          const presentation = Array.isArray(merged.settings) ? merged.settings.find(s => s._template === "presentation") : undefined;
-          const seo = Array.isArray(merged.settings) ? merged.settings.find(s => s._template === "seo") : undefined;
+          // Shallow merge: top-level keys from payload REPLACE previous.
+          // This ensures arrays (navLinks, blocks, items…) are replaced, not merged.
+          const merged = { ...previous, ...(data.payload as Partial<Tenant>) } as Tenant & { settings?: any[] };
+
+          // Flatten page settings array to root on the fly for the renderer
+          const urlSettings = Array.isArray(merged.settings) ? merged.settings.find((s: any) => s._template === "urlSettings") : undefined;
+          const presentation = Array.isArray(merged.settings) ? merged.settings.find((s: any) => s._template === "presentation") : undefined;
+          const seo = Array.isArray(merged.settings) ? merged.settings.find((s: any) => s._template === "seo") : undefined;
 
           if (urlSettings) {
             merged.slug = urlSettings.slug ?? merged.slug;

@@ -57,7 +57,7 @@ export default async function CollectionEditorPage({ params }: CollectionPathPro
 
   const { tenantType, tenantId, pageSlug } = parsed;
 
-  const pages = listTenantPages(tenantType, tenantId)
+  const pages = (await listTenantPages(tenantType, tenantId))
     .map((page) => {
       const urlSettings = Array.isArray(page.settings)
         ? page.settings.find((s) => s._template === "urlSettings")

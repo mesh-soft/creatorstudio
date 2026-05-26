@@ -7,16 +7,17 @@ type TenantRootPageProps = {
   }>;
 };
 
-export function generateStaticParams() {
-  return getAllTenantSlugs().map((tenantSlug) => ({ tenantId: tenantSlug }));
+export async function generateStaticParams() {
+  const slugs = await getAllTenantSlugs();
+  return slugs.map((tenantSlug) => ({ tenantId: tenantSlug }));
 }
 
 export default async function TenantRootPage({ params }: TenantRootPageProps) {
   const { tenantId } = await params;
-  const tenant = findTenantBySlug(tenantId);
+  const tenant = await findTenantBySlug(tenantId);
   if (!tenant) notFound();
 
-  const pages = listTenantPages(tenant.tenantType, tenantId);
+  const pages = await listTenantPages(tenant.tenantType, tenantId);
   const home = pages.find((page) => page.isHome) ?? pages.find((page) => page.path === "/") ?? pages[0];
   if (!home) notFound();
 

@@ -20,7 +20,7 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
   const { tenantId, pageSlug } = await params;
   const { draft } = await searchParams;
   
-  const tenant = getTenantByPageSlug(tenantId, pageSlug);
+  const tenant = await getTenantByPageSlug(tenantId, pageSlug);
   if (!tenant) notFound();
 
   const draftTenant = draft ? parseDraftTenant(draft, tenant) : tenant;

@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env MONOREPO_DEV=true TINA_PUBLIC_IS_LOCAL=true tinacms dev -c \"next dev --webpack\"",
+    "dev": "next dev --webpack",
     "build": "next build --webpack",
-    "build:tina": "tinacms build && next build --webpack",
+    "build:tina": "next build --webpack",
     "build:tenants": "npm run build && node scripts/build-tenants.mjs",
     "deploy:cloudflare": "node scripts/deploy-cloudflare.mjs",
     "deploy:surge": "node scripts/deploy-surge.mjs",
@@ -20,6 +20,8 @@
     "migrate:home-site-fields": "node scripts/copy-site-fields-to-home-pages.mjs"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.744.0",
+    "@octokit/rest": "^22.0.1",
     "date-fns": "^2.30.0",
     "graphql": "15.8.0",
     "next": "16.2.6",
@@ -30,6 +32,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@tinacms/cli": "workspace:*",
+    "concurrently": "^9.0.0",
     "cross-env": "^7.0.3",
     "@types/node": "^20.19.40",
     "@types/react": "^19",

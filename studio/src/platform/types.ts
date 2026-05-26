@@ -233,6 +233,7 @@ export type TenantSite = {
     gaMeasurementId?: string;
     gtmContainerId?: string;
     metaPixelId?: string;
+    customScripts?: { code: string; inHead: boolean }[];
   };
   header?: {
     show?: boolean;

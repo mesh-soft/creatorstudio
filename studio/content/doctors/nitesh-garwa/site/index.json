@@ -41,8 +41,8 @@
     },
     {
       "themeId": "hospital-standard",
-      "variantPresetId": "doctor-compact",
-      "styleId": "doctor-derma-minimal",
+      "variantPresetId": "doctor-premium",
+      "styleId": "doctor-premium-warm",
       "style": {
         "colors": {
           "primary": "#0f766e",
@@ -87,7 +87,15 @@
     {
       "show": true,
       "copyright": "copying",
-      "_template": "footer"
+      "_template": "footer",
+      "socialHeading": "connect with us",
+      "socialLinks": [
+        {
+          "label": "test",
+          "type": "external",
+          "icon": "pill"
+        }
+      ]
     }
   ],
   "_template": "site"

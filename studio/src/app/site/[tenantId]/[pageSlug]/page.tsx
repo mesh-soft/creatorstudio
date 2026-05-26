@@ -15,8 +15,9 @@ type SitePageProps = {
 // No dynamic export needed - Next.js will automatically make this static
 // because generateStaticParams is present and searchParams is removed.
 
-export function generateStaticParams() {
-  return getAllTenantPageParams().map((item) => ({
+export async function generateStaticParams() {
+  const params = await getAllTenantPageParams();
+  return params.map((item) => ({
     tenantId: item.tenantSlug,
     pageSlug: item.pageSlug,
   }));
@@ -24,7 +25,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: SitePageProps): Promise<Metadata> {
   const { tenantId, pageSlug } = await params;
-  const tenant = getTenantByPageSlug(tenantId, pageSlug);
+  const tenant = await getTenantByPageSlug(tenantId, pageSlug);
 
   if (!tenant) return {};
 
@@ -42,7 +43,7 @@ export async function generateMetadata({ params }: SitePageProps): Promise<Metad
 
 export default async function SitePage({ params }: SitePageProps) {
   const { tenantId, pageSlug } = await params;
-  const tenant = getTenantByPageSlug(tenantId, pageSlug);
+  const tenant = await getTenantByPageSlug(tenantId, pageSlug);
 
   if (!tenant) {
     notFound();

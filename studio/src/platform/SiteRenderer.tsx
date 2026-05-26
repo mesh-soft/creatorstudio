@@ -145,6 +145,7 @@ export function SiteRenderer({ tenant, pageSlug = "home", previewLinks = false, 
 
   const googleFontsUrl = buildGoogleFontsUrl(typography.heading, typography.body);
   const analytics = tenant.analytics;
+  const customScripts: {code:string;inHead:boolean}[] = Array.isArray(analytics?.customScripts) ? analytics!.customScripts : [];
 
   return (
     <main ref={containerRef} className={`site-shell ${tenant.tenantType}`} style={cssVars}>
@@ -189,6 +190,11 @@ export function SiteRenderer({ tenant, pageSlug = "home", previewLinks = false, 
           }}
         />
       )}
+      {/* Custom scripts marked for <head> — rendered inline here since we're inside <main> */}
+      {customScripts.filter(s => s.inHead && s.code.trim()).map((s, i) => (
+        <div key={`cs-head-${i}`} dangerouslySetInnerHTML={{ __html: s.code }} style={{display:"none"}} />
+      ))}
+
       {previewLinks ? <PreviewHeader tenant={tenant} /> : null}
       <article className="tenant-site">
         <SubscriptionBar tenant={tenant} />
@@ -211,10 +217,13 @@ export function SiteRenderer({ tenant, pageSlug = "home", previewLinks = false, 
 
         {/* Global Footer Fallback (only if no active footer block is on the page) */}
         {showGlobalFooter && (
-          <Footer 
-            tenant={tenant} 
-            copyright={tenant.footer?.copyright} 
-            socialLinks={tenant.footer?.socialLinks} 
+          <Footer
+            tenant={tenant}
+            copyright={tenant.footer?.copyright}
+            socialLinks={tenant.footer?.socialLinks}
+            footerLinks={tenant.footer?.links}
+            linksHeading={tenant.footer?.linksHeading}
+            socialHeading={tenant.footer?.socialHeading}
             sectionField={
               studioMode
                 ? siteAwareTinaField((tinaDocument ?? (tenant as Record<string, unknown>)) as Record<string, unknown>, "footer")
@@ -223,6 +232,11 @@ export function SiteRenderer({ tenant, pageSlug = "home", previewLinks = false, 
           />
         )}
       </article>
+
+      {/* Custom scripts marked for body (injected after content) */}
+      {customScripts.filter(s => !s.inHead && s.code.trim()).map((s, i) => (
+        <div key={`cs-body-${i}`} dangerouslySetInnerHTML={{ __html: s.code }} />
+      ))}
     </main>
   );
 }
@@ -285,6 +299,9 @@ function renderBlocks(
             tenant={tenant}
             copyright={activeBlock?.copyright || tenant.footer?.copyright}
             socialLinks={activeBlock?.socialLinks || tenant.footer?.socialLinks}
+            footerLinks={activeBlock?.links || tenant.footer?.links}
+            linksHeading={activeBlock?.linksHeading || tenant.footer?.linksHeading}
+            socialHeading={activeBlock?.socialHeading || tenant.footer?.socialHeading}
             sectionField={sectionField}
             studioMode={studioMode}
             css={activeBlock?.css}
@@ -420,18 +437,29 @@ function renderBlocks(
   });
 }
 type NavLinkItem =
-  | { _template: 'sectionLink'; label: string; sectionId: string }
-  | { _template: 'pageLink'; label: string; pageSlug: string }
-  | { _template: 'externalLink'; label: string; url: string };
+  | { _template: 'sectionLink'; label: string; sectionId: string; icon?: string }
+  | { _template: 'pageLink'; label: string; pageSlug: string; icon?: string }
+  | { _template: 'externalLink'; label: string; url: string; icon?: string }
+  | { type: 'section'; label: string; sectionId: string; icon?: string }
+  | { type: 'page'; label: string; pageSlug: string; icon?: string }
+  | { type: 'external'; label: string; url: string; icon?: string };
 
-function resolveNavLink(link: string | NavLinkItem): { label: string; href: string } {
+function resolveNavLink(link: string | NavLinkItem): { label: string; href: string; icon?: string } {
   if (typeof link === 'string') {
     const [label, url] = link.includes('|') ? link.split('|') : [link, '#'];
     return { label, href: url };
   }
-  if (link._template === 'sectionLink') return { label: link.label, href: `#${link.sectionId}` };
-  if (link._template === 'pageLink') return { label: link.label, href: `/${link.pageSlug}` };
-  if (link._template === 'externalLink') return { label: link.label, href: link.url };
+  // Legacy _template format
+  if ('_template' in link) {
+    if (link._template === 'sectionLink') return { label: link.label, href: `#${link.sectionId}`, icon: (link as any).icon };
+    if (link._template === 'pageLink') return { label: link.label, href: `/${(link as any).pageSlug}`, icon: (link as any).icon };
+    if (link._template === 'externalLink') return { label: link.label, href: (link as any).url!, icon: (link as any).icon };
+  }
+  // New type-based format (from FNavLinks editor)
+  const l = link as any;
+  if (l.type === 'section') return { label: l.label, href: `#${l.sectionId}`, icon: l.icon };
+  if (l.type === 'page') return { label: l.label, href: `/${l.pageSlug}`, icon: l.icon };
+  if (l.type === 'external') return { label: l.label, href: l.url!, icon: l.icon };
   return { label: '', href: '#' };
 }
 
@@ -473,14 +501,14 @@ function Header({
         </button>
         <nav className={`header-nav${menuOpen ? " open" : ""}`}>
           {links.map((link, i) => {
-            const { label, href } = resolveNavLink(link);
+            const { label, href, icon } = resolveNavLink(link);
             return (
               <a
                 key={i}
                 href={href}
                 onClick={() => setMenuOpen(false)}
-                style={{ fontSize: "14px", fontWeight: 600, color: "var(--site-text)", opacity: 0.8, textDecoration: "none" }}
-              >
+                style={{ fontSize: "14px", fontWeight: 600, color: "var(--site-text)", opacity: 0.8, textDecoration: "none", display:"flex", alignItems:"center", gap:6 }}>
+                {icon && <span style={{ fontSize:"16px" }}>{iconToEmoji(icon)}</span>}
                 {label}
               </a>
             );
@@ -494,6 +522,9 @@ function Footer({
   tenant,
   copyright,
   socialLinks,
+  footerLinks,
+  linksHeading,
+  socialHeading,
   sectionField,
   studioMode,
   css,
@@ -502,33 +533,59 @@ function Footer({
   tenant: Tenant;
   copyright?: string;
   socialLinks?: (string | NavLinkItem)[];
+  footerLinks?: (string | NavLinkItem)[];
+  linksHeading?: string;
+  socialHeading?: string;
   sectionField?: string;
   studioMode?: boolean;
   css?: any;
   backgroundImage?: string;
 }) {
   const displayCopyright = copyright || `© ${new Date().getFullYear()} ${tenant.profile.displayName}. All rights reserved.`;
-  const links = Array.isArray(socialLinks) && socialLinks.length > 0 ? socialLinks : ["Facebook|#", "Twitter|#", "Instagram|#"];
+  const socials = Array.isArray(socialLinks) && socialLinks.length > 0 ? socialLinks : ["Facebook|#", "Twitter|#", "Instagram|#"];
+  const navLinks = Array.isArray(footerLinks) && footerLinks.length > 0 ? footerLinks : [];
 
   return (
     <Section tag="footer" className="site-footer" sectionField={sectionField} style={css} backgroundImage={backgroundImage}>
-      <div style={{ padding: "40px", borderTop: "1px solid rgba(0,0,0,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: "40px" }}>
-        <div style={{ maxWidth: "300px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-            <img src={tenant.profile.photo} alt="Logo" style={{ height: "32px", width: "32px", borderRadius: "50%", objectFit: "cover" }} />
+      <div className="footer-inner">
+        <div className="footer-brand-col">
+          <div className="footer-logo">
+            <img src={tenant.profile.photo} alt="Logo"
+              style={{ height: "32px", width: "32px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
             <strong style={{ fontSize: "16px" }}>{tenant.profile.displayName}</strong>
           </div>
-          <p style={{ fontSize: "14px", opacity: 0.6, lineHeight: 1.6 }}>{tenant.profile.bio?.slice(0, 100)}...</p>
+          {tenant.profile.bio && (
+            <p className="footer-bio">{tenant.profile.bio.slice(0, 120)}…</p>
+          )}
         </div>
-        
-        <div>
-          <h4 style={{ fontSize: "14px", marginBottom: "16px", textTransform: "uppercase", letterSpacing: "1px" }}>Connect</h4>
-          <div style={{ display: "flex", gap: "16px" }}>
-            {links.map((link, i) => {
-              const { label, href } = resolveNavLink(link);
+
+        {navLinks.length > 0 && (
+          <div className="footer-connect-col">
+            <h4 className="footer-links-heading">{linksHeading || "Links"}</h4>
+            <div className="footer-social">
+              {navLinks.map((link, i) => {
+                const { label, href, icon } = resolveNavLink(link);
+                return (
+                  <a key={i} href={href}
+                    style={{ fontSize: "14px", color: "var(--primary)", textDecoration: "none", fontWeight: 500, display:"flex", alignItems:"center", gap:4 }}>
+                    {icon && <span style={{ fontSize:"15px" }}>{iconToEmoji(icon)}</span>}
+                    {label}
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className="footer-connect-col">
+          <h4 className="footer-links-heading">{socialHeading || "Connect"}</h4>
+          <div className="footer-social">
+            {socials.map((link, i) => {
+              const { label, href, icon } = resolveNavLink(link);
               return (
-                <a key={i} href={href} style={{ fontSize: "14px", color: "var(--primary)", textDecoration: "none", fontWeight: 500 }}>
+                <a key={i} href={href}
+                  style={{ fontSize: "14px", color: "var(--primary)", textDecoration: "none", fontWeight: 500, display:"flex", alignItems:"center", gap:4 }}>
+                  {icon && <span style={{ fontSize:"15px" }}>{iconToEmoji(icon)}</span>}
                   {label}
                 </a>
               );
@@ -536,9 +593,9 @@ function Footer({
           </div>
         </div>
       </div>
-      <div style={{ marginTop: "40px", paddingTop: "20px", borderTop: "1px solid rgba(0,0,0,0.05)", fontSize: "12px", opacity: 0.5, textAlign: "center" }}>
+
+      <div className="footer-copyright">
         {displayCopyright}
-      </div>
       </div>
     </Section>
   );
@@ -567,7 +624,7 @@ function Awards({
   return (
     <Section className={`block awards-section${variant ? ` awards-${variant}` : ""}`} sectionField={sectionField} style={block?.css} backgroundImage={block?.backgroundImage}>
       <BlockTitle kicker={block?.kicker ?? "Recognition"} title={block?.title ?? "Awards & Achievements"} />
-      <div className="awards-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px" }}>
+      <div className="awards-grid">
         {awards.map((award: any, i: number) => (
           <Card key={i} className="award-card" style={{ textAlign: "center", padding: "24px" }}>
             <div style={{ fontSize: "24px", marginBottom: "12px" }}>{iconFor(award.icon) || "🏆"}</div>
@@ -1284,6 +1341,20 @@ function inlineMarkdown(text: string): string {
     .replace(/\[(.+?)\]\((.+?)\)/g, (_, label, url) => `<a href="${escapeHtml(safehref(url))}" style="color:var(--primary)">${label}</a>`);
 }
 
+function iconToEmoji(icon: string): string {
+  const map: Record<string, string> = {
+    stethoscope:"🩺",'heart-pulse':"💗", syringe:"💉", bandage:"🩹", pill:"💊", thermometer:"🌡️",
+    brain:"🧠", bone:"🦴", heart:"❤️", lungs:"🫁", tooth:"🦷", eye:"👁️", baby:"👶", dna:"🧬",
+    microscope:"🔬", ambulance:"🚑", hospital:"🏥", ribbon:"🎗️", siren:"🚨", activity:"📈",
+    users:"👥",'user-check':"🥼", smile:"😊", award:"🏆", certificate:"📜", shield:"🛡️",
+    star:"⭐", check:"✅", lock:"🔒", verified:"✔️", calendar:"📅", clock:"⏰",
+    phone:"📞", mail:"✉️",'map-pin':"📍", whatsapp:"💬", video:"📹", globe:"🌐",
+    building:"🏢", home:"🏠", car:"🚗", chart:"📊", document:"📄", sparkles:"✨",
+    zap:"⚡", leaf:"🌿", sun:"☀️", info:"ℹ️",'arrow-right':"→",
+  };
+  return map[icon] ?? "";
+}
+
 function iconFor(icon?: string): React.ReactElement | null {
   return iconElement(icon, { width: "1.1em", height: "1.1em" });
 }
@@ -1309,7 +1380,7 @@ function Testimonials({
   return (
     <Section className={`block testimonials-section${variant ? ` testimonials-${variant}` : ""}`} sectionField={sectionField} style={block?.css} backgroundImage={block?.backgroundImage}>
       <BlockTitle kicker={block?.kicker ?? "Testimonials"} title={block?.title ?? "What our patients say"} />
-      <div className="testimonials-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
+      <div className="testimonials-grid">
         {testimonials.map((t: any, i: number) => (
           <Card key={i} className="testimonial-card">
             <Text editPath={studioMode ? `blocks.${blockIndex}.items.${i}.quote` : undefined}>"{t.quote}"</Text>

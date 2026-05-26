@@ -7,29 +7,93 @@
         "Expert cardiology care for every heartbeat",
         "Keeping your heart healthy, one beat at a time",
         "Comprehensive cardiac care near you",
-        "Heart health is our priority"
+        "Heart health is our priority",
+        "Advanced cardiac care, compassionate approach",
+        "Where heart health meets expertise",
+        "Your heart, in expert hands",
+        "Precision cardiology for every patient",
+        "Protecting hearts, changing lives",
+        "World-class heart care at your doorstep"
       ],
       "subheadlines": [
         "Preventive cardiology, diagnostics, and practical care plans for long-term heart health.",
         "From routine check-ups to advanced cardiac procedures, we provide complete heart care.",
         "Board-certified cardiologist with 15+ years of experience in heart health management.",
-        "Advanced echocardiography, ECG, and cardiac risk assessment under one roof."
+        "Advanced echocardiography, ECG, and cardiac risk assessment under one roof.",
+        "Specialized in coronary artery disease, arrhythmias, and heart failure management.",
+        "Early detection saves lives — book your cardiac screening today.",
+        "Trusted by thousands of patients for accurate diagnosis and personalized treatment.",
+        "Combining cutting-edge technology with compassionate care for your heart.",
+        "From prevention to intervention — complete cardiac care for life.",
+        "Evidence-based cardiology with a focus on your long-term well-being."
+      ],
+      "kickers": [
+        "Trusted Cardiac Care",
+        "Heart Specialists",
+        "Expert Cardiology",
+        "Advanced Heart Care",
+        "Certified Cardiologist",
+        "Heart Health Center",
+        "Cardiac Excellence",
+        "Your Heart Matters"
+      ],
+      "bios": [
+        "A board-certified cardiologist with over 15 years of experience managing complex cardiac conditions. Specializes in preventive cardiology, echocardiography, and interventional procedures, helping thousands of patients achieve better heart health.",
+        "Dedicated to providing compassionate, evidence-based cardiac care. With extensive training in advanced cardiac imaging and heart failure management, I bring world-class cardiology expertise to every patient encounter.",
+        "Passionate about preventive cardiology and patient education. I combine the latest cardiac research with a personalized approach, helping patients understand and manage their heart health effectively.",
+        "A highly trained cardiologist specializing in coronary artery disease and arrhythmia management, known for a thorough diagnostic approach and clear communication that puts patients at ease.",
+        "Committed to transforming cardiac care through innovation and empathy. My extensive experience in echocardiography, stress testing, and cardiac rehabilitation ensures comprehensive care for every patient."
       ],
       "services": [
-        { "title": "Echo Review", "description": "Echocardiography review and follow-up guidance.", "icon": "scan" },
-        { "title": "ECG", "description": "Quick in-clinic ECG testing and interpretation.", "icon": "activity" },
-        { "title": "Cardiology Consultation", "description": "Diagnosis and treatment planning for heart-related concerns.", "icon": "heart" },
-        { "title": "Holter Monitoring", "description": "24-hour heart rhythm monitoring and analysis.", "icon": "activity" },
-        { "title": "Cardiac Risk Assessment", "description": "Comprehensive evaluation of heart disease risk factors.", "icon": "heart" }
+        { "title": "Echocardiography", "description": "Advanced echocardiography review, interpretation, and follow-up care.", "icon": "scan" },
+        { "title": "ECG & Holter", "description": "In-clinic ECG testing and 24-hour Holter rhythm monitoring.", "icon": "activity" },
+        { "title": "Cardiology Consultation", "description": "Comprehensive diagnosis and treatment planning for heart concerns.", "icon": "heart" },
+        { "title": "Cardiac Risk Assessment", "description": "Thorough evaluation of your heart disease risk factors and prevention plan.", "icon": "shield" },
+        { "title": "Stress Testing", "description": "Exercise stress tests to evaluate heart performance under load.", "icon": "heart-pulse" },
+        { "title": "Heart Failure Management", "description": "Ongoing monitoring and optimized management for heart failure patients.", "icon": "stethoscope" },
+        { "title": "Preventive Cardiology", "description": "Lifestyle counseling and medication strategies to prevent heart disease.", "icon": "leaf" },
+        { "title": "Hypertension Management", "description": "Diagnosis, treatment, and long-term control of high blood pressure.", "icon": "activity" }
       ],
       "ctas": [
         "Ready to take care of your heart?",
         "Book your cardiac consultation today.",
-        "Your heart matters — schedule a check-up now."
+        "Your heart matters — schedule a check-up now.",
+        "Don't wait — protect your heart health today.",
+        "Take the first step towards a healthier heart.",
+        "Schedule your cardiac screening now.",
+        "Speak to a cardiologist this week.",
+        "Get peace of mind — book your heart check today.",
+        "Let's build a healthier heart together.",
+        "One consultation can change everything — book today."
       ],
       "faqs": [
-        { "question": "What should I bring to my cardiology appointment?", "answer": "Please bring any previous ECG reports, current medications list, and insurance details." },
-        { "question": "How often should I get a heart check-up?", "answer": "Adults over 40 should have annual cardiac screenings. Those with risk factors may need more frequent visits." }
+        { "question": "What should I bring to my cardiology appointment?", "answer": "Please bring any previous ECG or echo reports, a list of current medications, and any relevant insurance documents." },
+        { "question": "How often should I get a heart check-up?", "answer": "Adults over 40 should have annual cardiac screenings. Those with risk factors such as diabetes, hypertension, or a family history of heart disease may need more frequent visits." },
+        { "question": "What are the warning signs of a heart attack?", "answer": "Common warning signs include chest pain or pressure, shortness of breath, pain radiating to the arm or jaw, sweating, and sudden dizziness. Seek emergency care immediately if you experience these." },
+        { "question": "Is high blood pressure dangerous for my heart?", "answer": "Yes, uncontrolled hypertension is a major risk factor for heart disease, stroke, and kidney damage. Regular monitoring and appropriate treatment are essential." },
+        { "question": "Can heart disease be prevented?", "answer": "Many forms of heart disease can be prevented or significantly delayed with lifestyle changes including a heart-healthy diet, regular exercise, not smoking, and managing stress." },
+        { "question": "What does an echocardiogram show?", "answer": "An echocardiogram uses sound waves to visualize the heart's structure and function, revealing valve conditions, wall motion abnormalities, and overall pumping efficiency." }
+      ],
+      "testimonials": [
+        { "quote": "The most thorough cardiologist I have ever visited. Explained everything clearly and put all my fears to rest.", "author": "Sunita K., 47" },
+        { "quote": "My cholesterol and blood pressure are now perfectly managed. The personalized care plan made all the difference.", "author": "Priya N., 39" },
+        { "quote": "I came in with palpitations and left with complete clarity about my heart health. Outstanding care.", "author": "Arun S., 55" },
+        { "quote": "The Holter monitoring here caught an arrhythmia that two other doctors had missed. Truly life-saving.", "author": "Leela T., 61" },
+        { "quote": "After my stent procedure, the follow-up care was exceptional. I feel like a new person.", "author": "Rajan M., 52" },
+        { "quote": "I appreciate how the doctor takes time to listen and never rushes through the consultation. Highly recommended.", "author": "Mohan P., 64" }
+      ],
+      "stats": [
+        { "value": "15+", "label": "Years Experience" },
+        { "value": "8000+", "label": "Patients Treated" },
+        { "value": "99%", "label": "Patient Satisfaction" },
+        { "value": "500+", "label": "Cardiac Procedures" },
+        { "value": "3", "label": "Hospitals Affiliated" }
+      ],
+      "awards": [
+        { "title": "Best Cardiologist of the Year", "organization": "City Medical Association" },
+        { "title": "Excellence in Patient Care", "organization": "National Health Council" },
+        { "title": "Top Doctor Recognition", "organization": "Healthcare India" },
+        { "title": "Research Excellence Award", "organization": "Cardiology Society of India" }
       ]
     },
     "dermatology": {
@@ -38,25 +102,94 @@
         "Expert skin care for every age",
         "Your skin deserves specialist care",
         "Advanced dermatology solutions",
-        "Clear skin starts here"
+        "Clear skin starts here",
+        "Radiant skin, remarkable results",
+        "Skin health is total health",
+        "From acne to aging — we have you covered",
+        "The skin clinic you can trust",
+        "Transforming skin, transforming lives",
+        "Evidence-based skin care for every condition",
+        "Your path to healthier, clearer skin"
       ],
       "subheadlines": [
         "Comprehensive dermatology services from acne treatment to skin cancer screening.",
         "Board-certified dermatologist offering medical, surgical, and cosmetic skin care.",
-        "Personalized treatment plans for all skin types and conditions."
+        "Personalized treatment plans for all skin types, tones, and conditions.",
+        "Combining the latest dermatological research with compassionate, patient-centered care.",
+        "Advanced laser treatments, chemical peels, and medical-grade skin therapies.",
+        "From chronic conditions like psoriasis and eczema to aesthetic enhancements.",
+        "Early detection of skin cancer saves lives — schedule your full-body skin check.",
+        "Treating every skin concern with precision, experience, and genuine care.",
+        "Your skin is unique — and so is our approach to treating it.",
+        "State-of-the-art dermatology clinic serving patients of all ages."
+      ],
+      "kickers": [
+        "Skin Specialists",
+        "Expert Dermatology",
+        "Clear Skin Experts",
+        "Trusted Skin Care",
+        "Cosmetic & Medical",
+        "Advanced Skin Clinic",
+        "Your Skin, Our Passion",
+        "Certified Dermatologist"
+      ],
+      "bios": [
+        "A board-certified dermatologist with over 12 years of experience treating a wide range of skin conditions. Specializes in medical dermatology, cosmetic procedures, and dermatoscopy-guided skin cancer detection.",
+        "Passionate about helping patients achieve healthy, confident skin. I combine evidence-based dermatology with the latest cosmetic techniques to deliver transformative results for every patient.",
+        "With advanced training in laser therapy, chemical peels, and immunodermatology, I offer comprehensive skin care solutions tailored to each patient's unique needs and goals.",
+        "Dedicated to making quality dermatology accessible to all. I take time to educate patients about their skin conditions and develop treatment plans that fit their lifestyle.",
+        "A specialist in both medical and aesthetic dermatology, I bring years of clinical expertise and artistic sensibility to every consultation, helping patients look and feel their best."
       ],
       "services": [
-        { "title": "Acne Treatment", "description": "Personalized acne care plans for clear, healthy skin.", "icon": "cross" },
-        { "title": "Skin Cancer Screening", "description": "Early detection and treatment of skin cancers.", "icon": "scan" },
-        { "title": "Eczema Care", "description": "Management and treatment of eczema and dermatitis.", "icon": "heart" },
-        { "title": "Cosmetic Dermatology", "description": "Anti-aging treatments and skin rejuvenation.", "icon": "users" }
+        { "title": "Acne Treatment", "description": "Personalized acne care plans including topical, oral, and procedural therapies.", "icon": "cross" },
+        { "title": "Skin Cancer Screening", "description": "Full-body dermoscopy-guided skin checks for early cancer detection.", "icon": "scan" },
+        { "title": "Eczema & Psoriasis Care", "description": "Comprehensive management of chronic inflammatory skin conditions.", "icon": "heart" },
+        { "title": "Cosmetic Dermatology", "description": "Anti-aging treatments, Botox, fillers, and skin rejuvenation procedures.", "icon": "sparkles" },
+        { "title": "Laser Treatments", "description": "Advanced laser therapy for pigmentation, scarring, and hair removal.", "icon": "zap" },
+        { "title": "Chemical Peels", "description": "Medical-grade peels for skin brightening, texture, and tone correction.", "icon": "leaf" },
+        { "title": "Hair & Scalp Care", "description": "Diagnosis and treatment of hair loss, dandruff, and scalp disorders.", "icon": "activity" },
+        { "title": "Patch Testing", "description": "Allergy patch testing to identify contact dermatitis triggers.", "icon": "check" }
       ],
       "ctas": [
         "Love your skin — book a consultation today.",
-        "Get the clear, healthy skin you deserve."
+        "Get the clear, healthy skin you deserve.",
+        "Take the first step to better skin.",
+        "Your skin transformation starts here.",
+        "Book your full-body skin check today.",
+        "Clear skin is possible — let's talk.",
+        "Schedule your personalized skin care consultation.",
+        "Start your journey to radiant skin.",
+        "Don't live with problem skin — help is here.",
+        "See what expert skin care can do for you."
       ],
       "faqs": [
-        { "question": "How often should I get a skin check?", "answer": "Annual skin screenings are recommended. Those with high risk factors should visit every 6 months." }
+        { "question": "How often should I get a skin cancer check?", "answer": "Annual full-body skin screenings are recommended for most adults. Those with a family history of skin cancer or many moles should consider checks every 6 months." },
+        { "question": "What is the best treatment for adult acne?", "answer": "Treatment depends on the type and severity of acne. Options include topical retinoids, antibiotics, hormonal therapy, chemical peels, and in some cases, oral isotretinoin." },
+        { "question": "How long before I see results from acne treatment?", "answer": "Most acne treatments take 6-8 weeks to show significant improvement. Consistency with the prescribed routine is key to achieving and maintaining clear skin." },
+        { "question": "Is cosmetic dermatology safe?", "answer": "When performed by a qualified dermatologist, cosmetic procedures like Botox and fillers are very safe. We use only FDA-approved products and follow strict protocols." },
+        { "question": "What causes eczema flares?", "answer": "Common eczema triggers include dry weather, stress, certain soaps or fabrics, allergens, and sweat. Identifying and avoiding your personal triggers is an important part of management." },
+        { "question": "Can laser treatments be done on all skin tones?", "answer": "Modern laser technology has made many treatments safer for darker skin tones. However, device selection and settings must be carefully adjusted. We assess each patient individually." }
+      ],
+      "testimonials": [
+        { "quote": "My acne of 10 years cleared up within 3 months of starting treatment here. I finally feel confident in my skin.", "author": "Meera L., 26" },
+        { "quote": "The skin cancer screening was thorough and the doctor found a suspicious lesion early. I'm grateful for the careful check.", "author": "David R., 54" },
+        { "quote": "The chemical peel made a visible difference in just one session. My skin looks years younger.", "author": "Anjali S., 41" },
+        { "quote": "I had tried everything for my eczema. Finally a doctor who took the time to find what was triggering it.", "author": "Karan M., 33" },
+        { "quote": "Professional, knowledgeable, and incredibly gentle. The best dermatologist I have ever been to.", "author": "Nisha P., 38" },
+        { "quote": "The laser treatment for my acne scars exceeded my expectations. Remarkable difference after just two sessions.", "author": "Rohit K., 29" }
+      ],
+      "stats": [
+        { "value": "12+", "label": "Years Experience" },
+        { "value": "10000+", "label": "Patients Treated" },
+        { "value": "98%", "label": "Patient Satisfaction" },
+        { "value": "50+", "label": "Skin Conditions Treated" },
+        { "value": "5", "label": "Awards Received" }
+      ],
+      "awards": [
+        { "title": "Best Dermatologist Award", "organization": "Dermatology Association of India" },
+        { "title": "Excellence in Cosmetic Dermatology", "organization": "City Medical Foundation" },
+        { "title": "Patient Choice Award", "organization": "Healthline India" },
+        { "title": "Top Skin Specialist", "organization": "Medical Excellence Awards" }
       ]
     },
     "pediatrics": {
@@ -65,25 +198,94 @@
         "Your child's health is our joy",
         "Trusted pediatric care for growing families",
         "Compassionate care for children of all ages",
-        "Where children come first"
+        "Where children come first",
+        "Nurturing your child's health and happiness",
+        "The child-friendly clinic families trust",
+        "Expert care from newborns to teenagers",
+        "Growing up healthy, one milestone at a time",
+        "Pediatric care with warmth and expertise",
+        "Your family's trusted child health partner",
+        "Every child deserves expert, loving care"
       ],
       "subheadlines": [
         "Comprehensive pediatric care from newborn check-ups to adolescent health management.",
-        "Child-friendly clinic with experienced pediatricians who truly care.",
-        "Vaccinations, growth monitoring, and developmental assessments."
+        "Child-friendly clinic with experienced pediatricians who truly care about your child.",
+        "Vaccinations, growth monitoring, developmental assessments, and illness care.",
+        "Creating a comfortable, stress-free environment where children feel safe and understood.",
+        "Bilingual consultations and school medical certificates available.",
+        "Specialized in newborn care, developmental pediatrics, and childhood nutrition.",
+        "From minor illnesses to complex developmental concerns — we are here for every stage.",
+        "Evidence-based pediatric care delivered with patience, warmth, and expertise.",
+        "Same-day appointments available for sick children who need urgent care.",
+        "Partnering with parents to raise healthier, happier children."
+      ],
+      "kickers": [
+        "Child Health Experts",
+        "Trusted Pediatricians",
+        "Family-Friendly Care",
+        "Kids First",
+        "Little Ones Matter",
+        "Pediatric Specialists",
+        "Gentle & Expert Care",
+        "Childhood Health Hub"
+      ],
+      "bios": [
+        "A dedicated pediatrician with over 10 years of experience in child health care. My child-friendly approach and clinical expertise make every visit a positive experience for kids and parents alike.",
+        "Passionate about supporting children's growth and development from birth through adolescence. I believe in empowering parents with knowledge and building trust through consistent, compassionate care.",
+        "Specializing in developmental pediatrics, childhood nutrition, and newborn care, I provide holistic healthcare that addresses the physical, emotional, and developmental needs of every child.",
+        "A family-centered pediatrician who takes the time to listen to both the child and the parents. I strive to make every child feel safe and every parent feel confident in their child's health.",
+        "Trained in the latest pediatric guidelines and dedicated to preventive medicine, I help families build strong health foundations that last a lifetime."
       ],
       "services": [
-        { "title": "Vaccinations", "description": "Complete immunization schedule for infants and children.", "icon": "cross" },
+        { "title": "Newborn Care", "description": "Specialized assessments and guidance for infants in their critical first months.", "icon": "baby" },
+        { "title": "Vaccinations", "description": "Complete immunization schedule following national guidelines for all ages.", "icon": "syringe" },
         { "title": "Growth Monitoring", "description": "Regular tracking of height, weight, and developmental milestones.", "icon": "activity" },
-        { "title": "Newborn Care", "description": "Specialized care for infants in their first critical months.", "icon": "heart" },
-        { "title": "Nutrition Counseling", "description": "Expert dietary guidance for healthy child development.", "icon": "users" }
+        { "title": "Developmental Assessment", "description": "Screening for developmental delays, speech issues, and behavioral concerns.", "icon": "brain" },
+        { "title": "Nutrition Counseling", "description": "Expert dietary guidance for healthy child development at every stage.", "icon": "leaf" },
+        { "title": "School Health Certificates", "description": "Fitness certificates, medical forms, and school entry health checks.", "icon": "certificate" },
+        { "title": "Adolescent Care", "description": "Confidential health guidance for teenagers navigating physical and emotional changes.", "icon": "users" },
+        { "title": "Sick Child Consultations", "description": "Same-day consultations for fever, infections, and acute childhood illnesses.", "icon": "stethoscope" }
       ],
       "ctas": [
         "Give your child the best start — book today.",
-        "Your child's health journey begins here."
+        "Your child's health journey begins here.",
+        "Schedule your child's check-up today.",
+        "Raise a healthier child — we'll help.",
+        "Book your infant's first visit now.",
+        "Your little one deserves expert care.",
+        "Don't delay your child's health — call us today.",
+        "Gentle, expert care is just a booking away.",
+        "Let's take care of your child, together.",
+        "Join thousands of happy families — book today."
       ],
       "faqs": [
-        { "question": "What vaccinations does my child need?", "answer": "We follow the national immunization schedule. A detailed chart will be provided at your first visit." }
+        { "question": "What vaccinations does my child need?", "answer": "We follow the national immunization schedule. A detailed vaccination chart will be provided at your first visit and updated at each follow-up." },
+        { "question": "How often should my child have a routine check-up?", "answer": "Newborns are seen frequently in the first year. From age 1-3, annual visits are recommended, and school-age children should be seen at least once a year." },
+        { "question": "When should I be worried about my child's fever?", "answer": "Seek medical attention for fevers above 39°C in babies under 3 months, fevers lasting more than 3 days, or fever with a rash, difficulty breathing, or unusual drowsiness." },
+        { "question": "Is it normal for my child to have a loss of appetite?", "answer": "Temporary loss of appetite is common in children, especially during illness or growth spurts. Persistent poor appetite warrants a consultation to rule out nutritional deficiencies or other concerns." },
+        { "question": "At what age should developmental milestones be achieved?", "answer": "Milestones vary, but general timelines exist for walking, talking, and social skills. We assess milestones at every check-up and refer for early intervention if needed." },
+        { "question": "How can I help my child build a healthy immune system?", "answer": "A balanced diet, regular physical activity, adequate sleep, good hygiene, and completing all vaccinations are the best ways to support a healthy immune system in children." }
+      ],
+      "testimonials": [
+        { "quote": "The most patient and gentle doctor with children. My toddler actually looks forward to visits now.", "author": "Pritha K., Parent" },
+        { "quote": "Excellent care from newborn stage to 5 years. Always available for advice and never dismisses any concern.", "author": "Rajesh M., Parent" },
+        { "quote": "My son has special needs and the doctor's understanding and specialized approach has made a real difference.", "author": "Ananya S., Parent" },
+        { "quote": "The vaccination clinic runs like clockwork — no long waits and a very calming environment for the kids.", "author": "Priya D., Parent" },
+        { "quote": "Clear explanations, practical advice, and genuine warmth. Exactly what a family needs in a pediatrician.", "author": "Sanjay N., Parent" },
+        { "quote": "Called with a concern about my baby at 9 PM and received a callback within minutes. Exceptional care.", "author": "Deepa V., Parent" }
+      ],
+      "stats": [
+        { "value": "10+", "label": "Years Experience" },
+        { "value": "12000+", "label": "Happy Patients" },
+        { "value": "99%", "label": "Parent Satisfaction" },
+        { "value": "5000+", "label": "Vaccinations Given" },
+        { "value": "2", "label": "Clinic Locations" }
+      ],
+      "awards": [
+        { "title": "Best Pediatrician Award", "organization": "Indian Academy of Pediatrics" },
+        { "title": "Child-Friendly Practice Award", "organization": "City Health Foundation" },
+        { "title": "Excellence in Newborn Care", "organization": "National Pediatrics Council" },
+        { "title": "Parent's Choice Award", "organization": "Healthcare India" }
       ]
     },
     "orthopedics": {
@@ -92,25 +294,94 @@
         "Expert bone and joint care",
         "Your mobility matters",
         "Comprehensive orthopedic solutions",
-        "Back to active living"
+        "Back to active living",
+        "Precision orthopedic care for every patient",
+        "Pain-free life is within reach",
+        "From injury to recovery — we are with you",
+        "Advanced joint care, lasting results",
+        "The orthopedic specialist you can trust",
+        "Restoring strength, movement, and confidence",
+        "Expert care for bones, joints, and beyond"
       ],
       "subheadlines": [
-        "Specialized care for bones, joints, and muscles — from diagnosis to rehabilitation.",
-        "Experienced orthopedic surgeon providing surgical and non-surgical treatments.",
-        "Sports injury management, joint replacement, and fracture care."
+        "Specialized care for bones, joints, and muscles — from diagnosis to full rehabilitation.",
+        "Experienced orthopedic surgeon providing both surgical and non-surgical treatments.",
+        "Sports injury management, joint replacement, and fracture care under one roof.",
+        "Minimally invasive surgical techniques for faster recovery and less pain.",
+        "From chronic back pain to acute sports injuries — comprehensive orthopedic care.",
+        "Advanced imaging, expert diagnosis, and personalized treatment plans.",
+        "Helping patients regain their independence and return to the activities they love.",
+        "Joint replacement, arthroscopy, and spine care by a fellowship-trained specialist.",
+        "Pain management and physiotherapy integration for holistic orthopedic care.",
+        "Trusted by athletes, active adults, and families for all orthopedic needs."
+      ],
+      "kickers": [
+        "Bone & Joint Experts",
+        "Orthopedic Specialists",
+        "Move Without Pain",
+        "Joint Care Center",
+        "Sports Medicine",
+        "Spine & Joint Clinic",
+        "Active Living, Restored",
+        "Fellowship-Trained Surgeon"
+      ],
+      "bios": [
+        "A fellowship-trained orthopedic surgeon with over 14 years of experience in joint replacement, sports medicine, and spine care. Committed to helping patients regain full mobility and live pain-free.",
+        "Specializing in minimally invasive orthopedic procedures, I combine surgical expertise with conservative management to find the best outcome for every patient's unique situation.",
+        "Passionate about helping athletes and active individuals recover from injury and return to peak performance. I offer personalized care plans from diagnosis through full rehabilitation.",
+        "With extensive training in complex joint reconstruction and arthroscopic surgery, I provide advanced orthopedic care with a focus on rapid recovery and long-term joint health.",
+        "Dedicated to making orthopedic care accessible and compassionate. I believe in thoroughly explaining all treatment options and involving patients in decisions about their own care."
       ],
       "services": [
-        { "title": "Joint Replacement", "description": "Advanced knee and hip replacement surgery.", "icon": "cross" },
-        { "title": "Sports Injury Care", "description": "Treatment for sprains, fractures, and ligament injuries.", "icon": "activity" },
-        { "title": "Spine Care", "description": "Diagnosis and management of back and neck conditions.", "icon": "scan" },
-        { "title": "Fracture Management", "description": "Expert casting, splinting, and surgical repair.", "icon": "heart" }
+        { "title": "Joint Replacement", "description": "Advanced knee, hip, and shoulder replacement surgery with rapid recovery protocols.", "icon": "bone" },
+        { "title": "Sports Injury Treatment", "description": "Expert management of ligament tears, muscle injuries, and sports-related fractures.", "icon": "activity" },
+        { "title": "Spine Care", "description": "Diagnosis and treatment of back pain, disc herniation, and spinal stenosis.", "icon": "scan" },
+        { "title": "Arthroscopic Surgery", "description": "Minimally invasive keyhole surgery for joint conditions with faster recovery.", "icon": "zap" },
+        { "title": "Fracture Management", "description": "Expert casting, splinting, and surgical repair of all types of fractures.", "icon": "cross" },
+        { "title": "Physiotherapy Integration", "description": "Coordinated rehabilitation plans with licensed physiotherapists post-surgery.", "icon": "heart-pulse" },
+        { "title": "Pain Management", "description": "Injections, bracing, and non-surgical therapies for joint and spine pain.", "icon": "shield" },
+        { "title": "Paediatric Orthopaedics", "description": "Treatment of bone and joint conditions specific to growing children.", "icon": "baby" }
       ],
       "ctas": [
         "Get back in motion — schedule your consultation.",
-        "Don't let pain hold you back."
+        "Don't let pain hold you back.",
+        "Your pain-free life starts here.",
+        "Book your orthopedic assessment today.",
+        "Take the first step toward recovery.",
+        "Regain your mobility — call today.",
+        "Schedule a consultation with our orthopedic expert.",
+        "Let's get you moving again.",
+        "Pain is not inevitable — get expert help.",
+        "Start your road to recovery today."
       ],
       "faqs": [
-        { "question": "Do I need surgery for my knee pain?", "answer": "Not always. Many knee conditions respond well to physiotherapy and medication. Surgery is considered after conservative options." }
+        { "question": "Do I need surgery for my knee pain?", "answer": "Not always. Many knee conditions respond well to physiotherapy, anti-inflammatory medication, and injections. Surgery is only recommended after conservative options have been exhausted." },
+        { "question": "How long is recovery after joint replacement?", "answer": "Most patients are walking with support within 24 hours. Full recovery takes 6-12 weeks depending on fitness, age, and adherence to rehabilitation exercises." },
+        { "question": "Can a slipped disc heal without surgery?", "answer": "Yes, the majority of disc herniations resolve with conservative treatment including physiotherapy, pain management, and activity modification within 6-12 weeks." },
+        { "question": "What sports injuries can be treated without surgery?", "answer": "Many sprains, strains, and minor ligament injuries can be effectively treated non-surgically with RICE (rest, ice, compression, elevation), physiotherapy, and bracing." },
+        { "question": "What should I do immediately after a sports injury?", "answer": "Apply RICE principles — rest the injured area, apply ice for 20 minutes every 2 hours, apply compression, and elevate the limb. Seek medical evaluation within 24-48 hours." },
+        { "question": "At what age is joint replacement typically recommended?", "answer": "There is no strict age requirement. The decision is based on pain severity, functional impairment, and quality of life impact rather than age alone." }
+      ],
+      "testimonials": [
+        { "quote": "My knee replacement was a complete success. I'm walking further than I have in a decade. Truly life-changing.", "author": "Krishnamurthy A., 67" },
+        { "quote": "Torn my ACL playing cricket and was back on the field in under 6 months. Exceptional surgical skill.", "author": "Vikram S., 28" },
+        { "quote": "The doctor explained every option before recommending surgery. I felt informed and confident throughout.", "author": "Lata R., 58" },
+        { "quote": "Three years of back pain resolved after a single minimally invasive procedure. I wish I had come sooner.", "author": "Ramesh N., 51" },
+        { "quote": "The post-operative care and physiotherapy coordination here is outstanding. Everything felt seamlessly managed.", "author": "Shalini K., 45" },
+        { "quote": "I had been told I would never play football again. Within 8 months post-surgery, I was back on the pitch.", "author": "Arjun P., 22" }
+      ],
+      "stats": [
+        { "value": "14+", "label": "Years Experience" },
+        { "value": "6000+", "label": "Surgeries Performed" },
+        { "value": "98%", "label": "Patient Satisfaction" },
+        { "value": "1000+", "label": "Joint Replacements" },
+        { "value": "4", "label": "Hospitals Affiliated" }
+      ],
+      "awards": [
+        { "title": "Best Orthopedic Surgeon", "organization": "Orthopedic Association of India" },
+        { "title": "Excellence in Sports Medicine", "organization": "National Sports Medicine Council" },
+        { "title": "Top Surgeon Award", "organization": "City Medical Foundation" },
+        { "title": "Patient Choice Award", "organization": "Healthcare Excellence Awards" }
       ]
     },
     "general-physician": {
@@ -119,25 +390,94 @@
         "Comprehensive care for all ages",
         "Trusted primary care near you",
         "Healthcare that puts you first",
-        "Your wellness is our mission"
+        "Your wellness is our mission",
+        "Expert family medicine, compassionate care",
+        "Your health, our commitment",
+        "Complete primary care for your entire family",
+        "Where your health journey begins",
+        "A doctor who truly listens",
+        "Same-day care for every health concern",
+        "Trusted healthcare, exceptional outcomes"
       ],
       "subheadlines": [
         "Complete primary healthcare services for your entire family under one roof.",
         "Experienced general physician offering preventive care, chronic disease management, and acute treatment.",
-        "Same-day appointments available for urgent health concerns."
+        "Same-day appointments available for urgent health concerns.",
+        "From common colds to complex chronic conditions — we care for you at every stage.",
+        "Trusted by thousands of families for reliable, personalized medical care.",
+        "Preventive health screenings, lifestyle counseling, and evidence-based treatment.",
+        "Building long-term relationships with patients and families based on trust and excellent care.",
+        "Offering comprehensive check-ups, blood investigations, and specialist referrals as needed.",
+        "Your health deserves the best — see a doctor who takes the time to understand you.",
+        "Accessible, affordable, and expert primary care for the whole family."
+      ],
+      "kickers": [
+        "Family Medicine Expert",
+        "Your Primary Physician",
+        "Trusted Family Doctor",
+        "General Medicine",
+        "Complete Health Care",
+        "Your Wellness Partner",
+        "Preventive & Curative",
+        "Health For All Ages"
+      ],
+      "bios": [
+        "A highly experienced general physician dedicated to providing holistic, patient-centered primary care to individuals and families. My approach combines thorough clinical assessment with genuine compassion for every patient.",
+        "With over a decade of experience in family medicine, I specialize in chronic disease management, preventive health, and acute illness care, serving as a trusted health partner for hundreds of families.",
+        "Committed to making quality healthcare accessible to all. I believe in taking time to listen, educate, and collaborate with patients to achieve their best health outcomes.",
+        "An expert in managing conditions like diabetes, hypertension, and thyroid disorders, I provide continuity of care that makes a real difference over time.",
+        "Trained in modern family medicine with a focus on preventive health, lifestyle medicine, and early disease detection. I aim to keep patients healthy, not just treat them when they are sick."
       ],
       "services": [
-        { "title": "General Consultation", "description": "Comprehensive health check-ups and illness management.", "icon": "heart" },
-        { "title": "Chronic Care", "description": "Ongoing management of diabetes, hypertension, and thyroid disorders.", "icon": "activity" },
-        { "title": "Preventive Health", "description": "Health screenings and lifestyle counseling for disease prevention.", "icon": "scan" },
-        { "title": "Vaccinations", "description": "Adult and pediatric immunization services.", "icon": "cross" }
+        { "title": "General Consultation", "description": "Comprehensive health assessments and illness diagnosis and management.", "icon": "stethoscope" },
+        { "title": "Chronic Disease Care", "description": "Ongoing management of diabetes, hypertension, thyroid, and lifestyle diseases.", "icon": "activity" },
+        { "title": "Preventive Health Packages", "description": "Annual health screenings tailored to your age and risk factors.", "icon": "shield" },
+        { "title": "Vaccinations", "description": "Adult and pediatric immunization services for all ages.", "icon": "syringe" },
+        { "title": "Minor Procedures", "description": "Wound care, suturing, ear syringing, and minor in-clinic procedures.", "icon": "cross" },
+        { "title": "Health Certificates", "description": "Fitness and medical certificates for work, school, and travel.", "icon": "certificate" },
+        { "title": "Lifestyle Counseling", "description": "Evidence-based guidance on diet, exercise, stress, and sleep.", "icon": "leaf" },
+        { "title": "Specialist Referrals", "description": "Coordinated referrals to trusted specialists when needed.", "icon": "users" }
       ],
       "ctas": [
         "Book your family's health check today.",
-        "Your health journey starts with a simple visit."
+        "Your health journey starts with a simple visit.",
+        "See a doctor who truly listens.",
+        "Book a same-day appointment now.",
+        "Take charge of your health — call today.",
+        "Your family deserves the best care.",
+        "Schedule a full health check-up this week.",
+        "Don't put off your health — act today.",
+        "One visit can make all the difference.",
+        "Start feeling better — book today."
       ],
       "faqs": [
-        { "question": "How often should I have a general health check-up?", "answer": "Adults should have annual check-ups. Those with chronic conditions may need visits every 3-6 months." }
+        { "question": "How often should I have a general health check-up?", "answer": "Adults should ideally have an annual health check-up. Those with chronic conditions like diabetes or hypertension may need follow-ups every 3-6 months." },
+        { "question": "What is included in a full health check-up?", "answer": "A comprehensive check-up typically includes history review, physical examination, blood and urine tests, blood pressure, weight assessment, and risk factor counseling." },
+        { "question": "When should I see a general physician versus a specialist?", "answer": "A general physician is your first point of contact for most health concerns. They will assess your condition and refer to a specialist if specialized care is needed." },
+        { "question": "How is diabetes managed in primary care?", "answer": "Diabetes management includes blood sugar monitoring, lifestyle modifications, oral medications or insulin, regular check-ups, and screening for complications." },
+        { "question": "Can I get a medical fitness certificate here?", "answer": "Yes, we provide fitness certificates for employment, school admissions, and travel purposes after a clinical assessment." },
+        { "question": "What vaccinations do adults need?", "answer": "Adult vaccines include annual flu shots, tetanus boosters, hepatitis B, and others based on age, occupation, and health status. We will create a tailored vaccination schedule for you." }
+      ],
+      "testimonials": [
+        { "quote": "My go-to doctor for everything. Always takes the time to explain things clearly and never rushes.", "author": "Nalini S., 43" },
+        { "quote": "Managed my father's hypertension and diabetes beautifully for 5 years. His health has never been better.", "author": "Karthik M., 38" },
+        { "quote": "I felt truly heard at my first consultation. A doctor who genuinely cares about your overall well-being.", "author": "Vidya R., 51" },
+        { "quote": "Got a same-day appointment when I had a bad fever. Quick, accurate diagnosis and I recovered in two days.", "author": "Suresh K., 29" },
+        { "quote": "My whole family sees this doctor. We trust the clinical judgment and always leave with a clear plan.", "author": "Meena P., 46" },
+        { "quote": "The preventive health package here detected an early thyroid issue that I was completely unaware of.", "author": "Anita D., 39" }
+      ],
+      "stats": [
+        { "value": "18+", "label": "Years Experience" },
+        { "value": "15000+", "label": "Patients Treated" },
+        { "value": "98%", "label": "Patient Satisfaction" },
+        { "value": "500+", "label": "Families Served" },
+        { "value": "1", "label": "Clinic Location" }
+      ],
+      "awards": [
+        { "title": "Best Family Physician", "organization": "City Medical Association" },
+        { "title": "Excellence in Primary Care", "organization": "National Health Council" },
+        { "title": "Patient Trust Award", "organization": "Healthcare India" },
+        { "title": "Community Health Champion", "organization": "Municipal Health Board" }
       ]
     },
     "gynecology": {
@@ -146,36 +486,484 @@
         "Compassionate care for women",
         "Your health at every stage",
         "Expert gynecology services",
-        "Caring for women, empowering lives"
+        "Caring for women, empowering lives",
+        "Women's health with warmth and expertise",
+        "Complete care for every woman",
+        "Your trusted gynecologist",
+        "From puberty to menopause — we are with you",
+        "Women's wellness, delivered with care",
+        "Empowering women through expert health care",
+        "Specialized care for the women who matter most"
       ],
       "subheadlines": [
         "Comprehensive women's health services from routine exams to specialized treatments.",
-        "Experienced gynecologist providing personalized care in a comfortable environment.",
-        "Prenatal care, family planning, and menopause management."
+        "Experienced gynecologist providing personalized care in a comfortable, private environment.",
+        "Prenatal care, family planning, and menopause management under one roof.",
+        "Creating a safe, supportive space for all your women's health needs.",
+        "Advanced laparoscopic procedures with faster recovery and minimal discomfort.",
+        "From adolescent gynecology to reproductive medicine — complete women's health.",
+        "High-risk pregnancy management, fertility assessments, and routine screening.",
+        "Combining clinical expertise with empathy for women at every life stage.",
+        "Your concerns matter — we take the time to listen and provide expert guidance.",
+        "Modern, evidence-based women's health care delivered with genuine compassion."
+      ],
+      "kickers": [
+        "Women's Health Experts",
+        "Trusted Gynecologist",
+        "Care at Every Stage",
+        "Obstetrics & Gynecology",
+        "Women's Wellness Center",
+        "Fertility & Pregnancy",
+        "Expert Women's Care",
+        "Empowering Women's Health"
+      ],
+      "bios": [
+        "A board-certified obstetrician and gynecologist with over 15 years of experience providing compassionate women's health care. Specializes in high-risk pregnancy management, laparoscopic surgery, and menopause care.",
+        "Dedicated to empowering women with knowledge and providing exceptional care throughout every stage of their lives — from adolescence through menopause and beyond.",
+        "With expertise in minimally invasive gynecologic surgery and reproductive medicine, I offer modern solutions that minimize recovery time while delivering outstanding clinical outcomes.",
+        "Passionate about women's preventive health and early cancer detection. I believe that informed, empowered women make the best decisions for their health.",
+        "A caring and skilled gynecologist known for creating a comfortable, judgement-free environment where women feel heard, respected, and well-cared for."
       ],
       "services": [
-        { "title": "Prenatal Care", "description": "Complete pregnancy monitoring and delivery planning.", "icon": "heart" },
-        { "title": "Family Planning", "description": "Contraception counseling and fertility assessments.", "icon": "users" },
-        { "title": "Menopause Care", "description": "Symptom management and hormonal health support.", "icon": "activity" },
-        { "title": "Screening Tests", "description": "Pap smears, mammography referrals, and HPV testing.", "icon": "scan" }
+        { "title": "Prenatal Care", "description": "Complete pregnancy monitoring, high-risk pregnancy management, and delivery planning.", "icon": "heart" },
+        { "title": "Family Planning", "description": "Contraception counseling and fertility assessments tailored to your needs.", "icon": "users" },
+        { "title": "Menopause Management", "description": "Symptom relief, hormone therapy, and long-term wellness support.", "icon": "activity" },
+        { "title": "Gynecologic Screening", "description": "Pap smears, mammography referrals, HPV testing, and STI screening.", "icon": "scan" },
+        { "title": "Laparoscopic Surgery", "description": "Minimally invasive surgery for fibroids, cysts, endometriosis, and more.", "icon": "zap" },
+        { "title": "Fertility Assessment", "description": "Comprehensive fertility work-up and counseling for couples trying to conceive.", "icon": "heart-pulse" },
+        { "title": "Adolescent Gynecology", "description": "Sensitive, age-appropriate care for teenage girls and young women.", "icon": "smile" },
+        { "title": "PCOS Management", "description": "Holistic management of polycystic ovary syndrome through lifestyle and treatment.", "icon": "leaf" }
       ],
       "ctas": [
         "Take charge of your health — book today.",
-        "Your health matters at every stage of life."
+        "Your health matters at every stage of life.",
+        "Schedule your women's health check-up.",
+        "Book a private, comfortable consultation today.",
+        "Your wellness is worth prioritizing — call now.",
+        "Speak to a trusted gynecologist this week.",
+        "Start your prenatal care journey today.",
+        "Don't delay your annual check — book now.",
+        "Expert care for every woman — book today.",
+        "Your health, our commitment — schedule now."
       ],
       "faqs": [
-        { "question": "How often should I have a gynecological check-up?", "answer": "Annual well-woman visits are recommended, including Pap smears every 3 years for women 21-65." }
+        { "question": "How often should I have a gynecological check-up?", "answer": "Annual well-woman visits are recommended, including Pap smears every 3 years for women aged 21-65, or every 5 years if combined with HPV testing." },
+        { "question": "At what age should I first see a gynecologist?", "answer": "It's recommended to have a first gynecology visit between ages 13-15, or when a young woman becomes sexually active, to establish care and discuss reproductive health." },
+        { "question": "What is the best contraception option for me?", "answer": "The best contraception depends on your health history, lifestyle, and future fertility plans. We discuss all options including pills, IUDs, implants, and barrier methods." },
+        { "question": "What are symptoms of PCOS?", "answer": "Common PCOS symptoms include irregular periods, excess hair growth, acne, weight gain, and difficulty conceiving. A combination of blood tests and ultrasound is used to diagnose it." },
+        { "question": "What can I expect during pregnancy check-ups?", "answer": "Prenatal visits include weight and blood pressure checks, fetal heart rate monitoring, growth scans, and blood and urine tests. The schedule intensifies in the third trimester." },
+        { "question": "What are the symptoms of menopause?", "answer": "Common symptoms include hot flashes, night sweats, irregular periods, mood changes, sleep disturbances, and vaginal dryness. Effective treatments are available to manage these." }
+      ],
+      "testimonials": [
+        { "quote": "Saw me through two pregnancies with incredible care and professionalism. I felt safe and supported throughout.", "author": "Divya S., 34" },
+        { "quote": "The doctor's patience and thoroughness when addressing my fertility concerns gave me real hope.", "author": "Rekha M., 30" },
+        { "quote": "My PCOS is finally under control thanks to the comprehensive care plan. My quality of life has improved enormously.", "author": "Aisha K., 27" },
+        { "quote": "After struggling to find a gynecologist I could trust, I found one here. The warmth and expertise are unmatched.", "author": "Sunanda P., 38" },
+        { "quote": "The laparoscopic procedure was done with such precision. Minimal pain and back to work in three days.", "author": "Kavitha N., 42" },
+        { "quote": "My teenage daughter felt completely at ease during her first consultation. A rare gift in a doctor.", "author": "Shanthi R., Mother" }
+      ],
+      "stats": [
+        { "value": "15+", "label": "Years Experience" },
+        { "value": "9000+", "label": "Patients Treated" },
+        { "value": "2000+", "label": "Deliveries Conducted" },
+        { "value": "99%", "label": "Patient Satisfaction" },
+        { "value": "500+", "label": "Laparoscopic Surgeries" }
+      ],
+      "awards": [
+        { "title": "Best Gynecologist Award", "organization": "Federation of Obstetric and Gynaecological Societies" },
+        { "title": "Excellence in Women's Health", "organization": "National Health Foundation" },
+        { "title": "Top Obstetrician Recognition", "organization": "City Medical Association" },
+        { "title": "Safe Motherhood Champion", "organization": "State Health Department" }
+      ]
+    },
+    "neurology": {
+      "headlines": [
+        "Expert neurological care, close to home",
+        "Your brain health is our priority",
+        "Advanced neurology for better outcomes",
+        "Precision care for complex neurological conditions",
+        "A sharper mind, a healthier life",
+        "Trusted neurologist for you and your family",
+        "Comprehensive brain and nerve care",
+        "Neurology expertise that makes a difference",
+        "Where complex brain conditions meet expert care",
+        "Caring for your nervous system with skill",
+        "Advanced diagnosis and personalized neurological care",
+        "From headaches to epilepsy — complete neurological care"
+      ],
+      "subheadlines": [
+        "Specialized diagnosis and management of brain, spine, and nerve conditions.",
+        "Expert in epilepsy, stroke, Parkinson's disease, and headache disorders.",
+        "Advanced neuroimaging interpretation and comprehensive treatment plans.",
+        "From your first symptom to long-term management — we are your neurological partner.",
+        "Combining cutting-edge neuroscience with compassionate, patient-centered care.",
+        "Early diagnosis of neurological conditions leads to significantly better outcomes.",
+        "Board-certified neurologist offering expert care for adults and the elderly.",
+        "Evidence-based neurology with a focus on quality of life and functional independence.",
+        "Specialized in headache clinics, movement disorders, and neuro-rehabilitation.",
+        "Advanced EEG, nerve conduction studies, and neurocognitive assessments available."
+      ],
+      "kickers": [
+        "Brain & Nerve Experts",
+        "Neurological Specialists",
+        "Expert Neurology",
+        "Movement Disorder Clinic",
+        "Headache & Migraine",
+        "Epilepsy Management",
+        "Stroke & Recovery",
+        "Neuro-Rehabilitation"
+      ],
+      "bios": [
+        "A fellowship-trained neurologist with expertise in epilepsy, stroke management, and movement disorders. Committed to accurate diagnosis and personalized treatment that maximizes patient quality of life.",
+        "Dedicated to helping patients understand and manage complex neurological conditions with clarity and compassion. Specializes in headache disorders, Parkinson's disease, and neurocognitive assessments.",
+        "With advanced training in clinical neurophysiology including EEG and nerve conduction studies, I provide precise diagnostic work-up and effective management for a full spectrum of neurological conditions.",
+        "Passionate about early diagnosis and rehabilitation in neurological disease. I work closely with physiotherapists and occupational therapists to provide truly holistic neurological care.",
+        "An expert in managing chronic neurological conditions, I take a long-term approach to patient care — building trust, monitoring progress, and adjusting treatment to achieve the best outcomes."
+      ],
+      "services": [
+        { "title": "Headache & Migraine Clinic", "description": "Evidence-based diagnosis and management of all types of headache disorders.", "icon": "brain" },
+        { "title": "Epilepsy Management", "description": "Comprehensive seizure assessment, EEG interpretation, and treatment optimization.", "icon": "activity" },
+        { "title": "Stroke Assessment & Rehab", "description": "Acute stroke assessment, secondary prevention, and rehabilitation planning.", "icon": "zap" },
+        { "title": "Parkinson's & Tremor Clinic", "description": "Diagnosis and medical management of movement disorders and tremors.", "icon": "stethoscope" },
+        { "title": "Nerve Conduction Studies", "description": "EMG and NCS testing for peripheral neuropathy and nerve injuries.", "icon": "scan" },
+        { "title": "Memory & Cognitive Clinic", "description": "Assessment of memory problems, dementia risk, and cognitive decline.", "icon": "brain" },
+        { "title": "Vertigo & Balance Care", "description": "Diagnosis and treatment of dizziness, vertigo, and balance disorders.", "icon": "activity" },
+        { "title": "Neuro-Rehabilitation", "description": "Coordinated recovery plans for stroke, injury, and neurological disease.", "icon": "heart-pulse" }
+      ],
+      "ctas": [
+        "Seek expert neurological care today.",
+        "Book your neurology consultation now.",
+        "Don't ignore neurological symptoms — act today.",
+        "Schedule a comprehensive neuro assessment.",
+        "Expert brain care is a call away.",
+        "Early diagnosis changes outcomes — book today.",
+        "Take control of your neurological health.",
+        "Get answers for your symptoms — consult today.",
+        "Your nervous system deserves expert care.",
+        "Schedule a consultation with our neurologist."
+      ],
+      "faqs": [
+        { "question": "When should I see a neurologist?", "answer": "See a neurologist for symptoms such as recurring headaches, seizures, memory problems, weakness or numbness in limbs, tremors, difficulty speaking, or sudden vision changes." },
+        { "question": "What is the difference between a neurologist and a neurosurgeon?", "answer": "A neurologist diagnoses and manages brain and nervous system conditions medically. A neurosurgeon performs brain and spine surgeries. Most neurological conditions are treated medically without surgery." },
+        { "question": "What does an EEG test show?", "answer": "An EEG (electroencephalogram) records the brain's electrical activity. It helps diagnose epilepsy, sleep disorders, encephalopathy, and other brain conditions." },
+        { "question": "What is the best treatment for migraines?", "answer": "Treatment includes identifying and avoiding triggers, acute medications for attacks, and preventive medications for frequent migraines. Lifestyle modifications also play an important role." },
+        { "question": "Can stroke damage be reversed?", "answer": "Immediate treatment within the first few hours of stroke can significantly reduce or reverse brain damage. Post-stroke rehabilitation helps recover lost functions over time." },
+        { "question": "What causes tingling or numbness in hands and feet?", "answer": "These symptoms can result from peripheral neuropathy, carpal tunnel syndrome, vitamin B12 deficiency, diabetes, or spine problems. A nerve conduction study helps identify the cause." }
+      ],
+      "testimonials": [
+        { "quote": "After years of uncontrolled migraines, I finally found a doctor who identified the correct type and prescribed a targeted treatment. Life-changing.", "author": "Kavya S., 35" },
+        { "quote": "My father's Parkinson's tremors are now much better managed. The personalized medication adjustment made a remarkable difference.", "author": "Rohit M., 52" },
+        { "quote": "A thorough and compassionate neurologist who took the time to explain my epilepsy diagnosis clearly and without fear.", "author": "Preethi N., 24" },
+        { "quote": "After my stroke, the rehabilitation plan coordinated by this clinic helped me regain almost full function in 4 months.", "author": "Gopal R., 61" },
+        { "quote": "The memory assessment was comprehensive and provided clarity about my mother's diagnosis and what we should expect going forward.", "author": "Anita K., 56" },
+        { "quote": "I came in with dizziness and was given a precise vertigo diagnosis and effective treatment within one visit.", "author": "Suresh P., 48" }
+      ],
+      "stats": [
+        { "value": "16+", "label": "Years Experience" },
+        { "value": "7000+", "label": "Patients Treated" },
+        { "value": "98%", "label": "Patient Satisfaction" },
+        { "value": "1000+", "label": "EEGs Interpreted" },
+        { "value": "3", "label": "Hospitals Affiliated" }
+      ],
+      "awards": [
+        { "title": "Best Neurologist of the Year", "organization": "Neurological Society of India" },
+        { "title": "Excellence in Epilepsy Care", "organization": "Indian Epilepsy Society" },
+        { "title": "Outstanding Patient Care", "organization": "City Medical Association" },
+        { "title": "Stroke Management Excellence", "organization": "National Brain Foundation" }
+      ]
+    },
+    "ophthalmology": {
+      "headlines": [
+        "Protecting your vision, every day",
+        "Expert eye care for every patient",
+        "See the world more clearly",
+        "Advanced eye care you can trust",
+        "Your sight is precious — protect it",
+        "Comprehensive ophthalmology services",
+        "Clarity of vision, clarity of care",
+        "The eye clinic trusted by families",
+        "From glasses to surgery — complete eye care",
+        "Expert diagnosis for every eye condition",
+        "Restoring and protecting vision for life",
+        "Modern ophthalmology, compassionate approach"
+      ],
+      "subheadlines": [
+        "Comprehensive eye care including cataract surgery, glaucoma management, and refractive procedures.",
+        "State-of-the-art diagnostic equipment for accurate detection and treatment of all eye conditions.",
+        "Expert ophthalmologist with advanced training in retinal disorders and surgical eye care.",
+        "From routine eye exams to complex retinal surgeries — we cover every aspect of eye health.",
+        "Diabetic retinopathy screening, cataract assessment, and vision correction solutions.",
+        "Early detection of glaucoma, macular degeneration, and retinal conditions.",
+        "Laser eye surgery, premium lens implants, and advanced surgical outcomes.",
+        "Patient-centered eye care that combines technology with genuine compassion.",
+        "Trusted by patients for accurate prescriptions, surgical excellence, and follow-up care.",
+        "Modern phacoemulsification cataract surgery with rapid visual recovery."
+      ],
+      "kickers": [
+        "Vision Specialists",
+        "Expert Eye Care",
+        "Complete Ophthalmology",
+        "Cataract & Glaucoma",
+        "Retina Specialists",
+        "Laser Vision Correction",
+        "Eye Surgery Experts",
+        "Trusted Eye Clinic"
+      ],
+      "bios": [
+        "A qualified ophthalmologist with over 13 years of experience in cataract surgery, glaucoma management, and medical retina care, committed to preserving and enhancing the vision of every patient.",
+        "Specializing in minimally invasive cataract surgery and premium intraocular lens implants, I combine surgical precision with patient-centered care to deliver outstanding visual outcomes.",
+        "With advanced training in vitreoretinal surgery and diabetic eye disease, I provide expert management for complex eye conditions that are often sight-threatening.",
+        "Passionate about preventing blindness through early detection and treatment. I believe every patient deserves clear, accurate information about their eye health and all available treatment options.",
+        "Dedicated to making quality eye care accessible and stress-free. My approach combines thorough examination with clear communication to ensure patients are informed and confident in their care."
+      ],
+      "services": [
+        { "title": "Cataract Surgery", "description": "Advanced phacoemulsification cataract removal with premium lens implants.", "icon": "eye" },
+        { "title": "Glaucoma Management", "description": "Early detection and pressure management to prevent glaucomatous vision loss.", "icon": "scan" },
+        { "title": "Diabetic Eye Screening", "description": "Annual retinal screening for patients with diabetes to prevent retinopathy.", "icon": "activity" },
+        { "title": "Refractive Surgery", "description": "LASIK and SMILE laser procedures for freedom from glasses and contact lenses.", "icon": "zap" },
+        { "title": "Retinal Care", "description": "Diagnosis and treatment of macular degeneration, retinal tears, and detachments.", "icon": "scan" },
+        { "title": "Routine Eye Exams", "description": "Comprehensive vision testing, refraction, and spectacle prescription.", "icon": "check" },
+        { "title": "Contact Lens Fitting", "description": "Expert fitting and guidance for all types of contact lenses.", "icon": "eye" },
+        { "title": "Squint Correction", "description": "Surgical and non-surgical treatment for strabismus in adults and children.", "icon": "baby" }
+      ],
+      "ctas": [
+        "Protect your vision — book your eye check today.",
+        "See better, live better — schedule now.",
+        "Your eyes deserve expert care — call today.",
+        "Schedule a comprehensive eye examination.",
+        "Early eye disease has no symptoms — get checked.",
+        "Book your cataract assessment today.",
+        "Clear vision is possible — let's make it happen.",
+        "Don't wait until you can't see — book now.",
+        "A clearer world awaits — schedule today.",
+        "Trusted eye care is one appointment away."
+      ],
+      "faqs": [
+        { "question": "How often should I have my eyes checked?", "answer": "Adults should have comprehensive eye exams every 1-2 years. Those over 40 or with risk factors like diabetes should have annual eye exams." },
+        { "question": "What are the early signs of cataracts?", "answer": "Early cataract symptoms include blurry or hazy vision, increased sensitivity to glare, faded colors, and difficulty seeing at night. Cataracts typically progress slowly." },
+        { "question": "Am I a candidate for laser eye surgery?", "answer": "LASIK or SMILE candidates need stable refraction, adequate corneal thickness, and good overall eye health. A comprehensive assessment will determine your suitability." },
+        { "question": "Can glaucoma be treated without surgery?", "answer": "Yes, in most cases, glaucoma is managed effectively with eye drops to lower pressure. Laser treatment and surgery are options for cases not controlled by medication." },
+        { "question": "How do I know if I have diabetic retinopathy?", "answer": "Early diabetic retinopathy often has no symptoms. Regular dilated eye exams are essential for diabetics. Advanced stages may cause blurry vision or floating spots." },
+        { "question": "What is the recovery like after cataract surgery?", "answer": "Most patients notice improved vision within 24 hours. Full recovery takes 4-6 weeks. The procedure is done under local anaesthesia and typically takes 15-20 minutes." }
+      ],
+      "testimonials": [
+        { "quote": "My cataract surgery was done seamlessly and my vision is clearer than it has been in 20 years. Remarkable results.", "author": "Krishnan A., 66" },
+        { "quote": "The doctor caught my glaucoma early during a routine check. I had no symptoms. Early detection saved my sight.", "author": "Usha R., 54" },
+        { "quote": "Had LASIK surgery and I woke up seeing perfectly. The procedure was quick and completely painless.", "author": "Siddharth P., 29" },
+        { "quote": "My diabetes-related eye changes were detected and treated early here. Outstanding preventive care.", "author": "Venkat N., 58" },
+        { "quote": "The eye clinic uses the latest equipment and the doctor is thorough, patient, and highly knowledgeable.", "author": "Nirmala S., 47" },
+        { "quote": "My child's squint was corrected with a single precise surgery. The recovery was quick and results are wonderful.", "author": "Priya M., Parent" }
+      ],
+      "stats": [
+        { "value": "13+", "label": "Years Experience" },
+        { "value": "5000+", "label": "Surgeries Performed" },
+        { "value": "99%", "label": "Patient Satisfaction" },
+        { "value": "2000+", "label": "Cataract Surgeries" },
+        { "value": "4", "label": "Awards Received" }
+      ],
+      "awards": [
+        { "title": "Best Ophthalmologist Award", "organization": "All India Ophthalmological Society" },
+        { "title": "Excellence in Cataract Surgery", "organization": "City Medical Foundation" },
+        { "title": "Patient Safety Award", "organization": "Eye Health Council of India" },
+        { "title": "Top Eye Surgeon Recognition", "organization": "Medical Excellence Awards" }
+      ]
+    },
+    "dentistry": {
+      "headlines": [
+        "Your smile, our passion",
+        "Expert dental care for lasting smiles",
+        "Healthy teeth, confident you",
+        "Complete dental care for the whole family",
+        "Where beautiful smiles are made",
+        "Advanced dentistry, gentle approach",
+        "Your trusted dental clinic",
+        "Transforming smiles, changing lives",
+        "Precision dental care you deserve",
+        "Anxiety-free dentistry in a caring environment",
+        "Modern dental solutions, timeless results",
+        "The smile clinic families trust"
+      ],
+      "subheadlines": [
+        "Comprehensive dental services from routine check-ups to full smile makeovers.",
+        "Family-friendly dental clinic offering preventive, restorative, and cosmetic dentistry.",
+        "Advanced technology including digital X-rays, 3D imaging, and pain-free procedures.",
+        "From children's first visit to complex dental implants — we treat all ages.",
+        "Cosmetic dentistry including veneers, whitening, aligners, and smile design.",
+        "Gentle, anxiety-free dental care in a calm, modern clinic environment.",
+        "Same-day emergency dental appointments available for urgent pain relief.",
+        "Implant dentistry, orthodontics, and full mouth rehabilitation under one roof.",
+        "Evidence-based dental care delivered with precision, warmth, and a personal touch.",
+        "Committed to helping every patient achieve a healthy, confident smile."
+      ],
+      "kickers": [
+        "Family Dentistry",
+        "Smile Specialists",
+        "Cosmetic & Restorative",
+        "Dental Care Experts",
+        "Implant & Ortho",
+        "Gentle & Advanced",
+        "Your Smile Matters",
+        "Trusted Dental Clinic"
+      ],
+      "bios": [
+        "A qualified and experienced dentist dedicated to providing gentle, comprehensive dental care for patients of all ages. Specializes in cosmetic dentistry, dental implants, and advanced restorative procedures.",
+        "Passionate about creating healthy, beautiful smiles in a stress-free environment. I believe dental visits should be comfortable and even enjoyable — not anxiety-provoking.",
+        "With advanced training in implant dentistry, Invisalign orthodontics, and porcelain veneers, I offer cutting-edge dental solutions with a focus on natural, beautiful aesthetics.",
+        "A family dentist who genuinely cares about the long-term oral health of every patient. I emphasize prevention, patient education, and building lasting relationships based on trust.",
+        "Committed to anxiety-free dentistry through a gentle touch, clear communication, and modern pain management. Every patient deserves to leave with a reason to smile."
+      ],
+      "services": [
+        { "title": "Dental Implants", "description": "Permanent tooth replacement with natural-looking, long-lasting implants.", "icon": "tooth" },
+        { "title": "Teeth Whitening", "description": "Professional in-clinic and home whitening for a brighter, confident smile.", "icon": "sparkles" },
+        { "title": "Orthodontics & Aligners", "description": "Traditional braces and clear aligner systems for straighter teeth.", "icon": "smile" },
+        { "title": "Porcelain Veneers", "description": "Thin custom-made veneers for chipped, stained, or misshapen teeth.", "icon": "star" },
+        { "title": "Root Canal Treatment", "description": "Pain-free, single-sitting root canal therapy to save infected teeth.", "icon": "cross" },
+        { "title": "Preventive Dentistry", "description": "Routine check-ups, cleaning, fluoride, and sealant applications.", "icon": "shield" },
+        { "title": "Pediatric Dentistry", "description": "Gentle, child-friendly dental care from the first tooth onwards.", "icon": "baby" },
+        { "title": "Emergency Dental Care", "description": "Same-day appointments for toothache, dental trauma, and urgent concerns.", "icon": "ambulance" }
+      ],
+      "ctas": [
+        "Book your smile consultation today.",
+        "Your perfect smile starts here.",
+        "Don't put off your dental health — call today.",
+        "Schedule your dental check-up now.",
+        "Emergency? We can see you today.",
+        "Transform your smile — book a consultation.",
+        "Start your dental journey with us.",
+        "A healthy smile is our goal for you.",
+        "Book your dental assessment today.",
+        "Your new smile is one appointment away."
+      ],
+      "faqs": [
+        { "question": "How often should I visit the dentist?", "answer": "Most adults should visit a dentist every 6 months for check-ups and professional cleaning. Those with gum disease or high cavity risk may need more frequent visits." },
+        { "question": "Is teeth whitening safe?", "answer": "Professional teeth whitening supervised by a dentist is safe and effective. It temporarily increases tooth sensitivity in some patients, which resolves within a few days." },
+        { "question": "What is the recovery time after a dental implant?", "answer": "Initial healing of the implant site takes 1-2 weeks. Full osseointegration (implant fusing with bone) takes 3-6 months, after which the permanent crown is placed." },
+        { "question": "At what age should children first see a dentist?", "answer": "Children should have their first dental visit by age 1 or when the first tooth appears. Early visits establish healthy habits and catch any developmental concerns." },
+        { "question": "How long does Invisalign treatment take?", "answer": "Invisalign treatment typically takes 6-18 months depending on the complexity of the alignment issue. Minor corrections can be completed in as little as 3-6 months." },
+        { "question": "What should I do for a dental emergency?", "answer": "For severe toothache, a knocked-out tooth, or broken dental work, call us immediately for a same-day appointment. Store knocked-out teeth in milk or saliva and come in immediately." }
+      ],
+      "testimonials": [
+        { "quote": "My smile makeover exceeded every expectation. The veneers look completely natural. I can't stop smiling.", "author": "Priya L., 32" },
+        { "quote": "Root canal treatment that was genuinely pain-free. I was amazed — and I had been dreading it for months.", "author": "Mahesh K., 44" },
+        { "quote": "My children actually enjoy their dental visits here. The gentle, child-friendly approach is a gift.", "author": "Nandita R., Parent" },
+        { "quote": "Got a dental implant after years of a gap in my smile. The result is indistinguishable from my natural teeth.", "author": "Suresh P., 55" },
+        { "quote": "Completed Invisalign in 10 months and my teeth are perfectly aligned. Couldn't be happier with the outcome.", "author": "Anjali M., 26" },
+        { "quote": "A dental emergency on a Sunday — I called and was seen within 2 hours. Excellent emergency care.", "author": "Venkat A., 38" }
+      ],
+      "stats": [
+        { "value": "11+", "label": "Years Experience" },
+        { "value": "8000+", "label": "Happy Smiles" },
+        { "value": "99%", "label": "Patient Satisfaction" },
+        { "value": "500+", "label": "Implants Placed" },
+        { "value": "1000+", "label": "Aligners Delivered" }
+      ],
+      "awards": [
+        { "title": "Best Dental Clinic", "organization": "Indian Dental Association" },
+        { "title": "Excellence in Implant Dentistry", "organization": "City Dental Foundation" },
+        { "title": "Patient Comfort Award", "organization": "Healthcare Excellence Awards" },
+        { "title": "Top Cosmetic Dentist", "organization": "Smile India Awards" }
+      ]
+    },
+    "psychiatry": {
+      "headlines": [
+        "Mental health matters — we are here",
+        "Expert psychiatric care with compassion",
+        "Your mental wellness is our priority",
+        "A safe space for your mental health journey",
+        "Understanding minds, healing lives",
+        "Compassionate psychiatry for real challenges",
+        "Mental health care without stigma",
+        "Expert support for mind and well-being",
+        "Empowering recovery, one step at a time",
+        "You do not have to face it alone",
+        "Mental wellness through expert, caring hands",
+        "Modern psychiatry with a human touch"
+      ],
+      "subheadlines": [
+        "Evidence-based psychiatric care for depression, anxiety, trauma, and complex mental health conditions.",
+        "A confidential, non-judgmental environment where you can speak freely about your challenges.",
+        "Integrating pharmacotherapy, psychotherapy, and lifestyle approaches for holistic mental well-being.",
+        "Expert management of mood disorders, anxiety disorders, ADHD, and addiction.",
+        "Specializing in adult psychiatry, adolescent mental health, and geriatric psychiatry.",
+        "Psychiatric care that respects your story, your values, and your path to recovery.",
+        "Collaborating with psychologists and therapists for comprehensive mental health support.",
+        "Building resilience and mental strength through expert guidance and evidence-based treatment.",
+        "Transforming mental health challenges into opportunities for growth and recovery.",
+        "A trusted psychiatrist committed to your long-term mental wellness."
+      ],
+      "kickers": [
+        "Mental Health Experts",
+        "Compassionate Psychiatry",
+        "Mind & Wellness",
+        "Expert Mental Care",
+        "Safe, Confidential Care",
+        "Recovery Specialists",
+        "Holistic Mental Health",
+        "Your Mental Wellness"
+      ],
+      "bios": [
+        "A board-certified psychiatrist with expertise in mood disorders, anxiety, trauma, and addiction. I believe in treating the whole person — not just symptoms — in a safe, supportive, and stigma-free environment.",
+        "Dedicated to making quality mental health care accessible and approachable. I combine medication management with psychotherapeutic techniques to create individualized treatment plans.",
+        "With extensive training in cognitive behavioral therapy, mindfulness-based interventions, and psychopharmacology, I offer comprehensive mental health care for adults and adolescents.",
+        "Passionate about reducing the stigma around mental health and helping individuals build resilience. My patient-centered approach ensures every person feels heard, respected, and empowered.",
+        "An experienced psychiatrist who takes the time to understand the full context of each patient's life before making treatment recommendations, ensuring care that is truly personalized."
+      ],
+      "services": [
+        { "title": "Depression Treatment", "description": "Evidence-based management of major depression, dysthymia, and bipolar disorder.", "icon": "heart" },
+        { "title": "Anxiety Management", "description": "Effective treatment for generalized anxiety, panic disorder, and social anxiety.", "icon": "shield" },
+        { "title": "ADHD Assessment & Care", "description": "Comprehensive evaluation and medication management for adults with ADHD.", "icon": "brain" },
+        { "title": "Trauma & PTSD Therapy", "description": "Specialized trauma-informed care for PTSD and complex trauma histories.", "icon": "heart-pulse" },
+        { "title": "Addiction Psychiatry", "description": "De-addiction management for alcohol, substances, and behavioral addictions.", "icon": "activity" },
+        { "title": "Psychotherapy Collaboration", "description": "Integrated care with psychologists for CBT, DBT, and supportive therapy.", "icon": "users" },
+        { "title": "Adolescent Mental Health", "description": "Sensitive, age-appropriate care for mental health challenges in teenagers.", "icon": "smile" },
+        { "title": "Geriatric Psychiatry", "description": "Mental health care for the elderly including dementia and late-life depression.", "icon": "stethoscope" }
+      ],
+      "ctas": [
+        "Take the first step toward better mental health.",
+        "You deserve to feel well — reach out today.",
+        "Book a confidential consultation today.",
+        "Help is closer than you think — call now.",
+        "Your mental health is worth prioritizing.",
+        "Begin your journey to well-being today.",
+        "Talk to a trusted psychiatrist this week.",
+        "Take care of your mind — book today.",
+        "Recovery begins with a single step — take it.",
+        "Expert, compassionate mental health care awaits."
+      ],
+      "faqs": [
+        { "question": "Is everything discussed with my psychiatrist confidential?", "answer": "Yes, all consultations are completely confidential. Information may only be shared in rare circumstances where there is a clear risk of harm to the patient or others, as required by law." },
+        { "question": "What is the difference between a psychiatrist and a psychologist?", "answer": "A psychiatrist is a medical doctor who can prescribe medications and provides both medical and psychological treatment. A psychologist specializes in talk therapies but cannot prescribe medication." },
+        { "question": "How long does psychiatric treatment take?", "answer": "Treatment duration depends on the condition and individual response. Some conditions are addressed in months; others may need long-term support. We review progress regularly and adjust care accordingly." },
+        { "question": "Do I need medication for depression or anxiety?", "answer": "Not necessarily. Many cases of anxiety and mild depression respond well to therapy alone. Moderate to severe cases often benefit from a combination of medication and psychotherapy." },
+        { "question": "What should I expect at my first psychiatric appointment?", "answer": "The first session is a detailed assessment of your history, symptoms, family background, and goals. It takes about 60 minutes and forms the basis of your personalized treatment plan." },
+        { "question": "Is it normal to feel nervous about seeing a psychiatrist?", "answer": "Absolutely. Many patients feel anxious about the first visit. Our clinic is a completely non-judgmental, safe space. Many patients report feeling significant relief just from talking openly." }
+      ],
+      "testimonials": [
+        { "quote": "The non-judgmental, understanding approach here made it possible for me to finally open up. I am genuinely recovering.", "author": "Anonymous, 31" },
+        { "quote": "My ADHD was diagnosed and treated here after years of struggling. The clarity I now have is life-changing.", "author": "Arjun K., 27" },
+        { "quote": "The integrative approach combining medication and therapy has worked better than anything I had tried before.", "author": "Meera S., 38" },
+        { "quote": "I was hesitant to see a psychiatrist because of stigma. I wish I had come sooner. Professional, kind care.", "author": "Rahul P., 44" },
+        { "quote": "My teenager's anxiety is now well-managed thanks to the sensitive, age-appropriate treatment here.", "author": "Kavitha R., Parent" },
+        { "quote": "After my trauma, I needed expert help. The care here helped me process and heal in ways I didn't think possible.", "author": "Anonymous, 29" }
+      ],
+      "stats": [
+        { "value": "12+", "label": "Years Experience" },
+        { "value": "5000+", "label": "Patients Supported" },
+        { "value": "98%", "label": "Patient Satisfaction" },
+        { "value": "100%", "label": "Confidentiality" },
+        { "value": "5", "label": "Therapy Modalities" }
+      ],
+      "awards": [
+        { "title": "Excellence in Mental Health Care", "organization": "Indian Psychiatric Society" },
+        { "title": "Best Psychiatrist Award", "organization": "City Mental Health Foundation" },
+        { "title": "Stigma Reduction Champion", "organization": "National Mental Health Alliance" },
+        { "title": "Patient Empathy Award", "organization": "Healthcare Excellence India" }
       ]
     }
   },
   "experienceLevels": {
     "junior": {
-      "prefixes": [
-        "Dedicated",
-        "Committed",
-        "Enthusiastic",
-        "Passionate"
-      ],
+      "prefixes": ["Dedicated", "Committed", "Enthusiastic", "Passionate"],
       "trustPhrases": [
         "Building trust through quality care",
         "Growing expertise with every patient",
@@ -183,12 +971,7 @@
       ]
     },
     "mid": {
-      "prefixes": [
-        "Experienced",
-        "Skilled",
-        "Qualified",
-        "Certified"
-      ],
+      "prefixes": ["Experienced", "Skilled", "Qualified", "Certified"],
       "trustPhrases": [
         "Years of experience, countless success stories",
         "Proven track record in patient care",
@@ -196,12 +979,7 @@
       ]
     },
     "senior": {
-      "prefixes": [
-        "Senior",
-        "Leading",
-        "Renowned",
-        "Distinguished"
-      ],
+      "prefixes": ["Senior", "Leading", "Renowned", "Distinguished"],
       "trustPhrases": [
         "Decades of expertise in specialized care",
         "Recognized leader in the field",
@@ -215,12 +993,72 @@
       "Your health is our mission",
       "Quality healthcare near you",
       "Compassionate care, proven results",
-      "Healthcare that puts patients first"
+      "Healthcare that puts patients first",
+      "Advanced medicine, human touch",
+      "Trusted specialists, outstanding outcomes",
+      "Modern healthcare with a personal approach",
+      "Where expertise meets genuine compassion",
+      "Your wellness is our purpose"
     ],
     "subheadlines": [
       "Providing comprehensive medical services with a patient-centered approach.",
       "State-of-the-art facilities with experienced medical professionals.",
-      "Committed to delivering the highest standards of medical care."
+      "Committed to delivering the highest standards of medical care.",
+      "Building lasting patient relationships through trust, expertise, and compassion.",
+      "Evidence-based medicine combined with personalized care for every patient.",
+      "Dedicated to improving health outcomes and enhancing quality of life.",
+      "Where patients always come first and quality is never compromised."
+    ],
+    "kickers": [
+      "Trusted Specialists",
+      "Expert Medical Care",
+      "Our Services",
+      "Why Choose Us",
+      "Patient Stories",
+      "Meet the Doctor",
+      "Quick Facts",
+      "Awards & Recognition",
+      "Our Mission",
+      "About Us",
+      "What We Do",
+      "Our Commitment"
+    ],
+    "sectionTitles": [
+      "Our Services",
+      "About the Doctor",
+      "What We Offer",
+      "Why Choose Us",
+      "Patient Testimonials",
+      "Our Story",
+      "Meet Our Team",
+      "Frequently Asked Questions",
+      "Our Awards",
+      "Clinic Timings",
+      "Photo Gallery",
+      "Get in Touch"
+    ],
+    "bios": [
+      "A dedicated medical professional committed to providing compassionate, evidence-based care to every patient who walks through the door.",
+      "With years of specialized training and clinical experience, I bring expertise and genuine empathy to every consultation.",
+      "Passionate about patient education and preventive medicine, helping individuals lead healthier, fuller lives through proactive healthcare.",
+      "Committed to building long-term relationships with patients and families, earning trust through consistent, high-quality medical care.",
+      "An experienced clinician who believes in treating the whole patient — not just the condition — for truly holistic healthcare outcomes.",
+      "Dedicated to staying at the forefront of medical advances to provide every patient with the best available treatment options.",
+      "My approach combines clinical rigor with genuine warmth, ensuring every patient feels heard, respected, and well-cared for."
+    ],
+    "buttonLabels": [
+      "Book Appointment",
+      "Schedule Consultation",
+      "Contact Us",
+      "Learn More",
+      "Get Started",
+      "Call Now",
+      "WhatsApp Us",
+      "View Services",
+      "Book Now",
+      "Consult Today",
+      "See All Services",
+      "Meet the Doctor"
     ],
     "timings": [
       { "day": "Monday", "primary": "10 AM - 2 PM", "secondary": "5 PM - 8 PM" },
@@ -232,14 +1070,26 @@
       { "day": "Sunday", "primary": "Closed", "secondary": "Closed" }
     ],
     "testimonials": [
-      { "quote": "Very professional and caring doctor. Highly recommended!", "author": "Patient Review" },
-      { "quote": "The clinic is well-equipped and the staff is very supportive.", "author": "Patient Review" },
-      { "quote": "Best healthcare experience I've had. Thank you!", "author": "Patient Review" }
+      { "quote": "Exceptional care from a doctor who truly listens and takes time to understand your concerns.", "author": "Patient Review" },
+      { "quote": "The clinic is modern, well-equipped, and the staff is warm and supportive throughout.", "author": "Patient Review" },
+      { "quote": "Best healthcare experience I have ever had. Accurate diagnosis and a clear, effective treatment plan.", "author": "Patient Review" },
+      { "quote": "I always leave consultations feeling informed and reassured. A truly compassionate medical professional.", "author": "Patient Review" },
+      { "quote": "Highly recommended by my family. The doctor combines expertise with genuine care for patients.", "author": "Patient Review" },
+      { "quote": "The most thorough doctor I have visited. Nothing is rushed and every concern is addressed.", "author": "Patient Review" }
     ],
     "stats": [
-      { "value": "15+", "label": "Years Experience" },
+      { "value": "10+", "label": "Years Experience" },
       { "value": "5000+", "label": "Patients Treated" },
-      { "value": "99%", "label": "Patient Satisfaction" }
+      { "value": "99%", "label": "Patient Satisfaction" },
+      { "value": "15+", "label": "Conditions Treated" },
+      { "value": "2", "label": "Clinic Locations" },
+      { "value": "24/7", "label": "Emergency Support" }
+    ],
+    "awards": [
+      { "title": "Best Specialist of the Year", "organization": "City Medical Association" },
+      { "title": "Excellence in Patient Care", "organization": "National Health Council" },
+      { "title": "Top Doctor Recognition", "organization": "Healthcare India" },
+      { "title": "Community Health Champion", "organization": "State Medical Board" }
     ]
   }
 }

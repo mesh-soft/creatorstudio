@@ -25,7 +25,7 @@ export default async function CreatorPage({ params, searchParams }: CreatorPageP
   const collection = TENANT_TYPE_TO_COLLECTION[tenantType];
   if (!collection) notFound();
 
-  const pages = listTenantPages(tenantType, tenantId)
+  const pages = (await listTenantPages(tenantType, tenantId))
     .map((page) => {
       const urlSettings = Array.isArray(page.settings)
         ? page.settings.find((s) => s._template === "urlSettings")

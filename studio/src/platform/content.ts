@@ -1,12 +1,10 @@
-import fs from "node:fs";
-import path from "node:path";
 import type { PageContent, Tenant, TenantFolderEntry, TenantPage, TenantSite, TenantType } from "./types";
 import { unwrapSiteSettingsToFlat } from "./siteSettingsNormalize";
+import { getContentAdapter } from "./contentAdapter";
+import { resolveContentDir } from "./contentAdapter";
 
-const contentRoot = path.join(process.cwd(), "content");
-
-export function getTenant(tenantType: TenantType, tenantId: string): Tenant {
-  const entries = readTenantFolders(tenantType);
+export async function getTenant(tenantType: TenantType, tenantId: string): Promise<Tenant> {
+  const entries = await readTenantFolders(tenantType);
   const entry = entries.find((item) => item.tenantSlug === tenantId);
   if (!entry) {
     throw new Error(`Tenant not found: ${tenantType}/${tenantId}`);
@@ -14,33 +12,42 @@ export function getTenant(tenantType: TenantType, tenantId: string): Tenant {
   return composeTenant(entry.tenantSlug, entry.site, getHomePage(entry.pages));
 }
 
-export function getAllTenants(): Tenant[] {
-  return [...readTenantFolders("doctor"), ...readTenantFolders("hospital")].map((entry) =>
+export async function getAllTenants(): Promise<Tenant[]> {
+  const doctors = await readTenantFolders("doctor");
+  const hospitals = await readTenantFolders("hospital");
+  return [...doctors, ...hospitals].map((entry) =>
     composeTenant(entry.tenantSlug, entry.site, getHomePage(entry.pages))
   );
 }
 
-export function findTenantById(tenantId: string): Tenant | undefined {
-  return getAllTenants().find((tenant) => tenant.tenantId === tenantId);
+export async function findTenantById(tenantId: string): Promise<Tenant | undefined> {
+  const all = await getAllTenants();
+  return all.find((tenant) => tenant.tenantId === tenantId);
 }
 
-export function findTenantBySlug(tenantSlug: string): Tenant | undefined {
-  const allEntries = [...readTenantFolders("doctor"), ...readTenantFolders("hospital")];
+export async function findTenantBySlug(tenantSlug: string): Promise<Tenant | undefined> {
+  const doctors = await readTenantFolders("doctor");
+  const hospitals = await readTenantFolders("hospital");
+  const allEntries = [...doctors, ...hospitals];
   const entry = allEntries.find((item) => item.tenantSlug === tenantSlug);
   if (!entry) return undefined;
   return composeTenant(entry.tenantSlug, entry.site, getHomePage(entry.pages));
 }
 
-export function getAllTenantSlugs(): string[] {
-  return [...readTenantFolders("doctor"), ...readTenantFolders("hospital")].map((entry) => entry.tenantSlug);
+export async function getAllTenantSlugs(): Promise<string[]> {
+  const doctors = await readTenantFolders("doctor");
+  const hospitals = await readTenantFolders("hospital");
+  return [...doctors, ...hospitals].map((entry) => entry.tenantSlug);
 }
 
-export function getTenantSiteBySlug(tenantType: TenantType, tenantSlug: string): TenantSite | undefined {
-  return readTenantFolders(tenantType).find((entry) => entry.tenantSlug === tenantSlug)?.site;
+export async function getTenantSiteBySlug(tenantType: TenantType, tenantSlug: string): Promise<TenantSite | undefined> {
+  const folders = await readTenantFolders(tenantType);
+  return folders.find((entry) => entry.tenantSlug === tenantSlug)?.site;
 }
 
-export function listTenantPages(tenantType: TenantType, tenantSlug: string): TenantPage[] {
-  return readTenantFolders(tenantType).find((entry) => entry.tenantSlug === tenantSlug)?.pages ?? [];
+export async function listTenantPages(tenantType: TenantType, tenantSlug: string): Promise<TenantPage[]> {
+  const folders = await readTenantFolders(tenantType);
+  return folders.find((entry) => entry.tenantSlug === tenantSlug)?.pages ?? [];
 }
 
 function getUrlSettings(page: TenantPage) {
@@ -63,16 +70,19 @@ function getPageSeo(page: TenantPage) {
   return block ?? page.seo;
 }
 
-export function getTenantPageBySlug(
+export async function getTenantPageBySlug(
   tenantType: TenantType,
   tenantSlug: string,
   pageSlug: string
-): TenantPage | undefined {
-  return listTenantPages(tenantType, tenantSlug).find((page) => getUrlSettings(page).slug === pageSlug);
+): Promise<TenantPage | undefined> {
+  const pages = await listTenantPages(tenantType, tenantSlug);
+  return pages.find((page) => getUrlSettings(page).slug === pageSlug);
 }
 
-export function getTenantByPageSlug(tenantSlug: string, pageSlug: string): Tenant | undefined {
-  const allEntries = [...readTenantFolders("doctor"), ...readTenantFolders("hospital")];
+export async function getTenantByPageSlug(tenantSlug: string, pageSlug: string): Promise<Tenant | undefined> {
+  const doctors = await readTenantFolders("doctor");
+  const hospitals = await readTenantFolders("hospital");
+  const allEntries = [...doctors, ...hospitals];
   const entry = allEntries.find((item) => item.tenantSlug === tenantSlug);
   if (!entry) return undefined;
 
@@ -81,8 +91,10 @@ export function getTenantByPageSlug(tenantSlug: string, pageSlug: string): Tenan
   return composeTenant(entry.tenantSlug, entry.site, page);
 }
 
-export function getAllTenantPageParams(): Array<{ tenantSlug: string; pageSlug: string }> {
-  return [...readTenantFolders("doctor"), ...readTenantFolders("hospital")].flatMap((entry) =>
+export async function getAllTenantPageParams(): Promise<Array<{ tenantSlug: string; pageSlug: string }>> {
+  const doctors = await readTenantFolders("doctor");
+  const hospitals = await readTenantFolders("hospital");
+  return [...doctors, ...hospitals].flatMap((entry) =>
     entry.pages.map((page) => ({
       tenantSlug: entry.tenantSlug,
       pageSlug: getUrlSettings(page).slug || "home",
@@ -90,42 +102,47 @@ export function getAllTenantPageParams(): Array<{ tenantSlug: string; pageSlug: 
   );
 }
 
-function readTenantFolders(tenantType: TenantType): TenantFolderEntry[] {
-  const directory = path.join(contentRoot, tenantType === "doctor" ? "doctors" : "hospitals");
-  if (!fs.existsSync(directory)) {
-    return [];
-  }
+async function readTenantFolders(tenantType: TenantType): Promise<TenantFolderEntry[]> {
+  const adapter = await getContentAdapter();
+  const dir = resolveContentDir(tenantType);
 
-  return fs
-    .readdirSync(directory)
-    .filter((entry) => fs.statSync(path.join(directory, entry)).isDirectory())
-    .map((tenantSlug) => readTenantFolderEntry(directory, tenantType, tenantSlug))
-    .filter((entry): entry is TenantFolderEntry => entry !== null);
+  const exists = await adapter.exists(dir);
+  if (!exists) return [];
+
+  const entries = await adapter.list(dir);
+  const dirs = entries.filter((e) => e.type === "dir");
+
+  const results = await Promise.all(
+    dirs.map((entry) => readTenantFolderEntry(adapter, dir, tenantType, entry.name))
+  );
+
+  return results.filter((entry): entry is TenantFolderEntry => entry !== null);
 }
 
-function readTenantFolderEntry(
-  tenantTypeDirectory: string,
+async function readTenantFolderEntry(
+  adapter: Awaited<ReturnType<typeof getContentAdapter>>,
+  parentDir: string,
   tenantType: TenantType,
   tenantSlug: string
-): TenantFolderEntry | null {
-  const tenantDirectory = path.join(tenantTypeDirectory, tenantSlug);
-  const siteFile = path.join(tenantDirectory, "site.json");
-  const siteDirectory = path.join(tenantDirectory, "site");
-  const siteIndexFile = path.join(siteDirectory, "index.json");
+): Promise<TenantFolderEntry | null> {
+  const tenantDir = `${parentDir}/${tenantSlug}`;
+  const flatSiteFile = `${tenantDir}/site.json`;
+  const siteIndexFile = `${tenantDir}/site/index.json`;
 
   let siteFileToRead: string;
-  if (fs.existsSync(siteFile)) {
-    siteFileToRead = siteFile;
-  } else if (fs.existsSync(siteIndexFile)) {
+  if (await adapter.exists(flatSiteFile)) {
+    siteFileToRead = flatSiteFile;
+  } else if (await adapter.exists(siteIndexFile)) {
     siteFileToRead = siteIndexFile;
   } else {
     return null;
   }
 
+  const raw = await adapter.read(siteFileToRead);
   const storedSite = unwrapSiteSettingsToFlat(
-    JSON.parse(fs.readFileSync(siteFileToRead, "utf8")) as Record<string, unknown>
+    JSON.parse(raw) as Record<string, unknown>
   ) as TenantSite;
-  const pages = readTenantPages(tenantDirectory, storedSite);
+  const pages = await readTenantPages(adapter, tenantDir, storedSite);
   const site = applyHomePageSiteOverrides(storedSite, pages);
 
   return {
@@ -136,25 +153,34 @@ function readTenantFolderEntry(
   };
 }
 
-function readTenantPages(tenantDirectory: string, site: TenantSite): TenantPage[] {
-  const pagesDirectory = path.join(tenantDirectory, "pages");
-  if (fs.existsSync(pagesDirectory)) {
-    return fs
-      .readdirSync(pagesDirectory)
-      .filter((entry) => entry.endsWith(".json"))
-      .map((entry) => JSON.parse(fs.readFileSync(path.join(pagesDirectory, entry), "utf8")) as TenantPage)
-      .sort((a, b) => {
-        const aUrl = getUrlSettings(a);
-        const bUrl = getUrlSettings(b);
-        const aIsHome = aUrl.isHome;
-        const bIsHome = bUrl.isHome;
-        const aSlug = aUrl.slug ?? "";
-        const bSlug = bUrl.slug ?? "";
-        return Number(Boolean(bIsHome)) - Number(Boolean(aIsHome)) || aSlug.localeCompare(bSlug);
-      });
-  }
+async function readTenantPages(
+  adapter: Awaited<ReturnType<typeof getContentAdapter>>,
+  tenantDir: string,
+  site: TenantSite
+): Promise<TenantPage[]> {
+  const pagesDir = `${tenantDir}/pages`;
+  const exists = await adapter.exists(pagesDir);
+  if (!exists) return site.pages ?? [];
 
-  return site.pages ?? [];
+  const entries = await adapter.list(pagesDir);
+  const jsonFiles = entries.filter((e) => e.type === "file" && e.name.endsWith(".json"));
+
+  const pages = await Promise.all(
+    jsonFiles.map(async (entry) => {
+      const raw = await adapter.read(`${pagesDir}/${entry.name}`);
+      return JSON.parse(raw) as TenantPage;
+    })
+  );
+
+  return pages.sort((a, b) => {
+    const aUrl = getUrlSettings(a);
+    const bUrl = getUrlSettings(b);
+    const aIsHome = aUrl.isHome;
+    const bIsHome = bUrl.isHome;
+    const aSlug = aUrl.slug ?? "";
+    const bSlug = bUrl.slug ?? "";
+    return Number(Boolean(bIsHome)) - Number(Boolean(aIsHome)) || aSlug.localeCompare(bSlug);
+  });
 }
 
 function applyHomePageSiteOverrides(site: TenantSite, pages: TenantPage[]): TenantSite {
@@ -173,7 +199,7 @@ function applyHomePageSiteOverrides(site: TenantSite, pages: TenantPage[]): Tena
 
 const defaultSubscription = {
   plan: "free",
-  validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+  validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
 };
 
 const defaultDomains = {
@@ -181,7 +207,6 @@ const defaultDomains = {
 };
 
 function composeTenant(tenantSlug: string, site: TenantSite, page: TenantPage): Tenant {
-  // Merge site-level and page-level presentation (page overrides site)
   const defaultPresentation = {
     themeId: "default",
     variantPresetId: "minimal",
@@ -210,10 +235,9 @@ function composeTenant(tenantSlug: string, site: TenantSite, page: TenantPage): 
     themeId: pagePres?.themeId ?? sitePresentation.themeId,
     variantPresetId: pagePres?.variantPresetId ?? sitePresentation.variantPresetId,
     styleId: pagePres?.styleId ?? sitePresentation.styleId,
-    style: sitePresentation.style, // Style overrides are always from site level
+    style: sitePresentation.style,
   };
 
-  // Merge site-level and page-level SEO (page overrides site)
   const seo = {
     ...site.seo,
     ...(getPageSeo(page) ?? {}),
@@ -240,8 +264,6 @@ function composeTenant(tenantSlug: string, site: TenantSite, page: TenantPage): 
     blocks: Array.isArray(page.blocks) ? page.blocks : [],
   };
 }
-
-
 
 function getHomePage(pages: TenantPage[]): TenantPage {
   const explicitHome = pages.find((page) => getUrlSettings(page).isHome);
