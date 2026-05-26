@@ -29,10 +29,11 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // The /preview route is force-dynamic (SSR) and reads content/* via fs at runtime.
-  // Tell Vercel's file tracer to bundle the content directory with those serverless functions.
+  // Tell Vercel's file tracer to bundle the content directory with the
+  // serverless functions that read from the filesystem at runtime.
   outputFileTracingIncludes: {
-    "/site/(.*)": ["./content/**/*", "./public/content/**/*"],
+    "/site/(.*)":  ["./content/**/*", "./public/content/**/*"],
+    "/api/(.*)":   ["./content/**/*", "./data/**/*"],
   },
   async headers() {
     return [
