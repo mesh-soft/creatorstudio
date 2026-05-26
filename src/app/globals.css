@@ -1,0 +1,700 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Salesforce Sans";
+  src: url("/fonts/SalesforceSans-Book.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Salesforce Sans";
+  src: url("/fonts/SalesforceSans-Bold.woff") format("woff"),
+       url("/fonts/SalesforceSans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Limit scanning to this app only — avoids pulling in the whole Tina monorepo via symlinks. */
+@source "../**/*.{js,ts,jsx,tsx}";
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --primary: #0f766e;
+  --secondary: #2563eb;
+  --accent: #f59e0b;
+  --site-bg: #ffffff;
+  --surface: #ffffff;
+  --site-text: #1e293b;
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Premium Typography */
+h1, h2, h3, h4 {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+p {
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--site-text), white 20%);
+}
+
+/* ── Site Shell & Container ────────────────────────────── */
+.site-shell {
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--background), color-mix(in srgb, var(--background), black 5%));
+  font-family: var(--body);
+  padding: 40px 20px;
+}
+
+.tenant-site {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: var(--site-bg);
+  border-radius: var(--radius);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1),
+    0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--primary), white 90%);
+}
+
+/* ── Blocks & Sections ─────────────────────────────────── */
+.block, .hero, .cta {
+  padding: clamp(40px, 8vw, 100px) clamp(20px, 5vw, 60px);
+}
+
+.block-title {
+  margin-bottom: 48px;
+  text-align: center;
+}
+
+.eyebrow {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+
+/* ── Hero ──────────────────────────────────────────────── */
+.hero {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 60px;
+  align-items: center;
+  background: radial-gradient(circle at top right, color-mix(in srgb, var(--primary), white 92%), transparent);
+}
+
+.hero h1 {
+  font-size: clamp(40px, 5vw, 72px);
+  margin-bottom: 24px;
+}
+
+.hero p {
+  font-size: 1.25rem;
+  max-width: 600px;
+}
+
+.hero-photo {
+  width: 100%;
+  border-radius: var(--radius);
+  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2);
+  transform: rotate(-1deg);
+  transition: transform 0.3s ease;
+}
+
+.hero-photo:hover {
+  transform: rotate(0deg) scale(1.02);
+}
+
+/* ── Cards ─────────────────────────────────────────────── */
+.card {
+  padding: 32px;
+  background: var(--surface);
+  border-radius: calc(var(--radius) * 0.75);
+  border: 1px solid color-mix(in srgb, var(--primary), white 92%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  border-color: color-mix(in srgb, var(--primary), white 80%);
+}
+
+/* ── Degree chips (Profile block) ──────────────────────── */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.chip {
+  display: inline-block;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--primary), white 88%);
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+/* ── Buttons ────────────────────────────────────────────── */
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  font-weight: 700;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn.primary {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 14px 0 color-mix(in srgb, var(--primary), transparent 60%);
+}
+
+.btn.primary:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+.btn.secondary {
+  border: 2px solid color-mix(in srgb, var(--primary), white 80%);
+  color: var(--primary);
+}
+
+.btn.secondary:hover {
+  background: color-mix(in srgb, var(--primary), white 95%);
+}
+
+/* ── Grid Layouts ───────────────────────────────────────── */
+/* Base — all grid blocks share gap */
+.services, .timings, .gallery, .faq {
+  display: grid;
+  gap: 24px;
+}
+
+/* Services default & variants — use min() so auto-fit never overflows */
+.services,
+.services-cards { grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); }
+.services-grid  { grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr)); }
+.services-compact { grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); }
+
+/* Gallery */
+.gallery,
+.gallery-grid { grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 16px; }
+
+/* Testimonials — CSS-driven so media queries can override */
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: 24px;
+}
+
+/* Awards */
+.awards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: 20px;
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 40px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  width: 100%;
+  position: relative;
+  flex-wrap: wrap;
+  gap: 0;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: 1px solid rgba(0,0,0,0.1);
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--site-text);
+  padding: 6px 10px;
+  border-radius: 8px;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-nav {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+/* ── Footer ─────────────────────────────────────────────── */
+.footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 36px;
+  padding: 40px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.footer-brand-col {
+  flex: 1 1 220px;
+  max-width: 320px;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.footer-bio {
+  font-size: 14px;
+  opacity: 0.6;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.footer-connect-col {
+  flex: 0 1 auto;
+}
+
+.footer-links-heading {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.6;
+}
+
+.footer-social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-copyright {
+  padding: 16px 40px 32px;
+  font-size: 12px;
+  opacity: 0.5;
+  text-align: center;
+  border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+/* ── Dashboard preview header ──────────────────────────── */
+.preview-header {
+  max-width: 1200px;
+  margin: 0 auto 20px;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.preview-header a {
+  font-weight: 700;
+  color: var(--secondary);
+}
+
+/* ── Overflow guard ─────────────────────────────────────── */
+.tenant-site, .block, .hero, .cta, .site-header, .site-footer {
+  overflow-x: hidden;
+  word-break: break-word;
+}
+
+/* ══════════════════════════════════════════════════════════
+   Responsive breakpoints
+   ══════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  /* Default hero collapses to single column */
+  .hero {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .hero p { margin: 0 auto; }
+  .button-row { justify-content: center; }
+  .hero-photo { max-width: 500px; margin: 40px auto 0; }
+
+  /* Hero variants must also collapse */
+  .hero-editorial,
+  .hero-split {
+    grid-template-columns: 1fr !important;
+    text-align: center;
+  }
+  .hero-editorial .button-row,
+  .hero-split .button-row { justify-content: center; }
+  .hero-editorial .hero-photo,
+  .hero-split .hero-photo { max-width: 420px; margin: 32px auto 0; }
+}
+
+@media (max-width: 768px) {
+  /* ── Shell & card chrome ── */
+  .site-shell {
+    padding: 0 !important;
+    background: var(--site-bg) !important;
+  }
+  .tenant-site {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+  }
+
+  /* ── Header hamburger ── */
+  .header-inner {
+    padding: 14px 20px !important;
+    gap: 0 !important;
+    align-items: center !important;
+  }
+  .hamburger-btn { display: flex !important; }
+  .header-nav {
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    padding: 8px 0 4px;
+    gap: 0;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    margin-top: 12px;
+  }
+  .header-nav.open { display: flex !important; }
+  .header-nav a {
+    padding: 12px 4px !important;
+    width: 100%;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    opacity: 1 !important;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 36px 20px !important;
+    gap: 28px !important;
+    grid-template-columns: 1fr !important;
+    text-align: center;
+  }
+  .hero h1 { font-size: clamp(26px, 7vw, 44px) !important; }
+  .hero p  { font-size: 1rem !important; margin: 0 auto !important; }
+  .hero-photo { max-width: 280px !important; margin: 0 auto !important; }
+  .button-row { justify-content: center !important; }
+
+  /* ── Hero variants ── */
+  .hero-editorial,
+  .hero-split {
+    grid-template-columns: 1fr !important;
+    text-align: center;
+  }
+  .hero-editorial h1,
+  .hero-split h1 { font-size: clamp(26px, 7vw, 44px) !important; }
+
+  /* ── General blocks ── */
+  .block, .cta {
+    padding: 36px 20px !important;
+  }
+  .card { padding: 20px !important; }
+  .block-title { margin-bottom: 28px !important; }
+
+  /* ── Services — all variants collapse to 1 column ── */
+  .services,
+  .services-cards,
+  .services-grid,
+  .services-compact {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Gallery ── */
+  .gallery,
+  .gallery-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+    gap: 10px !important;
+  }
+  .gallery-wide {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  .gallery-masonry {
+    columns: 2 !important;
+    column-gap: 10px !important;
+  }
+
+  /* ── Profile variants ── */
+  .profile-editorial,
+  .profile-split {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+  .profile { flex-direction: column !important; }
+
+  /* ── Timings variants ── */
+  .timings-cards  { grid-template-columns: repeat(auto-fit, minmax(min(160px,100%), 1fr)) !important; }
+  .timings-split  { grid-template-columns: 1fr !important; }
+
+  /* ── Testimonials ── */
+  .testimonials-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  /* ── Stats ── */
+  .stats-horizontal { gap: 20px !important; }
+
+  /* ── Awards ── */
+  .awards-grid { grid-template-columns: 1fr !important; }
+
+  /* ── Footer ── */
+  .footer-inner {
+    flex-direction: column !important;
+    padding: 28px 20px !important;
+    gap: 20px !important;
+  }
+  .footer-brand-col { max-width: 100% !important; }
+  .footer-copyright { padding: 14px 20px 28px !important; }
+
+  /* ── Buttons ── */
+  .button-row { gap: 10px !important; }
+  .btn { padding: 12px 20px !important; font-size: 14px !important; }
+}
+
+@media (max-width: 480px) {
+  .header-inner { padding: 12px 16px !important; }
+  .hero h1 { font-size: clamp(22px, 8vw, 36px) !important; }
+  .hero-photo { max-width: 220px !important; }
+  .block, .cta { padding: 28px 16px !important; }
+  .card { padding: 16px !important; }
+
+  /* Gallery masonry — single column on very small screens */
+  .gallery-masonry { columns: 1 !important; }
+
+  /* Gallery grid — tiny thumbnails */
+  .gallery,
+  .gallery-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Button wrapping */
+  .btn { width: 100%; justify-content: center; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   Block-level layout variant classes
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Hero variants ── */
+.hero-compact {
+  padding: clamp(28px, 5vw, 52px) clamp(20px, 5vw, 60px) !important;
+}
+.hero-compact h1 { font-size: clamp(30px, 4vw, 52px) !important; }
+
+.hero-centered {
+  grid-template-columns: 1fr !important;
+  text-align: center;
+  justify-items: center;
+}
+.hero-centered p { max-width: 640px; margin: 0 auto; }
+.hero-centered .button-row { justify-content: center; }
+.hero-centered .hero-photo { margin: 32px auto 0; }
+
+.hero-editorial {
+  grid-template-columns: 0.55fr 1.45fr;
+  gap: 48px;
+}
+.hero-editorial h1 { font-size: clamp(28px, 3.5vw, 48px) !important; }
+
+.hero-split {
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+/* ── Profile variants ── */
+.profile-centered { text-align: center; justify-items: center; }
+.profile-compact   { padding: 40px clamp(20px, 5vw, 60px) !important; }
+.profile-editorial { display: grid; grid-template-columns: 0.55fr 1.45fr; gap: 48px; align-items: start; }
+.profile-split     { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+
+/* ── Services variants ── */
+.services-list {
+  grid-template-columns: 1fr !important;
+}
+.services-list .card {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 20px 24px !important;
+}
+.services-compact .card { padding: 20px !important; }
+
+/* ── Timings variants ── */
+.timings-compact .card { padding: 14px 18px !important; }
+.timings-cards { grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); }
+.timings-split { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+/* ── Gallery variants ── */
+.gallery-masonry {
+  columns: 3;
+  column-gap: 12px;
+  display: block !important;
+}
+.gallery-masonry .gallery-item {
+  break-inside: avoid;
+  margin-bottom: 12px;
+  border-radius: var(--radius);
+  /* reset aspect-ratio from base — masonry doesn't use it */
+  aspect-ratio: unset;
+}
+.gallery-masonry img {
+  break-inside: avoid;
+  margin-bottom: 12px;
+  border-radius: var(--radius);
+  width: 100%;
+  height: auto;
+}
+
+.gallery-wide {
+  grid-template-columns: repeat(2, 1fr) !important;
+}
+
+/* ── FAQ variants ── */
+.faq-accordion .card {
+  cursor: pointer;
+  border-left: 3px solid var(--primary);
+}
+.faq-minimal .card {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--primary), white 88%) !important;
+  border-radius: 0 !important;
+  padding: 18px 4px !important;
+}
+
+/* ── CTA variants ── */
+.cta-minimal {
+  background: transparent !important;
+  text-align: center;
+}
+.cta-minimal .button-row { justify-content: center; }
+
+.cta-bold {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+.cta-bold *:not(button) { color: #fff !important; }
+.cta-bold .btn.secondary {
+  border-color: rgba(255,255,255,.5) !important;
+  color: #fff !important;
+}
+
+.cta-centered { text-align: center; }
+.cta-centered .button-row { justify-content: center; }
+
+/* ── Testimonials variants ── */
+.testimonials-carousel {
+  display: flex !important;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  gap: 20px !important;
+  padding-bottom: 8px;
+  /* Hide scrollbar in most browsers while keeping scroll */
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
+}
+.testimonials-carousel .testimonial-card {
+  flex: 0 0 min(300px, 85vw);
+  scroll-snap-align: start;
+}
+.testimonials-carousel::-webkit-scrollbar { height: 4px; }
+.testimonials-carousel::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--primary), white 60%); border-radius: 4px; }
+
+.testimonials-minimal .card {
+  background: transparent !important;
+  border: none !important;
+  border-left: 3px solid var(--primary) !important;
+  border-radius: 0 !important;
+  padding: 12px 20px !important;
+}
+
+/* ── Stats variants ── */
+.stats-horizontal {
+  display: flex !important;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 32px;
+}
+.stats-compact .card { padding: 16px 20px !important; }
+
+/* ── Text variants ── */
+.text-centered { text-align: center; }
+.text-narrow   { max-width: 640px; margin-left: auto; margin-right: auto; }
+.text-wide     { max-width: 100%; padding-left: 0 !important; padding-right: 0 !important; }
+
+/* ── Awards variants ── */
+.awards-timeline .award-card {
+  border-left: 3px solid var(--primary);
+  border-radius: 0 var(--radius) var(--radius) 0 !important;
+  padding-left: 20px !important;
+}
+.awards-cards {
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)) !important;
+  gap: 20px;
+}
+.awards-compact .card { padding: 14px 18px !important; }
+
+/* ── Location variants ── */
+.location-full-width { padding: 0 !important; }
+.location-full-width iframe { border-radius: 0 !important; }
+.location-compact { padding: 32px clamp(20px, 5vw, 60px) !important; }

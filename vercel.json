@@ -1,6 +1,5 @@
 {
   "framework": "nextjs",
-  "rootDirectory": "studio",
   "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm run build:tina"
+  "buildCommand": "pnpm run build"
 }

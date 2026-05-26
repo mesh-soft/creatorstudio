@@ -1,19 +1,43 @@
 {
+  "name": "doctor-sites",
+  "version": "0.1.0",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "studio"
-  ],
   "scripts": {
-    "build:tina-packages": "pnpm --dir packages/tinacms run build",
-    "dev": "pnpm --dir studio run dev"
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "build:tenants": "npm run build && node scripts/build-tenants.mjs",
+    "deploy:cloudflare": "node scripts/deploy-cloudflare.mjs",
+    "deploy:surge": "node scripts/deploy-surge.mjs",
+    "deploy:tenant": "node scripts/deploy-tenant.mjs",
+    "deploy": "npm run build:tenants && npm run deploy:surge",
+    "start": "next start",
+    "lint": "eslint",
+    "migrate:content-folders": "node scripts/migrate-content-to-folders.mjs",
+    "migrate:nested-pages": "node scripts/migrate-to-nested-pages.mjs",
+    "revert:directory-structure": "node scripts/revert-to-directory-structure.mjs",
+    "migrate:split-pages": "node scripts/split-nested-pages.mjs",
+    "migrate:home-site-fields": "node scripts/copy-site-fields-to-home-pages.mjs"
   },
-  "pnpm": {
-    "peerDependencyRules": {
-      "allowedVersions": {
-        "react": "19",
-        "react-dom": "19"
-      }
-    }
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.744.0",
+    "@octokit/rest": "^22.0.1",
+    "date-fns": "^2.30.0",
+    "graphql": "15.8.0",
+    "next": "16.2.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "concurrently": "^9.0.0",
+    "cross-env": "^7.0.3",
+    "@types/node": "^20.19.40",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "1.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

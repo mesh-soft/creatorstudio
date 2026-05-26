@@ -8,35 +8,33 @@ JSON files are rendered by Next.js into static HTML and deployed to Surge.sh.
 
 ---
 
-## Monorepo layout
+## Repository layout
 
 ```
 /
-├── packages/tinacms/          Forked & customised TinaCMS (pnpm workspace)
-└── studio/                    Next.js 16 application (editor + renderer)
-    ├── content/
-    │   ├── doctors/{tenantId}/site/index.json      Tenant metadata + global settings
-    │   └── doctors/{tenantId}/pages/{slug}.json    Page blocks + page settings
-    ├── public/content/{type}/{tenantId}/           Media uploads
-    ├── sites/{type}/{tenantId}/                    Pre-rendered static output (deployed)
-    ├── src/
-    │   ├── app/                                    Next.js App Router routes
-    │   │   ├── creator/[tenantType]/[tenantId]/    Split-pane editor entry
-    │   │   ├── site/[tenantId]/[pageSlug]/         Public site + preview route
-    │   │   └── api/content/snapshot/route.ts       Snapshot versioning API
-    │   ├── platform/                               Core rendering + types
-    │   │   ├── SiteRenderer.tsx                    Block → React component mapper
-    │   │   ├── types.ts                            TypeScript: Tenant, TenantBlock, TenantPage
-    │   │   ├── catalog.ts                          Theme presets + themeBlocks defaults
-    │   │   ├── content.ts                          Filesystem reader (SSR only)
-    │   │   └── siteSettingsNormalize.ts            Flat ↔ nested settings transform
-    │   └── components/
-    │       ├── TenantImageField.tsx                Custom Tina image uploader
-    │       └── SuggestionPopup.tsx                 AI catchphrase suggestions (Ctrl+Space)
-    ├── tina/config.ts                              TinaCMS collection + field schemas
-    └── scripts/
-        ├── deploy-tenant.mjs                       Build → assemble → Surge deploy
-        └── build-tenants.mjs                       Batch build helper
+├── content/
+│   ├── doctors/{tenantId}/site/index.json      Tenant metadata + global settings
+│   └── doctors/{tenantId}/pages/{slug}.json    Page blocks + page settings
+├── public/content/{type}/{tenantId}/           Media uploads
+├── sites/{type}/{tenantId}/                    Pre-rendered static output (deployed)
+├── src/
+│   ├── app/                                    Next.js App Router routes
+│   │   ├── creator/[tenantType]/[tenantId]/    Split-pane editor entry
+│   │   ├── site/[tenantId]/[pageSlug]/         Public site + preview route
+│   │   └── api/content/snapshot/route.ts       Snapshot versioning API
+│   ├── platform/                               Core rendering + types
+│   │   ├── SiteRenderer.tsx                    Block → React component mapper
+│   │   ├── types.ts                            TypeScript: Tenant, TenantBlock, TenantPage
+│   │   ├── catalog.ts                          Theme presets + themeBlocks defaults
+│   │   ├── content.ts                          Filesystem reader (SSR only)
+│   │   └── siteSettingsNormalize.ts            Flat ↔ nested settings transform
+│   └── components/
+│       ├── TenantImageField.tsx                Custom Tina image uploader
+│       └── SuggestionPopup.tsx                 AI catchphrase suggestions (Ctrl+Space)
+├── tina/config.ts                              TinaCMS collection + field schemas
+└── scripts/
+    ├── deploy-tenant.mjs                       Build → assemble → Surge deploy
+    └── build-tenants.mjs                       Batch build helper
 ```
 
 ---
@@ -71,15 +69,14 @@ content/{type}/{tenantId}/pages/{slug}.json
 
 | File | Role |
 |------|------|
-| `studio/src/app/creator/[tenantType]/[tenantId]/CreatorStudioClient.tsx` | Split-pane editor hub. Parses Tina hash, collects form drafts, broadcasts postMessage to preview iframe, AI suggestion trigger |
-| `studio/src/platform/SiteRenderer.tsx` | Converts `Tenant` object → React component tree. Injects CSS custom props, resolves header/footer fallbacks |
-| `studio/src/platform/types.ts` | Single source of truth for `Tenant`, `TenantSite`, `TenantPage`, `TenantBlock`, `VariantPreset`, `StylePreset` |
-| `studio/tina/config.ts` | Full TinaCMS schema: `doctorSite` and `hospitalSite` collections, all field definitions, nav-link templates, icon options |
-| `studio/src/platform/catalog.ts` | `stylePresets` map (10 colour/typography themes), `variantPresets`, `getThemeBlocks()` default block list per `themeId` |
-| `studio/src/platform/content.ts` | SSR: reads JSON files from disk, merges site + page into `Tenant` |
-| `studio/src/platform/siteSettingsNormalize.ts` | `toSiteSettingsPathFromFlat()` — maps flat dot-path (e.g. `profile.displayName`) to nested Tina document path through the `settings[]` array |
-| `packages/tinacms/…/css-field-plugin.tsx` | Custom Tina field component for `ui: { component: "css" }`. Modal with structured UI + raw JSON toggle, color picker, 300+ CSS property search |
-| `studio/scripts/deploy-tenant.mjs` | Single-tenant deploy. Args: `<tenantId> [--build]` |
+| `src/app/creator/[tenantType]/[tenantId]/CreatorStudioClient.tsx` | Split-pane editor hub. Parses Tina hash, collects form drafts, broadcasts postMessage to preview iframe, AI suggestion trigger |
+| `src/platform/SiteRenderer.tsx` | Converts `Tenant` object → React component tree. Injects CSS custom props, resolves header/footer fallbacks |
+| `src/platform/types.ts` | Single source of truth for `Tenant`, `TenantSite`, `TenantPage`, `TenantBlock`, `VariantPreset`, `StylePreset` |
+| `tina/config.ts` | Full TinaCMS schema: `doctorSite` and `hospitalSite` collections, all field definitions, nav-link templates, icon options |
+| `src/platform/catalog.ts` | `stylePresets` map (10 colour/typography themes), `variantPresets`, `getThemeBlocks()` default block list per `themeId` |
+| `src/platform/content.ts` | SSR: reads JSON files from disk, merges site + page into `Tenant` |
+| `src/platform/siteSettingsNormalize.ts` | `toSiteSettingsPathFromFlat()` — maps flat dot-path (e.g. `profile.displayName`) to nested Tina document path through the `settings[]` array |
+| `scripts/deploy-tenant.mjs` | Single-tenant deploy. Args: `<tenantId> [--build]` |
 
 ---
 
@@ -197,13 +194,13 @@ Three templates on any nav/social links field:
 
 ### Admin iframe integration
 
-`packages/tinacms/…/admin/index.tsx` — reports hash changes to parent window so `CreatorStudioClient` can track which tenant/page is being edited.
+The TinaCMS admin iframe reports hash changes to the parent window so `CreatorStudioClient` can track which tenant/page is being edited.
 
 ---
 
 ## CreatorStudioClient mechanics
 
-`studio/src/app/creator/[tenantType]/[tenantId]/CreatorStudioClient.tsx`
+`src/app/creator/[tenantType]/[tenantId]/CreatorStudioClient.tsx`
 
 - **Hash monitoring**: polls TinaCMS iframe `location.hash` to detect current collection/document → updates preview URL
 - **Draft sync**: collects all TinaCMS form field values via DOM inspection (`data-tina-field` attributes), sends as `postMessage` to preview iframe
@@ -226,23 +223,18 @@ annotations in `SiteRenderer`.
 
 ```bash
 # From repo root
-pnpm dev             # starts studio with TinaCMS local mode
+pnpm dev             # starts Next.js dev server
 
-# Build TinaCMS fork after changes
-pnpm build:tina-packages
-
-# Deploy a tenant (from studio/)
+# Deploy a tenant
 node scripts/deploy-tenant.mjs nitesh-garwa           # reuse .next
 node scripts/deploy-tenant.mjs nitesh-garwa --build   # full rebuild
 ```
-
-Environment variable needed: `TINA_PUBLIC_IS_LOCAL=true` (set automatically by `tinacms dev`).
 
 ---
 
 ## Adding a new block type
 
-1. Add TypeScript union member to `TenantBlock` in `studio/src/platform/types.ts`
+1. Add TypeScript union member to `TenantBlock` in `src/platform/types.ts`
 2. Add a template entry in `tina/config.ts` inside `pageFields[0].templates`
 3. Add a render case in `SiteRenderer.tsx` mapping `_template` to a React component
 4. Optionally add the block to default theme block lists in `catalog.ts#getThemeBlocks()`
@@ -256,7 +248,7 @@ Environment variable needed: `TINA_PUBLIC_IS_LOCAL=true` (set automatically by `
 
 ## Important notes
 
-- `studio/CLAUDE.md` imports `@AGENTS.md` which warns: this is Next.js 16 with breaking changes from prior versions. Check `node_modules/next/dist/docs/` before writing App Router code.
+- `AGENTS.md` warns: this is Next.js 16 with breaking changes from prior versions. Check `node_modules/next/dist/docs/` before writing App Router code.
 - The `sites/{type}/{tenantId}/` directory is **generated output** — do not hand-edit it.
 - `content/` files are the source of truth — TinaCMS writes here, `content.ts` reads here.
 - CSS in blocks is stored as a JSON string (`'{"background-color":"red"}'`), not raw CSS. `SiteRenderer` parses and applies it as inline style with `!important`.

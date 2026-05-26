@@ -1,7 +1,0 @@
-{
-  "data": {
-    "deleteDocument": {
-      "__typename": "Author"
-    }
-  }
-}

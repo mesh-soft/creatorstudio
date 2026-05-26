@@ -1,7 +1,0 @@
-{
-  "data": {
-    "addPendingDocument": {
-      "__typename": "Movie"
-    }
-  }
-}

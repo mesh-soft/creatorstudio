@@ -1,9 +1,0 @@
-query {
-  directorConnection {
-    edges {
-      node {
-        name
-      }
-    }
-  }
-}

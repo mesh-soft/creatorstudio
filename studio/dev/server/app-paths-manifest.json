@@ -1,5 +1,0 @@
-{
-  "/creator/[tenantType]/[tenantId]/page": "app/creator/[tenantType]/[tenantId]/page.js",
-  "/site/[tenantId]/[pageSlug]/page": "app/site/[tenantId]/[pageSlug]/page.js",
-  "/site/[tenantId]/[pageSlug]/preview/page": "app/site/[tenantId]/[pageSlug]/preview/page.js"
-}

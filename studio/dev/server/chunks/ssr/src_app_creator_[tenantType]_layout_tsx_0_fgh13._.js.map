@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///Users/naveenkumar/Documents/Codex/2026-05-10/doctor-sites/src/app/creator/%5BtenantType%5D/layout.tsx"],"sourcesContent":["export default function CreatorLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  return children;\n}\n"],"names":["CreatorLayout","children"],"mappings":";;;;AAAe,SAASA,cAAc,EACpCC,QAAQ,EAGT;IACC,OAAOA;AACT"}}]
-}

@@ -1,3 +1,0 @@
----
-name: Sofia Coppolla
----

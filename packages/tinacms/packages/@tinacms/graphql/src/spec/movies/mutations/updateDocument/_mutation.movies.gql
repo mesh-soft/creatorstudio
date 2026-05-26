@@ -1,5 +1,0 @@
-mutation UpdateMovie($params: MovieMutation!) {
-  updateMovie(relativePath: "star-wars.mdx", params: $params) {
-    title
-  }
-}
