@@ -20,7 +20,7 @@ function decodePayload(token: string): { exp: number } | null {
   }
 }
 
-export function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow public paths
