@@ -18,24 +18,24 @@
       "_template": "domains"
     },
     {
-      "displayName": "Nitesh Garwa",
-      "specialty": "General Practitioner",
+      "displayName": "DR NITESH GARWA'S CLINIC",
+      "specialty": "INTERNAL MEDICINE",
       "degrees": [
         "MBBS",
         "MD"
       ],
-      "registrationNumber": "DMC-88769",
-      "experienceYears": 15,
-      "bio": "Nitesh Garwa is a dedicated general practitioner with 15+ years of experience in preventive care, diagnosis, and treatment of common medical conditions.",
+      "registrationNumber": "RMC- 32764",
+      "experienceYears": 12,
+      "bio": "Nitesh Garwa is a dedicated practitioner with 12+ years of experience in preventive care, diagnosis, and treatment of medical conditions like hypertension, diabetes, respiratory disease, rheumatic disease and thyroid care",
       "photo": "/content/doctors/nitesh-garwa/WhatsApp Image 2026-05-12 at 8.40.19 PM.jpeg",
       "_template": "profile"
     },
     {
       "clinicName": "Nitesh Garwa Clinic",
-      "phone": "+91 99999 99999",
-      "whatsapp": "+919999999999",
+      "phone": "+91 9521587760",
+      "whatsapp": "+91 9521587760",
       "email": "clinic@nitesh-garwa.com",
-      "address": "123 Main Road, Near City Hospital, Delhi",
+      "address": "near ganpati mobile bus stand bissau",
       "mapUrl": "https://maps.google.com",
       "_template": "business"
     },
