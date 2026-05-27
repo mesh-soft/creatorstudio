@@ -48,7 +48,7 @@ try {
 const { MongoClient } = await import("mongodb");
 const client = new MongoClient(MONGODB_URI);
 await client.connect();
-const db = client.db();
+const db = client.db("creatorStudio");
 const users = db.collection("users");
 
 let count = 0;

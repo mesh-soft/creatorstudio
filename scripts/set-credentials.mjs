@@ -82,7 +82,7 @@ if (AUTH_BACKEND === "mongo") {
   const { MongoClient } = await import("mongodb");
   const client = new MongoClient(MONGODB_URI);
   await client.connect();
-  const db = client.db();
+  const db = client.db("creatorStudio");
   await db.collection("credentials").updateOne(
     { _id: tenantId },
     { $set: entry },

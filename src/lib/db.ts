@@ -9,6 +9,6 @@ export async function getDb(): Promise<Db> {
   if (!uri) throw new Error("MONGODB_URI not set");
   client = new MongoClient(uri);
   await client.connect();
-  db = client.db();
+  db = client.db("creatorStudio");
   return db;
 }
