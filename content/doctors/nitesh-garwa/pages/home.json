@@ -55,6 +55,24 @@
           "title": "Health Checkup",
           "description": "Preventive health screenings and wellness packages.",
           "icon": "heart-pulse"
+        },
+        {
+          "title": "hypertension"
+        },
+        {
+          "title": "diabetes"
+        },
+        {
+          "title": "thyroid care"
+        },
+        {
+          "title": "rheumatic disease  and gout"
+        },
+        {
+          "title": "asthma and copd"
+        },
+        {
+          "title": "infectious diseases"
         }
       ],
       "css": "{\"base\":{\"background\":\"#f0e5e5\"},\"mobile\":{},\"tablet\":{}}",
