@@ -11,6 +11,7 @@
 3. **Validation stays in sync.** The enum lists in `src/lib/importValidator.ts` must mirror `src/platform/catalog.ts` at all times.
 4. **Pure utilities stay pure.** `src/lib/imageScanner.ts` and `src/lib/importValidator.ts` must not import Node.js or Next.js modules — they run in both browser and server contexts.
 5. **Block `css` is always JSON-serialised.** Never store raw CSS strings in block data.
+6. **All content I/O through the adapter.** Never use `fs` directly — always call `getContentAdapter()`.
 
 ---
 
@@ -19,18 +20,21 @@
 ```bash
 pnpm dev            # Next.js dev server on :3000
 pnpm build          # production build
+pnpm build:tenants  # build + generate tenant static output
 ```
 
-TinaCMS runs in local mode (`TINA_PUBLIC_IS_LOCAL=true`). No cloud CMS needed.
+No middleware or CMS server needed. Content is read directly from the filesystem in dev.
 
 Required environment variables:
 
 | Variable | Purpose |
 |----------|---------|
-| `CONTENT_ADAPTER` | `"fs"` (default), `"s3"`, `"github"`, `"gcp"` |
+| `CONTENT_BACKEND` | `"fs"` (default), `"github"`, `"s3"`, `"gcp"` |
 | `JWT_SECRET` | Token signing secret |
 | `PEXELS_API_KEY` | Stock photo search |
 | `ANTHROPIC_API_KEY` | AI suggestion feature |
+
+Additional vars per backend — see `docs/ARCHITECTURE.md`.
 
 ---
 
@@ -54,28 +58,14 @@ In `src/platform/types.ts`, add a union member to `TenantBlock`:
   }
 ```
 
-Also export a named type from the per-block file and re-export from `types.ts`:
-
-```typescript
-export type { MyblockBlock } from "../blocks/myblock/types";
-```
-
 ### 2. Create the block folder
 
 ```
 src/blocks/myblock/
   types.ts      — export interface MyblockBlock { ... }
-  schema.ts     — TinaCMS field schema (array of Tina field objects)
+  schema.ts     — field schema (for import validation)
   Myblock.tsx   — React component, accepts MyblockBlock props
   index.ts      — re-export component as default + schema
-```
-
-Component signature:
-
-```typescript
-import type { MyblockBlock } from "./types";
-
-export default function Myblock(props: MyblockBlock & { variant?: string }) { ... }
 ```
 
 ### 3. Register in the block registry
@@ -91,18 +81,21 @@ export const blockRegistry: Record<string, React.ComponentType<any>> = {
 };
 ```
 
-### 4. Add TinaCMS schema
+### 4. Add to the editor
 
-`tina/config.ts` — inside `pageFields[0].templates`, add the schema from `schema.ts`.
-Pattern used by every existing block:
+`src/components/editor/BlockEditor.tsx`:
 
+Add to `blockTemplates`:
 ```typescript
-{
-  name: "myblock",
-  label: "My Block",
-  fields: [...myblockSchema],
-}
+myblock: { _template: "myblock", enabled: true, title: "", items: [], variant: "", backgroundImage: "", css: "" },
 ```
+
+Add to `variantLabels`:
+```typescript
+myblock: "My Block",
+```
+
+Add a case in `BlockForm` for `tpl === "myblock"`.
 
 ### 5. Update the import validator
 
@@ -117,8 +110,7 @@ export const VALID_BLOCK_TEMPLATES = [
 
 ### 6. Add to theme layouts (optional)
 
-`src/platform/catalog.ts` — add `{ _template: "myblock", enabled: true }` to the relevant
-`themeLayouts` arrays if the block should appear by default.
+`src/platform/catalog.ts` — add `{ _template: "myblock", enabled: true }` to relevant `themeLayouts` arrays.
 
 ---
 
@@ -139,12 +131,11 @@ export const stylePresets: Record<string, StylePreset> = {
 };
 ```
 
-### 2. Add Tina selector option
+### 2. Add editor selector option
 
-`tina/config.ts` — in both `siteFields` and `pageFields`, add to the `styleId` select options:
-
+`src/components/editor/BlockEditor.tsx` — add to `styleOptions` array:
 ```typescript
-{ label: "My Theme (Doctor)", value: "doctor-my-theme" }
+{ v: "doctor-my-theme", l: "My Theme (Doctor)" }
 ```
 
 ### 3. Update validator
@@ -190,26 +181,6 @@ const files = formData.getAll("image") as File[];
 
 ---
 
-## Recipe: AI-driven site creation workflow
-
-The import system (`/api/import/tenant`) enables a full AI → JSON → site pipeline:
-
-1. Provide `docs/ai-context.md` to an AI assistant to generate `site.json` + `home.json`.
-2. Optionally use `/api/pexels?query=...` to find stock photos (returns Pexels photo objects).
-3. POST to `/api/import/tenant` with the JSON + any image files.
-4. On success, tenant is live in the editor at `/creator/doctor/{tenantId}`.
-5. Deploy with `node scripts/deploy-tenant.mjs {tenantId} --build`.
-
-**Validation errors** come back as:
-
-```json
-{ "error": "Validation failed", "details": [{ "path": "blocks[0].items[1].src", "message": "..." }] }
-```
-
-Fix the JSON and re-submit.
-
----
-
 ## Working with the content adapter
 
 Never read/write `content/` files directly in application code. Always go through the adapter:
@@ -217,13 +188,33 @@ Never read/write `content/` files directly in application code. Always go throug
 ```typescript
 import { getContentAdapter } from "@/platform/contentAdapter";
 
-const adapter = getContentAdapter();
-const raw = await adapter.read("doctors/dr-smith/site/index.json");
+const adapter = await getContentAdapter();
+const raw = await adapter.read("content/doctors/dr-smith/site/index.json");
 const site = JSON.parse(raw);
-await adapter.write("doctors/dr-smith/site/index.json", JSON.stringify(site, null, 2));
+await adapter.write("content/doctors/dr-smith/site/index.json", JSON.stringify(site, null, 2));
 ```
 
-File paths passed to the adapter are **relative** to the `content/` root — do not include `content/` prefix.
+**Path convention:** Adapter paths include the full relative path from project root, including `content/` prefix.
+
+Available on the server side (`content.ts`) and in API routes. The factory returns a singleton based on `CONTENT_BACKEND`.
+
+---
+
+## Recipe: adding a new content adapter
+
+1. Implement `ContentAdapter` interface in `src/platform/contentAdapter/adapters/{name}.ts`.
+2. Register in `src/platform/contentAdapter/index.ts` factory under a new `CONTENT_BACKEND` value.
+
+```typescript
+case 'mycloud': {
+  const { MyCloudAdapter } = await import('./adapters/mycloud');
+  _adapter = new MyCloudAdapter({
+    apiKey: process.env.MYCLOUD_API_KEY!,
+    bucket: process.env.MYCLOUD_BUCKET!,
+  });
+  break;
+}
+```
 
 ---
 
@@ -255,8 +246,55 @@ const profile = site.settings.find(s => s._template === "profile");
 
 When updating settings, replace by index (not push). The fixed order must be preserved.
 
-`src/platform/siteSettingsNormalize.ts#toSiteSettingsPathFromFlat()` handles the
-flat-path ↔ array-index translation needed for TinaCMS `tinaField()` annotations.
+`src/platform/siteSettingsNormalize.ts` handles conversion between `settings[]` format and flat properties:
+- `unwrapSiteSettingsToFlat(site)` — `settings[]` → flat (used by content.ts for reading)
+- `wrapFlatSiteIntoSettings(site)` — flat → `settings[]` (used by create-tenant API)
+
+---
+
+## Live preview protocol
+
+The preview iframe communicates with the editor via `postMessage`:
+
+```typescript
+// Editor → Preview (draft update)
+{ type: "studio:draft-update", payload: TenantObject }
+
+// Preview receives via window.addEventListener("message", ...)
+```
+
+The editor pushes drafts on every field change (180ms debounced) by serializing the current `page` and `site` React state. The preview's `LivePreviewClient` receives the message and deep-merges the payload into the current `Tenant` state.
+
+---
+
+## Nav link data format
+
+Header `navLinks` and footer `links`/`socialLinks` support three formats:
+
+**New format** (from FNavLinks editor):
+```typescript
+{ type: "section", label: "Services", sectionId: "services", icon: "stethoscope" }
+{ type: "page", label: "About", pageSlug: "about", icon: "info" }
+{ type: "external", label: "Facebook", url: "https://facebook.com", icon: "globe" }
+```
+
+**Legacy format** (from TinaCMS):
+```typescript
+{ _template: "sectionLink", label: "Services", sectionId: "services" }
+{ _template: "pageLink", label: "About", pageSlug: "about" }
+{ _template: "externalLink", label: "Facebook", url: "https://facebook.com" }
+```
+
+**String format** (pipe-delimited):
+```
+"Services|#services"
+"About|/about"
+"Facebook|https://facebook.com"
+```
+
+`resolveNavLink()` in `SiteRenderer.tsx` handles all three. `normalizeNavItems()` in `BlockEditor.tsx` normalizes to the new format for the editor.
+
+When writing data, prefer the new `type`-based format. The renderer supports all formats for backward compatibility.
 
 ---
 
@@ -267,13 +305,7 @@ Images in block/site JSON can be:
 - **External URL** — `https://images.pexels.com/...` — served from CDN, no upload needed.
 - **Local path** — `/content/{type}/{tenantId}/filename.jpg` — must exist in `public/content/` before deploy.
 
-The import API (`/api/import/tenant`) validates that every `/content/...` reference in the
-JSON is covered by either:
-- An uploaded file in the multipart request, OR
-- An existing file already on disk at `public/content/{type}/{tenantId}/`
-
-Use `src/lib/imageScanner.ts#auditImages()` to check coverage before submitting.
-Keys scanned: `photo`, `src`, `backgroundImage`, `logo`, `ogImage`, `image`.
+The import API validates that every `/content/...` reference in the JSON is covered by either an uploaded file or an existing file on disk.
 
 ---
 
@@ -284,16 +316,30 @@ Keys scanned: `photo`, `src`, `backgroundImage`, `logo`, `ogImage`, `image`.
 | `tenant` | Own content only (`/api/content/*` for own `tenantId`) |
 | `admin` | All content + `/api/tenants`, `/api/create-tenant`, `/api/import/*` |
 
-Add credentials with `node scripts/set-credentials.mjs`. Token expires when manually revoked
-(there is no short-lived expiry — revoke by removing the credential entry).
+Add credentials with `node scripts/set-credentials.mjs`. Token expires when manually revoked.
 
 ---
 
-## Snapshot / version history
+## Testing a change end-to-end
 
-Before every `content/save` write, the API calls `content/snapshot` to archive the old JSON.
-Snapshots live in `content/{type}/{tenantId}/pages-backup/`. Do not delete these manually —
-they are the rollback mechanism.
+1. Edit content via the editor at `http://localhost:3000/creator`.
+2. View rendered result at `http://localhost:3000/site/{tenantId}/home`.
+3. Preview at `http://localhost:3000/site/{tenantId}/home/preview`.
+4. For deploy testing: `node scripts/deploy-tenant.mjs {tenantId}`.
+
+For API testing:
+
+```bash
+# Read tenant
+curl "http://localhost:3000/api/content/read?tenantType=doctor&tenantId=dr-smith&pageSlug=home" \
+  -H "Authorization: Bearer <token>"
+
+# Save content
+curl -X POST http://localhost:3000/api/content/save \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"tenantType":"doctor","tenantId":"dr-smith","pageSlug":"home","data":{...}}'
+```
 
 ---
 
@@ -302,41 +348,13 @@ they are the rollback mechanism.
 | Mistake | Rule |
 |---------|------|
 | Editing `sites/` directly | It's generated output. Edit `content/` instead. |
-| Adding Node imports to `src/lib/imageScanner.ts` or `importValidator.ts` | These run in the browser. Keep them pure TS. |
+| Using `fs` directly in app code | Always use `getContentAdapter()`. |
+| Adding Node imports to `src/lib/imageScanner.ts` or `importValidator.ts` | These run in the browser — keep them pure TS. |
 | Storing raw CSS in block `css` field | Must be a JSON-stringified object. |
-| Out-of-order `settings[]` | Page must have exactly 3; site exactly 8. Order is fixed. |
+| Out-of-order `settings[]` | Page must have exactly 3; site exactly 8-9. Order is fixed. |
 | Adding a block type without updating `importValidator.ts` | Import API will reject valid JSON. |
-| Adding a style/theme without updating `importValidator.ts` | Same — validator and catalog must stay in sync. |
-| Using `catalog.ts` enums in client components | `catalog.ts` imports platform types — check for Node.js server-only imports before using client-side. |
+| Adding a style/theme without updating `importValidator.ts` | Validator and catalog must stay in sync. |
+| Adding a block type without adding it to `BlockEditor.tsx` | Editor won't show it in the add-block menu or render its form. |
 | Committing real secrets to `data/credentials.json` | File is git-tracked. Use hashed credentials only. |
-
----
-
-## Testing a change end-to-end
-
-1. Edit `content/{type}/{tenantId}/pages/home.json` directly (or via the editor).
-2. View at `http://localhost:3000/site/{tenantId}/home` to see the rendered result.
-3. View at `http://localhost:3000/creator/doctor/{tenantId}` to test the editor flow.
-4. For deploy testing: `node scripts/deploy-tenant.mjs {tenantId}` (reuses existing build).
-
-For import flow testing:
-
-```bash
-curl -X POST http://localhost:3000/api/import/tenant \
-  -H "Authorization: Bearer <admin-token>" \
-  -F "site=@/path/to/site.json" \
-  -F "pages=@/path/to/home.json"
-```
-
----
-
-## File naming conventions
-
-| What | Convention |
-|------|------------|
-| Tenant IDs | `dr-firstname-lastname` (doctor), `city-name-hospital` (hospital) |
-| Page slugs | `home`, `services`, `about`, `contact` |
-| Block component files | `PascalCase.tsx` matching `_template` in PascalCase |
-| Block folders | `kebab-case` matching `_template` value |
-| API route files | `route.ts` (Next.js convention) |
-| Page route files | `page.tsx` (Next.js convention) |
+| Using `CONTENT_ADAPTER` env var | It's `CONTENT_BACKEND`. |
+| Including `content/` prefix twice in adapter paths | Adapter paths include the prefix. Example: `content/doctors/dr-smith/site/index.json`, NOT `doctors/dr-smith/site/index.json`. |
