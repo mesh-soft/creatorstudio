@@ -210,6 +210,11 @@ export function SiteRenderer({ tenant, pageSlug = "home", previewLinks = false, 
             footerLinks={tenant.footer?.links}
             linksHeading={tenant.footer?.linksHeading}
             socialHeading={tenant.footer?.socialHeading}
+            showBusinessInfo={tenant.footer?.showBusinessInfo}
+            allRightsReserved={tenant.footer?.allRightsReserved}
+            address={tenant.footer?.address}
+            phone={tenant.footer?.phone}
+            email={tenant.footer?.email}
           />
         )}
       </article>
@@ -274,6 +279,11 @@ function renderBlocks(
             footerLinks={activeBlock?.links || tenant.footer?.links}
             linksHeading={activeBlock?.linksHeading || tenant.footer?.linksHeading}
             socialHeading={activeBlock?.socialHeading || tenant.footer?.socialHeading}
+            showBusinessInfo={activeBlock?.showBusinessInfo ?? tenant.footer?.showBusinessInfo}
+            allRightsReserved={activeBlock?.allRightsReserved ?? tenant.footer?.allRightsReserved}
+            address={activeBlock?.address || tenant.footer?.address}
+            phone={activeBlock?.phone || tenant.footer?.phone}
+            email={activeBlock?.email || tenant.footer?.email}
             sectionField={sectionField}
             studioMode={studioMode}
             css={activeBlock?.css}
@@ -491,6 +501,11 @@ function Footer({
   footerLinks,
   linksHeading,
   socialHeading,
+  showBusinessInfo,
+  allRightsReserved,
+  address,
+  phone,
+  email,
   sectionField,
   studioMode,
   css,
@@ -502,6 +517,11 @@ function Footer({
   footerLinks?: (string | NavLinkItem)[];
   linksHeading?: string;
   socialHeading?: string;
+  showBusinessInfo?: boolean;
+  allRightsReserved?: boolean;
+  address?: string;
+  phone?: string;
+  email?: string;
   sectionField?: string;
   studioMode?: boolean;
   css?: any;
@@ -510,6 +530,12 @@ function Footer({
   const displayCopyright = copyright || `© ${new Date().getFullYear()} ${tenant.profile.displayName}. All rights reserved.`;
   const socials = Array.isArray(socialLinks) && socialLinks.length > 0 ? socialLinks : ["Facebook|#", "Twitter|#", "Instagram|#"];
   const navLinks = Array.isArray(footerLinks) && footerLinks.length > 0 ? footerLinks : [];
+  const showContact = showBusinessInfo !== false;
+  const showRights = allRightsReserved !== false;
+  const biz = tenant.business;
+  const contactAddress = address || biz?.address;
+  const contactPhone   = phone   || biz?.phone;
+  const contactEmail   = email   || biz?.email;
 
   return (
     <Section tag="footer" className="site-footer" sectionField={sectionField} style={css} backgroundImage={backgroundImage}>
@@ -558,11 +584,41 @@ function Footer({
             })}
           </div>
         </div>
+
+        {showContact && (contactAddress || contactPhone || contactEmail) && (
+          <div className="footer-connect-col">
+            <h4 className="footer-links-heading">Contact</h4>
+            <div className="footer-social" style={{ flexDirection: "column", gap: "10px" }}>
+              {contactAddress && (
+                <span style={{ fontSize: "14px", display: "flex", alignItems: "flex-start", gap: 6, opacity: 0.85 }}>
+                  <span style={{ flexShrink: 0 }}>📍</span>
+                  <span>{contactAddress}</span>
+                </span>
+              )}
+              {contactPhone && (
+                <a href={`tel:${contactPhone}`}
+                  style={{ fontSize: "14px", color: "var(--primary)", textDecoration: "none", fontWeight: 500, display: "flex", alignItems: "center", gap: 6 }}>
+                  <span>📞</span>
+                  {contactPhone}
+                </a>
+              )}
+              {contactEmail && (
+                <a href={`mailto:${contactEmail}`}
+                  style={{ fontSize: "14px", color: "var(--primary)", textDecoration: "none", fontWeight: 500, display: "flex", alignItems: "center", gap: 6 }}>
+                  <span>✉️</span>
+                  {contactEmail}
+                </a>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="footer-copyright">
-        {displayCopyright}
-      </div>
+      {showRights && (
+        <div className="footer-copyright">
+          {displayCopyright}
+        </div>
+      )}
     </Section>
   );
 }

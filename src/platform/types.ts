@@ -14,6 +14,14 @@ export type TenantBlock =
       enabled?: boolean;
       copyright?: string;
       socialLinks?: string[];
+      links?: string[];
+      linksHeading?: string;
+      socialHeading?: string;
+      showBusinessInfo?: boolean;
+      allRightsReserved?: boolean;
+      address?: string;
+      phone?: string;
+      email?: string;
       backgroundImage?: string;
       css?: string;
     }
@@ -239,6 +247,19 @@ export type TenantSite = {
     show?: boolean;
     logo?: string;
     navLinks?: string[];
+  };
+  footer?: {
+    show?: boolean;
+    copyright?: string;
+    socialLinks?: string[];
+    links?: string[];
+    linksHeading?: string;
+    socialHeading?: string;
+    showBusinessInfo?: boolean;
+    allRightsReserved?: boolean;
+    address?: string;
+    phone?: string;
+    email?: string;
   };
   pages?: TenantPage[];
 };

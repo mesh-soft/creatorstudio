@@ -7,6 +7,7 @@ import {
 import { SuggestionPopup } from "../SuggestionPopup";
 import { type SuggestionFieldType } from "../../lib/catchphrases";
 import { getActiveSession, getAuthHeaders, clearStoredToken } from "../../lib/clientAuth";
+import { iconElement } from "../../lib/icons";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type JsonObject  = { [key: string]: any };
@@ -97,6 +98,19 @@ const iconOptions: {v:string;l:string;e:string}[] = [
   {v:"sun",            l:"Health",         e:"☀️"},
   {v:"info",           l:"Info",           e:"ℹ️"},
   {v:"arrow-right",    l:"Proceed",        e:"→"},
+  // Social
+  {v:"facebook",        l:"Facebook",       e:""},
+  {v:"twitter",         l:"Twitter / X",    e:""},
+  {v:"instagram",       l:"Instagram",      e:""},
+  {v:"linkedin",        l:"LinkedIn",       e:""},
+  {v:"youtube",         l:"YouTube",        e:""},
+  // Others / extras
+  {v:"heartFill",       l:"Heart Filled",   e:"❤️"},
+  {v:"cross",           l:"Medical Plus",   e:"➕"},
+  {v:"scan",            l:"Scan / CT",      e:"🖨️"},
+  {v:"graduation",      l:"Graduation",     e:"🎓"},
+  {v:"user",            l:"Person",         e:"👤"},
+  {v:"checkCircle",     l:"Check Circle",   e:"✅"},
 ];
 const blockTemplates: Record<string, JsonObject> = {
   hero:{_template:"hero",enabled:true,headline:"",subheadline:"",photo:"",buttons:[],variant:"",backgroundImage:"",css:""},
@@ -322,7 +336,6 @@ export function BlockEditor({
   const [error,    setError]    = useState<string|null>(null);
   const [viewport, setViewport] = useState<Viewport>("desktop");
   const [siteOpen, setSiteOpen] = useState(false);
-  const [siteSect, setSiteSect] = useState<SiteSection>("profile");
   const previewRef = useRef<HTMLIFrameElement>(null);
   const debRef     = useRef<number|null>(null);
   const dragIdx    = useRef<number|null>(null);
@@ -716,11 +729,11 @@ export function BlockEditor({
       {siteOpen && site && (
         <SiteSettingsDrawer
           site={site} onChange={setSite}
-          section={siteSect} onSectionChange={setSiteSect}
           onSave={()=>save("site")}
           saving={saving==="site"} saved={saved==="site"}
           onClose={()=>setSiteOpen(false)}
           pages={pages}
+          layout="tabs"
         />
       )}
 
@@ -836,16 +849,51 @@ function PageSettingsPanel({ page, onChange }: {page:JsonObject;onChange:(v:Json
   );
 }
 
-// ─── Site Settings Drawer ───────────────────────────────────────────────────
-function SiteSettingsDrawer({site,onChange,section,onSectionChange,onSave,saving,saved,onClose,pages}:{
-  site:JsonObject;onChange:(v:JsonObject)=>void;
-  section:SiteSection;onSectionChange:(s:SiteSection)=>void;
-  onSave:()=>void;saving:boolean;saved:boolean;onClose:()=>void;
-  pages:string[];
+// ─── Setting Card (mirrors BlockCard style for site settings) ────────────────
+function SettingCard({ label, children, defaultOpen }: {
+  label: string; children: React.ReactNode; defaultOpen?: boolean;
 }) {
   const T = useT();
+  const [open, setOpen] = useState(defaultOpen ?? false);
+  return (
+    <div style={{
+      background: T.surface,
+      borderRadius: 2,
+      overflow: "hidden",
+      borderTop:    `1px solid ${T.border}`,
+      borderRight:  `1px solid ${T.border}`,
+      borderBottom: `1px solid ${T.border}`,
+      borderLeft:   open ? `3px solid ${T.accent}` : `1px solid ${T.border}`,
+      boxShadow:    open ? `0 2px 14px rgba(117,38,227,.14),0 1px 4px rgba(0,0,0,.28)` : "none",
+      transition:   "border-left .14s, box-shadow .14s",
+    }}>
+      <div onClick={() => setOpen(o => !o)} style={{
+        display:"flex", alignItems:"center", justifyContent:"space-between",
+        padding:"9px 12px", cursor:"pointer", userSelect:"none",
+        borderBottom: open ? `1px solid ${T.border}` : "none",
+        background: open ? `${T.accent}09` : "transparent",
+      }}>
+        <span style={{fontSize:"15px", fontWeight:600, color:T.text, letterSpacing:".1px"}}>{label}</span>
+        <span style={{color:T.textMute, fontSize:"14px", transition:"transform .14s", transform:open?"rotate(90deg)":"", display:"inline-block"}}>▶</span>
+      </div>
+      {open && (
+        <div style={{padding:"16px 14px", display:"flex", flexDirection:"column", gap:14}}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
 
-  // site.settings is an array of template objects: [{_template:"profile",...}, ...]
+// ─── Site Settings Drawer ───────────────────────────────────────────────────
+function SiteSettingsDrawer({site,onChange,onSave,saving,saved,onClose,pages,layout="vertical"}:{
+  site:JsonObject; onChange:(v:JsonObject)=>void;
+  onSave:()=>void; saving:boolean; saved:boolean; onClose:()=>void;
+  pages:string[]; layout?:"tabs"|"vertical";
+}) {
+  const T = useT();
+  const [activeTab, setActiveTab] = useState<SiteSection>(SITE_SECTIONS[0].key);
+
   const settings: any[] = Array.isArray(site.settings) ? site.settings : [];
   const getSetting = (template: string) => settings.find(s => s._template === template) ?? {};
   const updSetting = (template: string, patch: object) => {
@@ -860,15 +908,19 @@ function SiteSettingsDrawer({site,onChange,section,onSectionChange,onSave,saving
     <>
       <div onClick={onClose} style={{position:"fixed",inset:0,background:T.overlay,zIndex:400}} />
       <div style={{
-        position:"fixed",top:48,right:0,bottom:0,   /* matches 48px header height */
-        width:"min(594px,100vw)",
-        background:T.bg,borderLeft:`1px solid ${T.borderMd}`,
-        zIndex:500,display:"flex",flexDirection:"column",
+        position:"fixed", top:48, right:0, bottom:0,
+        width: layout==="tabs" ? "min(624px,100vw)" : "min(504px,100vw)",
+        minWidth: layout==="tabs" ? 456 : undefined,
+        background:T.bg, borderLeft:`1px solid ${T.borderMd}`,
+        zIndex:500, display:"flex", flexDirection:"column",
         boxShadow:"-8px 0 32px rgba(0,0,0,.45)",
+        fontFamily:"'Salesforce Sans','Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif",
+        color:T.text,
+        colorScheme:T.isDark?"dark":"light",
       }}>
-        {/* Drawer header */}
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 18px",borderBottom:`1px solid ${T.borderMd}`,background:T.surface,flexShrink:0}}>
-          <span style={{fontSize:"14px",fontWeight:700,color:T.textSub,textTransform:"uppercase",letterSpacing:".7px"}}>Site Settings</span>
+        {/* Header */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 14px",borderBottom:`1px solid ${T.borderMd}`,background:T.surface,flexShrink:0}}>
+          <span style={{fontSize:"15px",fontWeight:700,color:T.textMute,textTransform:"uppercase",letterSpacing:".8px"}}>Site Settings</span>
           <div style={{display:"flex",gap:6,alignItems:"center"}}>
             <button onClick={onSave} disabled={saving} style={{
               padding:"6px 16px", borderRadius:4, border:"none",
@@ -882,24 +934,42 @@ function SiteSettingsDrawer({site,onChange,section,onSectionChange,onSave,saving
           </div>
         </div>
 
-        {/* Section tabs — no scroll, wrap freely */}
-        <div style={{display:"flex",flexWrap:"wrap",borderBottom:`1px solid ${T.borderMd}`,padding:"0 18px",flexShrink:0,background:T.surface}}>
-          {SITE_SECTIONS.map(s=>(
-            <button key={s.key} onClick={()=>onSectionChange(s.key)} style={{
-              padding:"9px 12px", border:"none", cursor:"pointer", background:"transparent",
-              fontFamily:"inherit", color:section===s.key?T.accent:T.textMute,
-              fontSize:"15px", fontWeight:section===s.key?600:400, flexShrink:0,
-              borderBottom:section===s.key?`2px solid ${T.accent}`:"2px solid transparent",
-              transition:"color .12s", letterSpacing:section===s.key?".2px":"0",
-              marginBottom:"-1px",
-            }}>{s.label}</button>
-          ))}
-        </div>
-
-        {/* Form */}
-        <div style={{flex:1,overflowY:"auto",padding:"20px 24px 40px"}}>
-          <SiteSectionForm section={section} getSetting={getSetting} updSetting={updSetting} pages={pages} />
-        </div>
+        {layout === "tabs" ? (
+          <>
+            {/* Tab bar */}
+            <div style={{
+              display:"flex", flexShrink:0, overflowX:"auto", gap:0,
+              borderBottom:`1px solid ${T.borderMd}`, background:T.surface,
+              scrollbarWidth:"none",
+            }}>
+              {SITE_SECTIONS.map(s => {
+                const active = s.key === activeTab;
+                return (
+                  <button key={s.key} onClick={() => setActiveTab(s.key)} style={{
+                    padding:"9px 14px", border:"none", borderBottom: active ? `2px solid ${T.accent}` : "2px solid transparent",
+                    background:"transparent", color: active ? T.accent : T.textMute,
+                    fontSize:"14px", fontWeight: active ? 600 : 400, letterSpacing: active ? ".2px" : "0",
+                    cursor:"pointer", fontFamily:"inherit", whiteSpace:"nowrap", flexShrink:0,
+                    transition:"color .12s, border-color .12s",
+                  }}>{s.label}</button>
+                );
+              })}
+            </div>
+            {/* Active tab content */}
+            <div style={{flex:1,overflowY:"auto",padding:"16px 16px 40px",display:"flex",flexDirection:"column",gap:14}}>
+              <SiteSectionForm section={activeTab} getSetting={getSetting} updSetting={updSetting} pages={pages} />
+            </div>
+          </>
+        ) : (
+          /* Accordion sections */
+          <div style={{flex:1,overflowY:"scroll",padding:"12px 14px 40px",display:"flex",flexDirection:"column",gap:5}}>
+            {SITE_SECTIONS.map(s => (
+              <SettingCard key={s.key} label={s.label}>
+                <SiteSectionForm section={s.key} getSetting={getSetting} updSetting={updSetting} pages={pages} />
+              </SettingCard>
+            ))}
+          </div>
+        )}
       </div>
     </>
   );
@@ -1321,7 +1391,22 @@ function BlockForm({block,onChange,index,mode,pages}:{block:JsonObject;onChange:
       const socialItems = normalizeNavItems(socialRaw);
       const linksRaw: any[] = Array.isArray(block.links) ? block.links : [];
       const linksItems = normalizeNavItems(linksRaw);
-      return <><FRich label="Copyright" value={block.copyright??""} onChange={v=>u("copyright",v)} /><FField label="Links Heading" value={block.linksHeading??""} onChange={v=>u("linksHeading",v)} /><FNavLinks label="Footer Links" value={linksItems} onChange={v=>u("links",v)} pages={pages} /><FField label="Social Heading" value={block.socialHeading??""} onChange={v=>u("socialHeading",v)} /><FNavLinks label="Social Links" value={socialItems} onChange={v=>u("socialLinks",v)} defaultType="external" hideType /></>;
+      return (
+        <>
+          <FToggle label="Show Business Info" value={block.showBusinessInfo!==false} onChange={v=>u("showBusinessInfo",v)} />
+          {block.showBusinessInfo!==false && <>
+            <FField label="Address" hint="Overrides business info" value={block.address??""} onChange={v=>u("address",v)} />
+            <FField label="Phone" hint="Overrides business info" value={block.phone??""} onChange={v=>u("phone",v)} />
+            <FField label="Email" hint="Overrides business info" value={block.email??""} onChange={v=>u("email",v)} />
+          </>}
+          <FToggle label="All Rights Reserved" value={block.allRightsReserved!==false} onChange={v=>u("allRightsReserved",v)} />
+          <FRich label="Copyright Text" value={block.copyright??""} onChange={v=>u("copyright",v)} />
+          <FField label="Links Heading" value={block.linksHeading??""} onChange={v=>u("linksHeading",v)} />
+          <FNavLinks label="Footer Links" value={linksItems} onChange={v=>u("links",v)} pages={pages} />
+          <FField label="Social Heading" value={block.socialHeading??""} onChange={v=>u("socialHeading",v)} />
+          <FNavLinks label="Social Links" value={socialItems} onChange={v=>u("socialLinks",v)} defaultType="external" hideType />
+        </>
+      );
     }
     case "whatsapp": return <><FField label="Phone (with country code)" value={block.phone??""} onChange={v=>u("phone",v)} /><FRich label="Pre-filled Message" value={block.message??""} onChange={v=>u("message",v)} /><FField label="Tooltip" value={block.label??""} onChange={v=>u("label",v)} /></>;
     case "location": return <><FField label="Kicker" value={block.kicker??""} onChange={v=>u("kicker",v)} fieldType="kicker" /><FRich label="Title" value={block.title??""} onChange={v=>u("title",v)} fieldType="sectionTitle" /><FField label="Map URL or lat,lng" value={block.mapUrl??""} onChange={v=>u("mapUrl",v)} /><FField label="Height (px)" type="number" value={block.height??400} onChange={v=>u("height",v)} /></>;
@@ -1343,65 +1428,57 @@ function SiteSectionForm({section,getSetting,updSetting,pages}:{
   switch(section) {
     case "profile": {
       const p = getSetting("profile");
-      return (
-        <div style={{display:"flex",flexDirection:"column",gap:16}}>
-          <FField label="Display Name" value={p.displayName??""} onChange={v=>updSetting("profile",{...p,displayName:v})} />
-          <FField label="Specialty" value={p.specialty??""} onChange={v=>updSetting("profile",{...p,specialty:v})} />
-          <FField label="Degrees (comma-separated)" value={Array.isArray(p.degrees)?p.degrees.join(", "):""} onChange={v=>updSetting("profile",{...p,degrees:v.split(",").map((s:string)=>s.trim()).filter(Boolean)})} />
-          <FField label="Registration #" value={p.registrationNumber??""} onChange={v=>updSetting("profile",{...p,registrationNumber:v})} />
-          <FField label="Experience (years)" type="number" value={p.experienceYears??0} onChange={v=>updSetting("profile",{...p,experienceYears:v})} />
-          <FImage label="Profile Photo" value={p.photo??""} onChange={v=>updSetting("profile",{...p,photo:v})} />
-          <FRich label="Bio" value={p.bio??""} onChange={v=>updSetting("profile",{...p,bio:v})} rows={4} />
-        </div>
-      );
+      return (<>
+        <FField label="Display Name" value={p.displayName??""} onChange={v=>updSetting("profile",{...p,displayName:v})} />
+        <FField label="Specialty" value={p.specialty??""} onChange={v=>updSetting("profile",{...p,specialty:v})} />
+        <FField label="Degrees (comma-separated)" value={Array.isArray(p.degrees)?p.degrees.join(", "):""} onChange={v=>updSetting("profile",{...p,degrees:v.split(",").map((s:string)=>s.trim()).filter(Boolean)})} />
+        <FField label="Registration #" value={p.registrationNumber??""} onChange={v=>updSetting("profile",{...p,registrationNumber:v})} />
+        <FField label="Experience (years)" type="number" value={p.experienceYears??0} onChange={v=>updSetting("profile",{...p,experienceYears:v})} />
+        <FImage label="Profile Photo" value={p.photo??""} onChange={v=>updSetting("profile",{...p,photo:v})} />
+        <FRich label="Bio" value={p.bio??""} onChange={v=>updSetting("profile",{...p,bio:v})} rows={4} />
+      </>);
     }
     case "business": {
       const b = getSetting("business");
-      return (
-        <div style={{display:"flex",flexDirection:"column",gap:16}}>
-          <FField label="Clinic / Hospital Name" value={b.clinicName??""} onChange={v=>updSetting("business",{...b,clinicName:v})} />
-          <FField label="Phone" value={b.phone??""} onChange={v=>updSetting("business",{...b,phone:v})} />
-          <FField label="WhatsApp" value={b.whatsapp??""} onChange={v=>updSetting("business",{...b,whatsapp:v})} />
-          <FField label="Email" value={b.email??""} onChange={v=>updSetting("business",{...b,email:v})} />
-          <FRich label="Address" value={b.address??""} onChange={v=>updSetting("business",{...b,address:v})} rows={2} />
-          <FField label="Map URL" value={b.mapUrl??""} onChange={v=>updSetting("business",{...b,mapUrl:v})} />
-        </div>
-      );
+      return (<>
+        <FField label="Clinic / Hospital Name" value={b.clinicName??""} onChange={v=>updSetting("business",{...b,clinicName:v})} />
+        <FField label="Phone" value={b.phone??""} onChange={v=>updSetting("business",{...b,phone:v})} />
+        <FField label="WhatsApp" value={b.whatsapp??""} onChange={v=>updSetting("business",{...b,whatsapp:v})} />
+        <FField label="Email" value={b.email??""} onChange={v=>updSetting("business",{...b,email:v})} />
+        <FRich label="Address" value={b.address??""} onChange={v=>updSetting("business",{...b,address:v})} rows={2} />
+        <FField label="Map URL" value={b.mapUrl??""} onChange={v=>updSetting("business",{...b,mapUrl:v})} />
+      </>);
     }
     case "presentation": {
       const pr = getSetting("presentation");
-      return (
-        <div style={{display:"flex",flexDirection:"column",gap:16}}>
-          <FSelect label="Theme Layout" value={pr.themeId??""} options={themeOptions} onChange={v=>updSetting("presentation",{...pr,themeId:v})} />
-          <FSelect label="Variant Preset" value={pr.variantPresetId??""} options={variantPresetOptions} onChange={v=>updSetting("presentation",{...pr,variantPresetId:v})} />
-          <FSelect label="Style Preset" value={pr.styleId??""} options={styleOptions} onChange={v=>updSetting("presentation",{...pr,styleId:v})} />
-          <FieldGroupLabel>Colors</FieldGroupLabel>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-            {[{k:"primary",d:"#2563eb"},{k:"secondary",d:"#64748b"},{k:"accent",d:"#f59e0b"},{k:"background",d:"#ffffff"},{k:"surface",d:"#f8fafc"},{k:"text",d:"#1e293b"}].map(c=>(
-              <FColor key={c.k} label={c.k[0].toUpperCase()+c.k.slice(1)}
-                value={pr.style?.colors?.[c.k]??c.d}
-                onChange={v=>updSetting("presentation",{...pr,style:{...pr.style,colors:{...pr.style?.colors,[c.k]:v}}})} />
-            ))}
-          </div>
-          <FieldGroupLabel>Shape</FieldGroupLabel>
-          <FField label="Border Radius (e.g. 8px)" value={pr.style?.shape?.radius??""} onChange={v=>updSetting("presentation",{...pr,style:{...pr.style,shape:{...pr.style?.shape,radius:v}}})} />
-          <FieldGroupLabel>Typography</FieldGroupLabel>
-          <FField label="Heading Font" value={pr.style?.typography?.heading??""} onChange={v=>updSetting("presentation",{...pr,style:{...pr.style,typography:{...pr.style?.typography,heading:v}}})} />
-          <FField label="Body Font" value={pr.style?.typography?.body??""} onChange={v=>updSetting("presentation",{...pr,style:{...pr.style,typography:{...pr.style?.typography,body:v}}})} />
+      return (<>
+        <FSelect label="Theme Layout" value={pr.themeId??""} options={themeOptions} onChange={v=>updSetting("presentation",{...pr,themeId:v})} />
+        <FSelect label="Variant Preset" value={pr.variantPresetId??""} options={variantPresetOptions} onChange={v=>updSetting("presentation",{...pr,variantPresetId:v})} />
+        <FSelect label="Style Preset" value={pr.styleId??""} options={styleOptions} onChange={v=>updSetting("presentation",{...pr,styleId:v})} />
+        <FieldGroupLabel>Colors</FieldGroupLabel>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+          {[{k:"primary",d:"#2563eb"},{k:"secondary",d:"#64748b"},{k:"accent",d:"#f59e0b"},{k:"background",d:"#ffffff"},{k:"surface",d:"#f8fafc"},{k:"text",d:"#1e293b"}].map(c=>(
+            <FColor key={c.k} label={c.k[0].toUpperCase()+c.k.slice(1)}
+              value={pr.style?.colors?.[c.k]??c.d}
+              onChange={v=>updSetting("presentation",{...pr,style:{...pr.style,colors:{...pr.style?.colors,[c.k]:v}}})} />
+          ))}
         </div>
-      );
+        <FieldGroupLabel>Shape</FieldGroupLabel>
+        <FField label="Border Radius (e.g. 8px)" value={pr.style?.shape?.radius??""} onChange={v=>updSetting("presentation",{...pr,style:{...pr.style,shape:{...pr.style?.shape,radius:v}}})} />
+        <FieldGroupLabel>Typography</FieldGroupLabel>
+        <FField label="Heading Font" value={pr.style?.typography?.heading??""} onChange={v=>updSetting("presentation",{...pr,style:{...pr.style,typography:{...pr.style?.typography,heading:v}}})} />
+        <FField label="Body Font" value={pr.style?.typography?.body??""} onChange={v=>updSetting("presentation",{...pr,style:{...pr.style,typography:{...pr.style?.typography,body:v}}})} />
+      </>);
     }
     case "header": {
       const h = getSetting("header");
       const navLinksRaw: any[] = Array.isArray(h.navLinks) ? h.navLinks : [];
       const navItems = normalizeNavItems(navLinksRaw);
-      return (
-        <div style={{display:"flex",flexDirection:"column",gap:16}}>
-          <FToggle label="Show Header" value={h.show!==false} onChange={v=>updSetting("header",{...h,show:v})} />
-          <FImage label="Logo" value={h.logo??""} onChange={v=>updSetting("header",{...h,logo:v})} />
-          <FNavLinks label="Nav Links" value={navItems} onChange={v=>updSetting("header",{...h,navLinks:v})} pages={pages} />
-        </div>
-      );
+      return (<>
+        <FToggle label="Show Header" value={h.show!==false} onChange={v=>updSetting("header",{...h,show:v})} />
+        <FImage label="Logo" value={h.logo??""} onChange={v=>updSetting("header",{...h,logo:v})} />
+        <FNavLinks label="Nav Links" value={navItems} onChange={v=>updSetting("header",{...h,navLinks:v})} pages={pages} />
+      </>);
     }
     case "footer": {
       const f = getSetting("footer");
@@ -1409,77 +1486,78 @@ function SiteSectionForm({section,getSetting,updSetting,pages}:{
       const socialItems = normalizeNavItems(socialLinksRaw);
       const linksRaw: any[] = Array.isArray(f.links) ? f.links : [];
       const linksItems = normalizeNavItems(linksRaw);
-      return (
-        <div style={{display:"flex",flexDirection:"column",gap:16}}>
-          <FToggle label="Show Footer" value={f.show!==false} onChange={v=>updSetting("footer",{...f,show:v})} />
-          <FRich label="Copyright Text" value={f.copyright??""} onChange={v=>updSetting("footer",{...f,copyright:v})} rows={1} />
-          <FField label="Links Heading" value={f.linksHeading??""} onChange={v=>updSetting("footer",{...f,linksHeading:v})} />
-          <FNavLinks label="Footer Links" value={linksItems} onChange={v=>updSetting("footer",{...f,links:v})} pages={pages} />
-          <FField label="Social Heading" value={f.socialHeading??""} onChange={v=>updSetting("footer",{...f,socialHeading:v})} />
-          <FNavLinks label="Social Links" value={socialItems} onChange={v=>updSetting("footer",{...f,socialLinks:v})} defaultType="external" hideType />
-        </div>
-      );
+      return (<>
+        <FToggle label="Show Footer" value={f.show!==false} onChange={v=>updSetting("footer",{...f,show:v})} />
+        <FToggle label="Show Business Info (Address, Phone, Email)" value={f.showBusinessInfo!==false} onChange={v=>updSetting("footer",{...f,showBusinessInfo:v})} />
+        {f.showBusinessInfo!==false && <>
+          <FField label="Address" hint="Overrides business info" value={f.address??""} onChange={v=>updSetting("footer",{...f,address:v})} />
+          <FField label="Phone" hint="Overrides business info" value={f.phone??""} onChange={v=>updSetting("footer",{...f,phone:v})} />
+          <FField label="Email" hint="Overrides business info" value={f.email??""} onChange={v=>updSetting("footer",{...f,email:v})} />
+        </>}
+        <FToggle label="All Rights Reserved" value={f.allRightsReserved!==false} onChange={v=>updSetting("footer",{...f,allRightsReserved:v})} />
+        <FRich label="Copyright Text" value={f.copyright??""} onChange={v=>updSetting("footer",{...f,copyright:v})} rows={1} />
+        <FField label="Links Heading" value={f.linksHeading??""} onChange={v=>updSetting("footer",{...f,linksHeading:v})} />
+        <FNavLinks label="Footer Links" value={linksItems} onChange={v=>updSetting("footer",{...f,links:v})} pages={pages} />
+        <FField label="Social Heading" value={f.socialHeading??""} onChange={v=>updSetting("footer",{...f,socialHeading:v})} />
+        <FNavLinks label="Social Links" value={socialItems} onChange={v=>updSetting("footer",{...f,socialLinks:v})} defaultType="external" hideType />
+      </>);
     }
     case "seo": {
       const seo = getSetting("seo");
-      return (
-        <div style={{display:"flex",flexDirection:"column",gap:16}}>
-          <FField label="Title" value={seo.title??""} onChange={v=>updSetting("seo",{...seo,title:v})} />
-          <FRich label="Description" value={seo.description??""} onChange={v=>updSetting("seo",{...seo,description:v})} rows={2} />
-          <FField label="Keywords (comma-separated)" value={Array.isArray(seo.keywords)?seo.keywords.join(", "):""} onChange={v=>updSetting("seo",{...seo,keywords:v.split(",").map((s:string)=>s.trim()).filter(Boolean)})} />
-          <FImage label="OG Image" value={seo.ogImage??""} onChange={v=>updSetting("seo",{...seo,ogImage:v})} />
-        </div>
-      );
+      return (<>
+        <FField label="Title" value={seo.title??""} onChange={v=>updSetting("seo",{...seo,title:v})} />
+        <FRich label="Description" value={seo.description??""} onChange={v=>updSetting("seo",{...seo,description:v})} rows={2} />
+        <FField label="Keywords (comma-separated)" value={Array.isArray(seo.keywords)?seo.keywords.join(", "):""} onChange={v=>updSetting("seo",{...seo,keywords:v.split(",").map((s:string)=>s.trim()).filter(Boolean)})} />
+        <FImage label="OG Image" value={seo.ogImage??""} onChange={v=>updSetting("seo",{...seo,ogImage:v})} />
+      </>);
     }
     case "analytics": {
       const a = getSetting("analytics");
       const scripts: {code:string;inHead:boolean}[] = Array.isArray(a.customScripts) ? a.customScripts : [];
       const setScripts = (s: {code:string;inHead:boolean}[]) => updSetting("analytics",{...a,customScripts:s});
-      return (
-        <div style={{display:"flex",flexDirection:"column",gap:16}}>
-          <FieldGroupLabel>Google Analytics / Tag Manager</FieldGroupLabel>
-          <FField label="GA Measurement ID" value={a.gaMeasurementId??""} onChange={v=>updSetting("analytics",{...a,gaMeasurementId:v})} />
-          <FField label="GTM Container ID" value={a.gtmContainerId??""} onChange={v=>updSetting("analytics",{...a,gtmContainerId:v})} />
-          <FieldGroupLabel>Meta / Facebook Pixel</FieldGroupLabel>
-          <FField label="Meta Pixel ID" value={a.metaPixelId??""} onChange={v=>updSetting("analytics",{...a,metaPixelId:v})} />
+      return (<>
+        <FieldGroupLabel>Google Analytics / Tag Manager</FieldGroupLabel>
+        <FField label="GA Measurement ID" value={a.gaMeasurementId??""} onChange={v=>updSetting("analytics",{...a,gaMeasurementId:v})} />
+        <FField label="GTM Container ID" value={a.gtmContainerId??""} onChange={v=>updSetting("analytics",{...a,gtmContainerId:v})} />
+        <FieldGroupLabel>Meta / Facebook Pixel</FieldGroupLabel>
+        <FField label="Meta Pixel ID" value={a.metaPixelId??""} onChange={v=>updSetting("analytics",{...a,metaPixelId:v})} />
 
-          {/* ── Custom Scripts ── */}
-          <FieldGroupLabel>Custom Scripts</FieldGroupLabel>
-          <div style={{display:"flex",flexDirection:"column",gap:10}}>
-            {scripts.map((sc,idx) => (
-              <CustomScriptItem
-                key={idx}
-                script={sc}
-                index={idx}
-                total={scripts.length}
-                onChange={updated => {
-                  const n = [...scripts];
-                  n[idx] = updated;
-                  setScripts(n);
-                }}
-                onRemove={() => setScripts(scripts.filter((_,j)=>j!==idx))}
-                onMove={(dir) => {
-                  const n = [...scripts];
-                  const swap = idx + dir;
-                  if (swap < 0 || swap >= n.length) return;
-                  [n[idx],n[swap]] = [n[swap],n[idx]];
-                  setScripts(n);
-                }}
-              />
-            ))}
-            <button
-              onClick={() => setScripts([...scripts, {code:"", inHead:false}])}
-              style={{
-                padding:"7px 14px", borderRadius:4,
-                border:`1px dashed ${T.accent}`, background:`${T.accent}10`,
-                color:T.accent, fontSize:"13px", fontWeight:600,
-                cursor:"pointer", fontFamily:"inherit", transition:"all .12s",
-              }}>
-              + Add Script
-            </button>
-          </div>
+        {/* ── Custom Scripts ── */}
+        <FieldGroupLabel>Custom Scripts</FieldGroupLabel>
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          {scripts.map((sc,idx) => (
+            <CustomScriptItem
+              key={idx}
+              script={sc}
+              index={idx}
+              total={scripts.length}
+              onChange={updated => {
+                const n = [...scripts];
+                n[idx] = updated;
+                setScripts(n);
+              }}
+              onRemove={() => setScripts(scripts.filter((_,j)=>j!==idx))}
+              onMove={(dir) => {
+                const n = [...scripts];
+                const swap = idx + dir;
+                if (swap < 0 || swap >= n.length) return;
+                [n[idx],n[swap]] = [n[swap],n[idx]];
+                setScripts(n);
+              }}
+            />
+          ))}
+          <button
+            onClick={() => setScripts([...scripts, {code:"", inHead:false}])}
+            style={{
+              padding:"7px 14px", borderRadius:4,
+              border:`1px dashed ${T.accent}`, background:`${T.accent}10`,
+              color:T.accent, fontSize:"13px", fontWeight:600,
+              cursor:"pointer", fontFamily:"inherit", transition:"all .12s",
+            }}>
+            + Add Script
+          </button>
         </div>
-      );
+      </>);
     }
     default: return null;
   }
@@ -1647,7 +1725,7 @@ function AddBlockMenu({onAdd}:{onAdd:(tpl:string)=>void}) {
 }
 
 // ─── Field Primitives (prefixed F to keep concise) ───────────────────────────
-function FField({label,value,onChange,type,fieldType}:{label:string;value:any;onChange:(v:any)=>void;type?:string;fieldType?:SuggestionFieldType}) {
+function FField({label,value,onChange,type,fieldType,hint}:{label:string;value:any;onChange:(v:any)=>void;type?:string;fieldType?:SuggestionFieldType;hint?:string}) {
   const T = useT();
   const {specialty,experienceYears} = useSpecialty();
   const [focused,setFocused] = useState(false);
@@ -1662,10 +1740,11 @@ function FField({label,value,onChange,type,fieldType}:{label:string;value:any;on
   };
   return (
     <div style={{position:"relative"}}>
-      <label style={lbl(T)}>
+      <label style={{...lbl(T), ...(hint ? {marginBottom:2} : {})}}>
         {label}
         {fieldType && <span style={{marginLeft:5,fontSize:"14px",fontWeight:400,color:T.textMute,letterSpacing:0,textTransform:"none",verticalAlign:"middle"}}>⌃Space</span>}
       </label>
+      {hint && <div style={{fontSize:"11px",color:T.textMute,marginBottom:5,letterSpacing:".1px",textTransform:"none",fontWeight:400,lineHeight:1.35}}>{hint}</div>}
       {type==="number"
         ? <input ref={inputRef} type="number" value={value??""} onChange={e=>onChange(e.target.value===""?undefined:Number(e.target.value))} style={s} onFocus={()=>setFocused(true)} onBlur={()=>setFocused(false)} />
         : <input ref={inputRef} type="text" value={typeof value==="string"?value:value==null?"":String(value)} onChange={e=>onChange(e.target.value)} style={s} onFocus={()=>setFocused(true)} onBlur={()=>setFocused(false)} onKeyDown={handleKeyDown} />
@@ -1711,24 +1790,56 @@ function FSelect({label,value,options,onChange}:{label:string;value:string;optio
   );
 }
 
-// ─── FIconPicker — WhatsApp-keyboard-style emoji grid ───────────────────────
+// ─── FIconPicker — tabbed SVG icon picker ───────────────────────────────────
+const ICON_TABS: {key:string;label:string;ids:string[];emoji?:true}[] = [
+  { key:"medical",    label:"Medical",
+    ids:["stethoscope","heart-pulse","syringe","bandage","pill","thermometer","brain","bone","heart","lungs","tooth","eye","baby","dna","microscope","ambulance","hospital","ribbon","siren","activity"] },
+  { key:"people",     label:"People",
+    ids:["users","user-check","smile","award","certificate","shield","star","check","lock","verified"] },
+  { key:"contact",    label:"Contact",
+    ids:["calendar","clock","phone","mail","map-pin","whatsapp","video","globe"] },
+  { key:"facilities", label:"Facilts.",
+    ids:["building","home","car","chart","document","sparkles","zap","leaf","sun","info","arrow-right"] },
+  { key:"social",     label:"Social",
+    ids:["facebook","twitter","instagram","linkedin","youtube"] },
+  { key:"emoji",      label:"Emoji",
+    ids:iconOptions.map(o=>o.v), emoji:true },
+  { key:"others",     label:"Others",
+    ids:["heartFill","cross","scan","graduation","user","checkCircle"] },
+];
+
 function FIconPicker({label,value,onChange}:{label:string;value:string;onChange:(v:string)=>void}) {
   const T = useT();
   const [open, setOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
   const [pos, setPos] = useState({ top:0, left:0, width:0 });
   const btnRef = useRef<HTMLButtonElement>(null);
+  const dropRef = useRef<HTMLDivElement>(null);
   const selected = iconOptions.find(o => o.v === value);
+
+  // Close on click outside — no backdrop so the editor stays scrollable
+  useEffect(()=>{
+    if (!open) return;
+    const h = (e:MouseEvent) => {
+      if (btnRef.current?.contains(e.target as Node)) return;
+      if (dropRef.current?.contains(e.target as Node)) return;
+      setOpen(false);
+    };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [open]);
 
   const handleOpen = () => {
     if (!open && btnRef.current) {
       const r = btnRef.current.getBoundingClientRect();
-      // Clamp so dropdown doesn't overflow right edge
-      const dropW = Math.max(r.width, 240);
+      const dropW = Math.max(r.width, 292);
       const left  = Math.min(r.left, window.innerWidth - dropW - 8);
       setPos({ top: r.bottom + 4, left, width: dropW });
     }
     setOpen(o => !o);
   };
+
+  const tab = ICON_TABS[activeTab];
 
   return (
     <div>
@@ -1743,57 +1854,72 @@ function FIconPicker({label,value,onChange}:{label:string;value:string;onChange:
           fontFamily:"inherit", textAlign:"left", display:"flex", alignItems:"center", gap:8,
           transition:"border-color .12s, box-shadow .12s", outline:"none",
         }}>
-          <span style={{fontSize:18,lineHeight:1,flexShrink:0}}>{selected?.e ?? "—"}</span>
-          <span style={{flex:1,color:selected?T.text:T.textMute,fontSize:"15px"}}>
-            {selected?.l ?? "None"}
+          <span style={{width:20,height:20,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,color:T.text}}>
+            {value ? iconElement(value,{width:18,height:18}) : <span style={{color:T.textMute,fontSize:16,lineHeight:1}}>—</span>}
           </span>
-          <span style={{color:T.textMute,fontSize:"15px",flexShrink:0,transition:"transform .12s",transform:open?"rotate(180deg)":"none"}}>▾</span>
+          <span style={{flex:1,color:selected?T.text:T.textMute,fontSize:"15px"}}>{selected?.l ?? "None"}</span>
+          <span style={{color:T.textMute,fontSize:"13px",flexShrink:0,transition:"transform .12s",transform:open?"rotate(180deg)":"none"}}>▾</span>
         </button>
-        {/* Fixed-position dropdown grid — escapes any overflow:hidden ancestor */}
+
+        {/* Fixed-position dropdown — no backdrop so editor scroll is unblocked */}
         {open && (
-          <>
-            <div onClick={()=>setOpen(false)} style={{position:"fixed",inset:0,zIndex:9980}} />
-            <div style={{
-              position:"fixed", top:pos.top, left:pos.left, width:pos.width, zIndex:9999,
-              background:T.surface, border:`1px solid ${T.borderMd}`,
-              borderRadius:6, boxShadow:T.shadowMd, padding:8,
-              maxHeight:260, overflowY:"auto",
-            }}>
-              {/* None */}
+          <div ref={dropRef} style={{
+            position:"fixed", top:pos.top, left:pos.left, width:pos.width, zIndex:9999,
+            background:T.surface, border:`1px solid ${T.borderMd}`,
+            borderRadius:6, boxShadow:T.shadowMd,
+          }}>
+            <div style={{display:"flex",borderBottom:`1px solid ${T.borderMd}`,borderRadius:"6px 6px 0 0",
+              background:T.isDark?"rgba(255,255,255,0.04)":"rgba(0,0,0,0.03)",overflow:"hidden"}}>
+              {ICON_TABS.map((t,i)=>(
+                <button key={t.key} onClick={()=>setActiveTab(i)} style={{
+                  flex:1, padding:"7px 2px", fontSize:"11px", fontWeight:500, border:"none",
+                  borderBottom: i===activeTab?`2px solid ${T.accent}`:"2px solid transparent",
+                  background:"transparent", color:i===activeTab?T.accent:T.textMute,
+                  cursor:"pointer", fontFamily:"inherit", transition:"color .1s,border-color .1s",
+                  whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
+                }}>{t.label}</button>
+              ))}
+            </div>
+            <div style={{padding:8}}>
               <button onClick={()=>{onChange("");setOpen(false);}} style={{
                 width:"100%", padding:"4px 8px", textAlign:"left", marginBottom:6,
-                border:`1px solid ${!value ? T.accent : "transparent"}`,
-                background: !value ? `${T.accent}18` : "transparent",
-                color: !value ? T.accent : T.textMute,
-                fontSize:"14px", cursor:"pointer", fontFamily:"inherit",
+                border:`1px solid ${!value?T.accent:"transparent"}`,
+                background:!value?`${T.accent}18`:"transparent",
+                color:!value?T.accent:T.textMute,
+                fontSize:"12px", cursor:"pointer", fontFamily:"inherit",
                 borderRadius:4, transition:"all .1s",
-              }}>— None</button>
-              <div style={{
+                display:"flex", alignItems:"center", gap:5,
+              }}><span style={{fontSize:13,lineHeight:1,fontWeight:600}}>✕</span> Clear</button>
+              <div onWheel={e=>e.stopPropagation()} style={{
                 display:"grid",
-                gridTemplateColumns:"repeat(auto-fill,minmax(52px,1fr))",
-                gap:3,
+                gridTemplateColumns:tab.emoji?"repeat(auto-fill,minmax(44px,1fr))":"repeat(auto-fill,minmax(52px,1fr))",
+                gap:3, maxHeight:204, overflowY:"scroll",
               }}>
-                {iconOptions.map(opt=>(
-                  <button key={opt.v} onClick={()=>{onChange(opt.v);setOpen(false);}}
-                    title={opt.l}
-                    style={{
-                      display:"flex", flexDirection:"column", alignItems:"center",
-                      padding:"6px 3px", borderRadius:5, cursor:"pointer",
-                      border:`1px solid ${value===opt.v ? T.accent : "transparent"}`,
-                      background: value===opt.v ? `${T.accent}20` : "transparent",
-                      fontFamily:"inherit", transition:"all .1s",
-                    }}
-                    onMouseEnter={e=>{if(value!==opt.v)(e.currentTarget as HTMLButtonElement).style.background=`${T.accent}0C`;}}
-                    onMouseLeave={e=>{if(value!==opt.v)(e.currentTarget as HTMLButtonElement).style.background="transparent";}}>
-                    <span style={{fontSize:19,lineHeight:1.25}}>{opt.e}</span>
-                    <span style={{fontSize:9,color:T.textMute,marginTop:2,lineHeight:1.2,textAlign:"center",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",width:"100%"}}>
-                      {opt.l.length>9?opt.l.slice(0,8)+"…":opt.l}
-                    </span>
-                  </button>
-                ))}
+                {tab.ids.map(id=>{
+                  const opt = iconOptions.find(o=>o.v===id);
+                  if (!opt) return null;
+                  const sel = value===opt.v;
+                  return (
+                    <button key={opt.v} onClick={()=>{onChange(opt.v);setOpen(false);}} title={opt.l}
+                      style={{display:"flex",flexDirection:"column",alignItems:"center",
+                        padding:tab.emoji?"5px 2px 4px":"7px 3px 5px",borderRadius:5,cursor:"pointer",
+                        border:`1px solid ${sel?T.accent:"transparent"}`,
+                        background:sel?`${T.accent}20`:"transparent",
+                        color:sel?T.accent:T.text,fontFamily:"inherit",transition:"all .1s"}}
+                      onMouseEnter={e=>{if(!sel)(e.currentTarget as HTMLButtonElement).style.background=`${T.accent}0C`;}}
+                      onMouseLeave={e=>{if(!sel)(e.currentTarget as HTMLButtonElement).style.background="transparent";}}>
+                      {tab.emoji
+                        ? <span style={{fontSize:20,lineHeight:1.3}}>{opt.e}</span>
+                        : <span style={{width:20,height:20,display:"flex",alignItems:"center",justifyContent:"center"}}>{iconElement(opt.v,{width:18,height:18})}</span>}
+                      <span style={{fontSize:9,color:T.textMute,marginTop:2,lineHeight:1.2,textAlign:"center",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",width:"100%"}}>
+                        {opt.l.length>9?opt.l.slice(0,8)+"…":opt.l}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
@@ -2449,6 +2575,85 @@ function normalizeNavItems(raw: any[]): NavLinkItem[] {
   });
 }
 
+function NavLinkRow({ item, i, value, onChange, dt, pages, sections, T, onDragStart, onDragOver, onDragEnd, hideType, defaultOpen }: {
+  item: NavLinkItem; i: number; value: NavLinkItem[]; onChange: (v: NavLinkItem[]) => void;
+  dt: NavLinkItem["type"]; pages?: string[]; sections: string[]; T: Tokens;
+  onDragStart: (e: React.DragEvent, i: number) => void;
+  onDragOver: (e: React.DragEvent, i: number) => void;
+  onDragEnd: (e: React.DragEvent) => void;
+  hideType?: boolean; defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen ?? false);
+  const selectStyle = (): React.CSSProperties => ({ ...inputBase(T, false), fontSize:"12.5px", cursor:"pointer", lineHeight:"1.5" });
+
+  return (
+    <div draggable onDragStart={(e) => onDragStart(e, i)} onDragOver={(e) => onDragOver(e, i)} onDragEnd={(e) => onDragEnd(e)}
+      style={{ background:T.bg, borderRadius:6, border:`1px solid ${open ? T.accent : T.border}`, overflow:"hidden", transition:"border-color .12s" }}>
+      <div onClick={() => setOpen(o => !o)}
+        style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"7px 10px", cursor:"pointer", userSelect:"none",
+          borderBottom: open ? `1px solid ${T.border}` : "none", background: open ? `${T.accent}08` : "transparent" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:7, minWidth:0 }}>
+          <span onClick={e => e.stopPropagation()} style={{ color:T.textDim, fontSize:"14px", cursor:"grab", flexShrink:0 }}>⠿</span>
+          <span style={{ fontSize:"13px", color: item.label ? T.text : T.textMute, fontWeight:500, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+            {item.label || "New link"}
+          </span>
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:5, flexShrink:0 }}>
+          <button onClick={e => { e.stopPropagation(); onChange(value.filter((_, j) => j !== i)); }}
+            style={{ padding:"1px 5px", borderRadius:3, border:"1px solid transparent", background:"transparent", color:T.textMute, fontSize:"12px", cursor:"pointer", transition:"all .15s", lineHeight:1 }}
+            onMouseEnter={e => { const el = e.currentTarget as HTMLButtonElement; el.style.color = T.red; el.style.borderColor = T.redBg; el.style.background = T.redBg; }}
+            onMouseLeave={e => { const el = e.currentTarget as HTMLButtonElement; el.style.color = T.textMute; el.style.borderColor = "transparent"; el.style.background = "transparent"; }}>✕</button>
+          <span style={{ color:T.textMute, fontSize:"12px", transition:"transform .12s", transform:open?"rotate(90deg)":"none", display:"inline-block" }}>▶</span>
+        </div>
+      </div>
+      {open && (
+        <div style={{ padding:"10px", display:"flex", flexDirection:"column", gap:8 }}>
+          <div style={{ display:"flex", gap:6 }}>
+            <input placeholder="Label" value={item.label}
+              onChange={e => { const n = [...value]; n[i] = { ...n[i], label: e.target.value }; onChange(n); }}
+              style={{ ...inputBase(T, false), fontSize:"12.5px", flex:1, width:"auto", minWidth:0 }} />
+            {!hideType && (
+              <select value={item.type ?? dt}
+                onChange={e => { const n = [...value]; n[i] = { ...n[i], type: e.target.value as NavLinkItem["type"] }; onChange(n); }}
+                style={{ ...selectStyle(), width:90, flex:"none" }}>
+                <option value="section">Section</option>
+                <option value="page">Page</option>
+                <option value="external">URL</option>
+              </select>
+            )}
+            <IconPicker value={item.icon ?? ""} onChange={v => { const n = [...value]; n[i] = v ? { ...n[i], icon: v } : (() => { const { icon, ...rest } = n[i]; return rest; })(); onChange(n); }} />
+          </div>
+          {(item.type ?? dt) === "section" && (
+            <select value={item.sectionId ?? ""}
+              onChange={e => { const n = [...value]; n[i] = { ...n[i], sectionId: e.target.value }; onChange(n); }}
+              style={{ width:"100%", ...selectStyle() }}>
+              <option value="">-- Pick a section --</option>
+              {sections.map(s => <option key={s} value={s}>{s[0].toUpperCase() + s.slice(1)}</option>)}
+            </select>
+          )}
+          {(item.type ?? dt) === "page" && (pages?.length ? (
+            <select value={item.pageSlug ?? ""}
+              onChange={e => { const n = [...value]; n[i] = { ...n[i], pageSlug: e.target.value }; onChange(n); }}
+              style={{ width:"100%", ...selectStyle() }}>
+              <option value="">-- Pick a page --</option>
+              {pages.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          ) : (
+            <input placeholder="Page slug" value={item.pageSlug ?? ""}
+              onChange={e => { const n = [...value]; n[i] = { ...n[i], pageSlug: e.target.value }; onChange(n); }}
+              style={{ width:"100%", ...inputBase(T, false), fontSize:"12.5px" }} />
+          ))}
+          {(item.type ?? dt) === "external" && (
+            <input placeholder="https://..." value={item.url ?? ""}
+              onChange={e => { const n = [...value]; n[i] = { ...n[i], url: e.target.value }; onChange(n); }}
+              style={{ width:"100%", ...inputBase(T, false), fontSize:"12.5px" }} />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function FNavLinks({ label, value, onChange, pages, defaultType, hideType }: {
   label: string; value: NavLinkItem[]; onChange: (v: NavLinkItem[]) => void;
   pages?: string[]; defaultType?: NavLinkItem["type"]; hideType?: boolean;
@@ -2456,8 +2661,8 @@ function FNavLinks({ label, value, onChange, pages, defaultType, hideType }: {
   const T = useT();
   const dt = defaultType ?? "section";
   const sections = Object.keys(blockTemplates).filter(k => !["header","footer"].includes(k));
-  const selectStyle = (): React.CSSProperties => ({ ...inputBase(T, false), fontSize:"12.5px", cursor:"pointer", lineHeight:"1.5" });
   const dragIdx = useRef<number | null>(null);
+  const [newIdx, setNewIdx] = useState<number | null>(null);
 
   const onDragStart = (e: React.DragEvent, i: number) => { e.stopPropagation(); dragIdx.current = i; };
   const onDragOver = (e: React.DragEvent, i: number) => {
@@ -2471,66 +2676,27 @@ function FNavLinks({ label, value, onChange, pages, defaultType, hideType }: {
   };
   const onDragEnd = (e: React.DragEvent) => { e.stopPropagation(); dragIdx.current = null; };
 
+  const handleAdd = () => {
+    const next = [...value, { label:"", type:dt }];
+    setNewIdx(next.length - 1);
+    onChange(next);
+  };
+
   return (
     <div>
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6 }}>
         <label style={lbl(T)}>{label}</label>
-        <button onClick={() => onChange([...value, { label:"", type:dt }])}
+        <button onClick={handleAdd}
           style={{ padding:"3px 10px", borderRadius:4, border:`1px solid ${T.accent}`, background:`${T.accent}14`, color:T.accent, fontSize:"10px", fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>+ Add</button>
       </div>
-      <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+      <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
         {value.map((item, i) => (
-          <div key={i} draggable onDragStart={(e) => onDragStart(e, i)} onDragOver={(e) => onDragOver(e, i)} onDragEnd={(e) => onDragEnd(e)}
-            style={{ padding:"8px 10px", background:T.bg, borderRadius:6, border:`1px solid ${T.border}`, cursor:"grab" }}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:4 }}>
-              <span style={{ color:T.textDim, fontSize:"10px", cursor:"grab" }}>⠿ {item.label || "New link"}</span>
-              <button onClick={() => onChange(value.filter((_, j) => j !== i))}
-                style={{ padding:"2px 6px", borderRadius:3, border:"1px solid transparent", background:"transparent", color:T.textMute, fontSize:"12px", cursor:"pointer", transition:"all .15s" }}
-                onMouseEnter={e => { const el = e.currentTarget as HTMLButtonElement; el.style.color = T.red; el.style.borderColor = T.red; el.style.background = T.redBg; }}
-                onMouseLeave={e => { const el = e.currentTarget as HTMLButtonElement; el.style.color = T.textMute; el.style.borderColor = "transparent"; el.style.background = "transparent"; }}>✕</button>
-            </div>
-            <div style={{ display:"flex", gap:6, marginBottom:6 }}>
-              {/* Label — flex:1 must come last to override width:100% from inputBase */}
-              <input placeholder="Label" value={item.label}
-                onChange={e => { const n = [...value]; n[i] = { ...n[i], label: e.target.value }; onChange(n); }}
-                style={{ ...inputBase(T, false), fontSize:"12.5px", flex:1, width:"auto", minWidth:0 }} />
-              {!hideType && (
-                <select value={item.type ?? dt}
-                  onChange={e => { const n = [...value]; n[i] = { ...n[i], type: e.target.value as NavLinkItem["type"] }; onChange(n); }}
-                  style={{ ...selectStyle(), width:90, flex:"none" }}>
-                  <option value="section">Section</option>
-                  <option value="page">Page</option>
-                  <option value="external">URL</option>
-                </select>
-              )}
-              <IconPicker value={item.icon ?? ""} onChange={v => { const n = [...value]; n[i] = v ? { ...n[i], icon: v } : (() => { const { icon, ...rest } = n[i]; return rest; })(); onChange(n); }} />
-            </div>
-            {(item.type ?? dt) === "section" && (
-              <select value={item.sectionId ?? ""}
-                onChange={e => { const n = [...value]; n[i] = { ...n[i], sectionId: e.target.value }; onChange(n); }}
-                style={{ width:"100%", ...selectStyle() }}>
-                <option value="">-- Pick a section --</option>
-                {sections.map(s => <option key={s} value={s}>{s[0].toUpperCase() + s.slice(1)}</option>)}
-              </select>
-            )}
-            {(item.type ?? dt) === "page" && (pages?.length ? (
-              <select value={item.pageSlug ?? ""}
-                onChange={e => { const n = [...value]; n[i] = { ...n[i], pageSlug: e.target.value }; onChange(n); }}
-                style={{ width:"100%", ...selectStyle() }}>
-                <option value="">-- Pick a page --</option>
-                {pages.map(p => <option key={p} value={p}>{p}</option>)}
-              </select>
-            ) : (
-              <input placeholder="Page slug" value={item.pageSlug ?? ""}
-                onChange={e => { const n = [...value]; n[i] = { ...n[i], pageSlug: e.target.value }; onChange(n); }}
-                style={{ width:"100%", ...inputBase(T, false), fontSize:"12.5px" }} />
-            ))}
-            {(item.type ?? dt) === "external" && (
-              <input placeholder="https://..." value={item.url ?? ""}
-                onChange={e => { const n = [...value]; n[i] = { ...n[i], url: e.target.value }; onChange(n); }}
-                style={{ width:"100%", ...inputBase(T, false), fontSize:"12.5px" }} />
-            )}
-          </div>
+          <NavLinkRow
+            key={i} item={item} i={i} value={value} onChange={v => { setNewIdx(null); onChange(v); }}
+            dt={dt} pages={pages} sections={sections} T={T}
+            onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd}
+            hideType={hideType} defaultOpen={i === newIdx}
+          />
         ))}
         {value.length === 0 && (
           <div style={{ padding:"16px", textAlign:"center", color:T.textMute, fontSize:"12px", border:`1px dashed ${T.borderMd}`, borderRadius:6 }}>
@@ -2542,53 +2708,109 @@ function FNavLinks({ label, value, onChange, pages, defaultType, hideType }: {
   );
 }
 
+// Compact icon-button trigger used inline in FNavLinks rows
 function IconPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const T = useT();
   const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const [activeTab, setActiveTab] = useState(0);
+  const [pos, setPos] = useState({ top:0, left:0 });
   const btnRef = useRef<HTMLButtonElement>(null);
-  const selectedIcon = iconOptions.find(o => o.v === value);
+  const dropRef = useRef<HTMLDivElement>(null);
+
+  // Close on click outside — no backdrop so editor scroll is unblocked
+  useEffect(()=>{
+    if (!open) return;
+    const h = (e:MouseEvent) => {
+      if (btnRef.current?.contains(e.target as Node)) return;
+      if (dropRef.current?.contains(e.target as Node)) return;
+      setOpen(false);
+    };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [open]);
 
   const handleOpen = () => {
     if (!open && btnRef.current) {
       const r = btnRef.current.getBoundingClientRect();
-      setPos({ top: r.bottom + 4, left: Math.min(r.left, window.innerWidth - 300) });
+      const dropW = 292;
+      const left = Math.min(r.left, window.innerWidth - dropW - 8);
+      setPos({ top: r.bottom + 4, left });
     }
     setOpen(o => !o);
   };
 
+  const tab = ICON_TABS[activeTab];
+
   return (
-    <div style={{ position:"relative" }}>
-      <button ref={btnRef} onClick={handleOpen}
-        style={{ width:42, height:32, borderRadius:4, border:`1px solid ${T.borderMd}`, background:T.input, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"18px", padding:0, fontFamily:"inherit" }}>
-        {selectedIcon ? selectedIcon.e : "·"}
+    <div style={{ position:"relative", flexShrink:0 }}>
+      <button ref={btnRef} onClick={handleOpen} title="Pick icon"
+        style={{
+          width:36, height:32, borderRadius:4, padding:0, cursor:"pointer",
+          border:`1px solid ${open?T.borderFocus:T.borderMd}`,
+          background:T.input, display:"flex", alignItems:"center", justifyContent:"center",
+          color:T.text, flexShrink:0, transition:"border-color .12s",
+        }}>
+        {value ? iconElement(value,{width:17,height:17}) : <span style={{color:T.textMute,fontSize:16,lineHeight:1}}>·</span>}
       </button>
+
       {open && (
-        <>
-          <div onClick={() => setOpen(false)} style={{ position:"fixed", inset:0, zIndex:9990 }} />
-          <div style={{
-            position:"fixed", top:pos.top, left:pos.left, zIndex:9999,
-            background:T.surface, border:`1px solid ${T.borderMd}`, borderRadius:6,
-            padding:6, display:"grid", gridTemplateColumns:"repeat(6, 1fr)", gap:2,
-            boxShadow:T.shadowMd, maxHeight:260, overflowY:"auto", width:288,
-          }}>
-            <button onClick={() => { onChange(""); setOpen(false); }}
-              style={{ gridColumn:"1 / -1", padding:"4px", border:"none", background:"transparent", color:T.textMute, fontSize:"12px", cursor:"pointer", borderRadius:3, fontFamily:"inherit" }}>
-              ✕ Clear
-            </button>
-            {iconOptions.map(o => (
-              <button key={o.v} title={o.l} onClick={() => { onChange(o.v); setOpen(false); }}
-                style={{
-                  padding:"6px 4px", border:"none", borderRadius:4, cursor:"pointer",
-                  background: value === o.v ? `${T.accent}22` : "transparent",
-                  fontSize:"20px", display:"flex", alignItems:"center", justifyContent:"center",
-                  transition:"background .1s", fontFamily:"inherit",
-                }}>
-                {o.e}
-              </button>
+        <div ref={dropRef} style={{
+          position:"fixed", top:pos.top, left:pos.left, width:292, zIndex:9999,
+          background:T.surface, border:`1px solid ${T.borderMd}`,
+          borderRadius:6, boxShadow:T.shadowMd,
+        }}>
+          <div style={{display:"flex",borderBottom:`1px solid ${T.borderMd}`,borderRadius:"6px 6px 0 0",
+            background:T.isDark?"rgba(255,255,255,0.04)":"rgba(0,0,0,0.03)",overflow:"hidden"}}>
+            {ICON_TABS.map((t,i)=>(
+              <button key={t.key} onClick={()=>setActiveTab(i)} style={{
+                flex:1, padding:"7px 2px", fontSize:"11px", fontWeight:500, border:"none",
+                borderBottom:i===activeTab?`2px solid ${T.accent}`:"2px solid transparent",
+                background:"transparent", color:i===activeTab?T.accent:T.textMute,
+                cursor:"pointer", fontFamily:"inherit", transition:"color .1s,border-color .1s",
+                whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
+              }}>{t.label}</button>
             ))}
           </div>
-        </>
+          <div style={{padding:8}}>
+            <button onClick={()=>{onChange("");setOpen(false);}} style={{
+              width:"100%", padding:"4px 8px", textAlign:"left", marginBottom:6,
+              border:`1px solid ${!value?T.accent:"transparent"}`,
+              background:!value?`${T.accent}18`:"transparent",
+              color:!value?T.accent:T.textMute,
+              fontSize:"12px", cursor:"pointer", fontFamily:"inherit",
+              borderRadius:4, transition:"all .1s",
+              display:"flex", alignItems:"center", gap:5,
+            }}><span style={{fontSize:13,lineHeight:1,fontWeight:600}}>✕</span> Clear</button>
+            <div onWheel={e=>e.stopPropagation()} style={{
+              display:"grid",
+              gridTemplateColumns:tab.emoji?"repeat(auto-fill,minmax(44px,1fr))":"repeat(auto-fill,minmax(52px,1fr))",
+              gap:3, maxHeight:204, overflowY:"scroll",
+            }}>
+              {tab.ids.map(id=>{
+                const opt = iconOptions.find(o=>o.v===id);
+                if (!opt) return null;
+                const sel = value===opt.v;
+                return (
+                  <button key={opt.v} onClick={()=>{onChange(opt.v);setOpen(false);}} title={opt.l}
+                    style={{display:"flex",flexDirection:"column",alignItems:"center",
+                      padding:tab.emoji?"5px 2px 4px":"7px 3px 5px",borderRadius:5,cursor:"pointer",
+                      border:`1px solid ${sel?T.accent:"transparent"}`,
+                      background:sel?`${T.accent}20`:"transparent",
+                      color:sel?T.accent:T.text,fontFamily:"inherit",transition:"all .1s"}}
+                    onMouseEnter={e=>{if(!sel)(e.currentTarget as HTMLButtonElement).style.background=`${T.accent}0C`;}}
+                    onMouseLeave={e=>{if(!sel)(e.currentTarget as HTMLButtonElement).style.background="transparent";}}>
+                    {tab.emoji
+                      ? <span style={{fontSize:20,lineHeight:1.3}}>{opt.e}</span>
+                      : <span style={{width:20,height:20,display:"flex",alignItems:"center",justifyContent:"center"}}>{iconElement(opt.v,{width:18,height:18})}</span>}
+                    <span style={{fontSize:9,color:T.textMute,marginTop:2,lineHeight:1.2,textAlign:"center",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",width:"100%"}}>
+                      {opt.l.length>9?opt.l.slice(0,8)+"…":opt.l}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

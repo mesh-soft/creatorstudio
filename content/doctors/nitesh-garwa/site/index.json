@@ -86,7 +86,7 @@
     },
     {
       "show": true,
-      "copyright": "copying",
+      "copyright": "<br>",
       "_template": "footer",
       "socialHeading": "connect with us",
       "socialLinks": [
