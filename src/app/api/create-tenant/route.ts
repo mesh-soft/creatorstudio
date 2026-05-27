@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { wrapFlatSiteIntoSettings } from "@/platform/siteSettingsNormalize";
 import { getContentAdapter } from "@/platform/contentAdapter";
 import { requireAuth } from "@/lib/token";
+import { TENANT_ID_RE } from "@/lib/importValidator";
 
 export async function POST(request: NextRequest) {
   // Only admin tokens may create new tenants
@@ -14,6 +15,20 @@ export async function POST(request: NextRequest) {
     if (!type || !name || !slug) {
       return NextResponse.json(
         { error: "Missing required fields: type, name, slug" },
+        { status: 400 },
+      );
+    }
+
+    if (type !== "doctor" && type !== "hospital") {
+      return NextResponse.json(
+        { error: 'type must be "doctor" or "hospital"' },
+        { status: 400 },
+      );
+    }
+
+    if (!TENANT_ID_RE.test(slug)) {
+      return NextResponse.json(
+        { error: "slug must be kebab-case: lowercase letters, numbers, hyphens, underscores; must start and end with a letter or digit; max 50 characters" },
         { status: 400 },
       );
     }

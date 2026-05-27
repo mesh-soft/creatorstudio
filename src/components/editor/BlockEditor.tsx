@@ -1230,76 +1230,8 @@ function ImagePickerModal({current,onSelect,onClose}:{
                 </p>
               </div>
             )
-          ) : (
-            /* ── Unsplash tab ── */
-            uNoKey ? (
-              <div style={{textAlign:"center",padding:"48px 24px",maxWidth:480,margin:"0 auto"}}>
-                <div style={{fontSize:32,marginBottom:12,opacity:.6}}>🔑</div>
-                <p style={{color:T.textSub,fontSize:"14px",fontWeight:500,margin:"0 0 8px"}}>Unsplash API key not configured</p>
-                <p style={{color:T.textMute,fontSize:"15px",margin:"0 0 16px",lineHeight:1.6}}>
-                  Add your free Unsplash API key to <code style={{background:T.surface,padding:"2px 6px",borderRadius:4,fontSize:"14px"}}>.env.local</code>:
-                </p>
-                <code style={{display:"block",background:T.surface,border:`1px solid ${T.borderMd}`,borderRadius:6,padding:"10px 14px",fontSize:"14px",color:T.accent,textAlign:"left",lineHeight:1.8,fontFamily:"'SF Mono',monospace"}}>
-                  UNSPLASH_ACCESS_KEY=your_access_key
-                </code>
-                <p style={{color:T.textMute,fontSize:"14px",marginTop:10}}>
-                  Get a free key at <a href="https://unsplash.com/developers" target="_blank" rel="noreferrer" style={{color:T.accent}}>unsplash.com/developers</a>
-                </p>
-              </div>
-            ) : uError ? (
-              <div style={{textAlign:"center",padding:40,color:T.red,fontSize:13}}>{uError}</div>
-            ) : uLoading && uPhotos.length === 0 ? (
-              <LoadingSpinner T={T} label="Searching Unsplash…" />
-            ) : uPhotos.length === 0 ? (
-              <div style={{textAlign:"center",padding:48,color:T.textMute,fontSize:13}}>No results for "{uQuery}"</div>
-            ) : (
-              <div>
-                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))",gap:8}}>
-                  {uPhotos.map(p=>(
-                    <button key={p.id} onClick={()=>pick(p.url)}
-                      title={p.description || p.credit}
-                      style={{
-                        padding:0,border:"none",background:"transparent",cursor:"pointer",
-                        borderRadius:7,overflow:"hidden",
-                        outline:current===p.url?`2.5px solid ${T.accent}`:"none",
-                        outlineOffset:2,display:"block",position:"relative",
-                      }}>
-                      <img src={p.thumb} alt={p.description || ""}
-                        style={{width:"100%",height:90,objectFit:"cover",display:"block",borderRadius:6}}
-                        loading="lazy" />
-                      {/* Credit overlay */}
-                      <div style={{
-                        position:"absolute",bottom:0,left:0,right:0,
-                        padding:"3px 5px",background:"rgba(0,0,0,.55)",
-                        fontSize:9,color:"rgba(255,255,255,.8)",
-                        overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
-                      }}>📷 {p.credit}</div>
-                      {current===p.url && (
-                        <div style={{position:"absolute",top:5,right:5,width:18,height:18,borderRadius:"50%",background:T.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px",color:"white",fontWeight:700}}>✓</div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-                {/* Load more */}
-                {uPage < uTotalPg && (
-                  <div style={{textAlign:"center",marginTop:16}}>
-                    <button onClick={()=>fetchUnsplash(uQuery,uPage+1,true)} disabled={uLoading}
-                      style={{
-                        padding:"7px 24px", borderRadius:4, border:`1px solid ${T.borderMd}`,
-                        background:"transparent", color:T.textSub, fontSize:11, fontWeight:600,
-                        cursor:uLoading?"default":"pointer", fontFamily:"inherit",
-                        opacity:uLoading?.65:1,
-                      }}>
-                      {uLoading ? "Loading…" : `Load more (page ${uPage+1} of ${uTotalPg})`}
-                    </button>
-                  </div>
-                )}
-                <p style={{textAlign:"center",margin:"12px 0 0",fontSize:10,color:T.textDim}}>
-                  Photos from <a href="https://unsplash.com?utm_source=doctor_sites&utm_medium=referral" target="_blank" rel="noreferrer" style={{color:T.textMute}}>Unsplash</a>
-                </p>
-              </div>
-            )
-          )}
+          )
+          : null}
         </div>
 
         {/* URL footer */}

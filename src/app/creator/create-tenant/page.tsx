@@ -86,7 +86,12 @@ export default function CreateTenantPage() {
   const set = (k: keyof FormData, v: string) => setForm(p => ({ ...p, [k]: v }));
 
   const generateSlug = (n: string) =>
-    n.toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9-_]/g,"").replace(/-+/g,"-").slice(0,40);
+    n.toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-_]/g, "")
+      .replace(/[-_]{2,}/g, "-")        // collapse consecutive separators
+      .replace(/^[-_]+|[-_]+$/g, "")   // strip leading/trailing separators
+      .slice(0, 50);
 
   const handleNameChange = (v: string) => {
     set("name", v);
@@ -100,7 +105,7 @@ export default function CreateTenantPage() {
   };
 
   const canProceed = useCallback((): boolean => {
-    if (step === 1) return form.name.trim().length > 0 && /^[a-z0-9-_]+$/.test(form.slug);
+    if (step === 1) return form.name.trim().length > 0 && /^[a-z0-9]([a-z0-9-_]{0,48}[a-z0-9])?$/.test(form.slug);
     if (step === 2) return form.phone.trim().length > 0 && form.email.trim().length > 0;
     if (step === 3) return form.address.trim().length > 0;
     return true;
@@ -227,8 +232,8 @@ export default function CreateTenantPage() {
             <Field label="URL Slug" id="slug" value={form.slug} onChange={v=>set("slug",v)}
               placeholder="dr-naveen-kumar" required
               hint={`Site URL: ${form.slug || "your-slug"}.surge.sh`} />
-            {form.slug && !/^[a-z0-9-_]+$/.test(form.slug) && (
-              <p style={{ margin:"4px 0 0", fontSize:11, color:T.red }}>Only lowercase letters, numbers, hyphens and underscores</p>
+            {form.slug && !/^[a-z0-9]([a-z0-9-_]{0,48}[a-z0-9])?$/.test(form.slug) && (
+              <p style={{ margin:"4px 0 0", fontSize:11, color:T.red }}>Must start and end with a letter or number · only lowercase, hyphens, underscores · max 50 characters</p>
             )}
           </div>
 

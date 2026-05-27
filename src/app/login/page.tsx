@@ -139,7 +139,7 @@ export default function LoginPage() {
                 type="text" autoComplete="username"
                 placeholder="e.g. nitesh-garwa"
                 value={tenantId} onChange={e => setTenantId(e.target.value)}
-                required disabled={loading}
+                disabled={loading}
                 style={inputStyle}
                 onFocus={e => (e.currentTarget.style.borderColor = T.accent)}
                 onBlur={e  => (e.currentTarget.style.borderColor = T.borderMd)}

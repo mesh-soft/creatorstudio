@@ -90,6 +90,13 @@ export default function CreatorHomePage() {
           <strong style={{ fontSize:14, letterSpacing:"-.3px" }}>Creator Studio</strong>
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+          <Link href="/creator/import" style={{
+            padding:"7px 14px", background:"transparent", color:T.textSub,
+            textDecoration:"none", borderRadius:6, fontSize:12, fontWeight:600,
+            border:`1px solid ${T.borderMd}`, letterSpacing:".2px",
+          }}>
+            Import JSON
+          </Link>
           <Link href="/creator/create-tenant" style={{
             padding:"7px 16px", background:T.accent, color:"#fff",
             textDecoration:"none", borderRadius:6, fontSize:12, fontWeight:700,
