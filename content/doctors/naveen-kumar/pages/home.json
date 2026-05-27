@@ -1,0 +1,59 @@
+{
+  "_template": "page",
+  "blocks": [
+    {
+      "_template": "hero",
+      "enabled": true,
+      "headline": "Welcome to Naveen Kumar Clinic",
+      "subheadline": "Expert care by Dentist with 15+ years of experience.",
+      "photo": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=900&q=80",
+      "buttons": [
+        {
+          "label": "Book Appointment",
+          "url": "#contact"
+        }
+      ]
+    },
+    {
+      "_template": "services",
+      "enabled": true,
+      "kicker": "Our Services",
+      "title": "Comprehensive Medical Care",
+      "items": [
+        {
+          "title": "General Consultation",
+          "description": "Complete health checkup and diagnosis."
+        },
+        {
+          "title": "Follow-up Care",
+          "description": "Regular monitoring and medication management."
+        }
+      ]
+    },
+    {
+      "_template": "footer",
+      "enabled": true,
+      "copyright": "© 2026 Naveen Kumar. All rights reserved."
+    }
+  ],
+  "settings": [
+    {
+      "_template": "urlSettings",
+      "slug": "home",
+      "path": "/",
+      "title": "Home",
+      "isHome": true
+    },
+    {
+      "_template": "presentation",
+      "themeId": "doctor-standard",
+      "variantPresetId": "doctor-classic",
+      "styleId": "doctor-teal-clean"
+    },
+    {
+      "_template": "seo",
+      "title": "Naveen Kumar — Home",
+      "description": "Welcome to Naveen Kumar's clinic."
+    }
+  ]
+}

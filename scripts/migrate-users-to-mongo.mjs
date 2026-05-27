@@ -3,13 +3,31 @@
  * Migrate users from data/credentials.json → MongoDB users collection.
  *
  * Usage:
- *   MONGODB_URI=mongodb://... node scripts/migrate-users-to-mongo.mjs
+ *   node scripts/migrate-users-to-mongo.mjs
+ *   (reads MONGODB_URI from .env.local automatically)
  *
  * Does NOT delete the JSON file — it's read-only. Safe to run multiple times (upsert).
  */
 
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+// Load .env.local manually (scripts don't auto-load Next.js env files)
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const envPath = join(__dirname, "..", ".env.local");
+try {
+  const envContent = readFileSync(envPath, "utf8");
+  for (const line of envContent.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const eq = trimmed.indexOf("=");
+    if (eq === -1) continue;
+    const key = trimmed.slice(0, eq).trim();
+    const val = trimmed.slice(eq + 1).trim().replace(/^["']|["']$/g, "");
+    if (!process.env[key]) process.env[key] = val;
+  }
+} catch {}
 
 const CREDENTIALS_PATH = join(process.cwd(), "data", "credentials.json");
 const MONGODB_URI = process.env.MONGODB_URI;

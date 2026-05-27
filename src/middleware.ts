@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const COOKIE_KEY = "ds_auth_token";
-const PUBLIC_PATHS = ["/login", "/api/auth/login", "/api/auth/verify"];
+const PUBLIC_PATHS = ["/login", "/signup", "/api/auth/login", "/api/auth/verify", "/api/auth/signup"];
 
 /**
  * Decode base64url (no padding, URL-safe chars) — works in Edge runtime.

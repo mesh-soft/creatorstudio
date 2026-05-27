@@ -169,10 +169,36 @@ export function requireAuth(req: NextRequest, options?: AuthOptions): AuthResult
   return { ok: true, payload };
 }
 
-export function requireGemAuth(req: NextRequest, rawBody: string): AuthResult {
+/** Verify signature only — allows expired tokens. Used for token refresh. */
+export function verifyTokenAllowExpired(token: string): VerifyResult {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return { ok: false, error: "malformed token" };
+
+    const [header, payloadB64, sig] = parts;
+    const body = `${header}.${payloadB64}`;
+    const expected = createHmac("sha256", getSecret()).update(body).digest("base64url");
+
+    const sigBuf = Buffer.from(sig, "base64url");
+    const expBuf = Buffer.from(expected, "base64url");
+    if (sigBuf.length !== expBuf.length || !timingSafeEqual(sigBuf, expBuf)) {
+      return { ok: false, error: "invalid signature" };
+    }
+
+    const payload = JSON.parse(
+      Buffer.from(payloadB64, "base64url").toString("utf8"),
+    ) as TokenPayload;
+
+    return { ok: true, payload };
+  } catch {
+    return { ok: false, error: "invalid token" };
+  }
+}
+
+export function requireGemAuth(req: NextRequest, rawBody: string, targetTenantId?: string): AuthResult {
   const secret = process.env.GEMINI_WEBHOOK_SECRET;
   if (!secret)
-    return { ok: false, response: NextResponse.json({ error: "Gem auth not configured", details: [{ path: "", message: "GEMINI_WEBHOOK_SECRET env var not set" }] }, { status: 503 }) };
+    return { ok: false, response: NextResponse.json({ error: "Invalid or expired Gem signature" }, { status: 401 }) };
 
   const valid = verifyGemSignature(
     req.headers.get("x-gem-timestamp"),
@@ -181,9 +207,28 @@ export function requireGemAuth(req: NextRequest, rawBody: string): AuthResult {
   );
 
   if (!valid)
-    return { ok: false, response: NextResponse.json({ error: "Invalid or expired Gem signature", details: [{ path: "", message: "HMAC signature mismatch or timestamp out of replay window" }] }, { status: 401 }) };
+    return { ok: false, response: NextResponse.json({ error: "Invalid or expired Gem signature" }, { status: 401 }) };
 
   const now = Math.floor(Date.now() / 1000);
+
+  // If a target tenant is specified (via X-Gem-Tenant header or parsed from body),
+  // scope the Gem to user-level access for that specific tenant.
+  const gemTenant = targetTenantId || req.headers.get("x-gem-tenant");
+  if (gemTenant) {
+    return {
+      ok: true,
+      payload: {
+        tenantId: gemTenant,
+        tenantType: "doctor" as const,
+        username: "gemini-gem",
+        role: "user" as const, // user role — can only access own content
+        iat: now,
+        exp: now + 60,
+      },
+    };
+  }
+
+  // No tenant specified — full admin access
   return {
     ok: true,
     payload: {
@@ -195,4 +240,57 @@ export function requireGemAuth(req: NextRequest, rawBody: string): AuthResult {
       exp: now + 60,
     },
   };
+}
+
+export async function checkResellerAccess(req: NextRequest, targetTenantId: string): Promise<AuthResult> {
+  const raw = extractBearerToken(req);
+  if (!raw) return { ok: false, response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
+
+  const result = verifyToken(raw);
+  if (!result.ok) return { ok: false, response: NextResponse.json({ error: `Unauthorized: ${result.error}` }, { status: 401 }) };
+
+  const { payload } = result;
+  if (payload.role !== "reseller") return { ok: false, response: NextResponse.json({ error: "Reseller access required" }, { status: 403 }) };
+
+  // Check if this reseller manages the target tenant
+  try {
+    const { getAuthStore } = await import("./authStore");
+    const store = await getAuthStore();
+    const creds = await store.getCredentials();
+    if (creds[targetTenantId]) {
+      if (store.getUser) {
+        const targetUser = await store.getUser(targetTenantId);
+        if (targetUser?.resellerId === payload.tenantId && targetUser?.resellerCanEdit !== false) {
+          return { ok: true, payload };
+        }
+      }
+    }
+  } catch {}
+
+  return { ok: false, response: NextResponse.json({ error: "Not authorized for this tenant" }, { status: 403 }) };
+}
+
+/** Like checkResellerAccess but ignores resellerCanEdit — for payment/management actions. */
+export async function checkResellerOwnership(req: NextRequest, targetTenantId: string): Promise<AuthResult> {
+  const raw = extractBearerToken(req);
+  if (!raw) return { ok: false, response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
+
+  const result = verifyToken(raw);
+  if (!result.ok) return { ok: false, response: NextResponse.json({ error: `Unauthorized: ${result.error}` }, { status: 401 }) };
+
+  const { payload } = result;
+  if (payload.role !== "reseller") return { ok: false, response: NextResponse.json({ error: "Reseller access required" }, { status: 403 }) };
+
+  try {
+    const { getAuthStore } = await import("./authStore");
+    const store = await getAuthStore();
+    if (store.getUser) {
+      const targetUser = await store.getUser(targetTenantId);
+      if (targetUser?.resellerId === payload.tenantId) {
+        return { ok: true, payload };
+      }
+    }
+  } catch {}
+
+  return { ok: false, response: NextResponse.json({ error: "Not authorized for this tenant" }, { status: 403 }) };
 }

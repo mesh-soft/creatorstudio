@@ -278,6 +278,190 @@ interface BlockEditorProps {
   onRestoreSnapshot?:(timestamp:string)=>void;
 }
 
+function ResellerEditToggle() {
+  const T = useT();
+  const { tenantId } = useTenant();
+  const [hasReseller, setHasReseller] = useState<boolean | null>(null);
+  const [canEdit, setCanEdit] = useState(true);
+  const [toggling, setToggling] = useState(false);
+
+  useEffect(() => {
+    const cookie = document.cookie.split("; ").find(r => r.startsWith("ds_auth_token="));
+    const h: Record<string,string> = cookie ? { Authorization: `Bearer ${cookie.split("=")[1]}` } : {};
+    fetch(`/api/users/${tenantId}`, { headers: h })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.resellerId) { setHasReseller(true); setCanEdit(d.resellerCanEdit !== false); } else setHasReseller(false); })
+      .catch(() => setHasReseller(false));
+  }, [tenantId]);
+
+  if (hasReseller !== true) return null;
+
+  const toggle = async () => {
+    setToggling(true);
+    const next = !canEdit;
+    setCanEdit(next);
+    const cookie = document.cookie.split("; ").find(r => r.startsWith("ds_auth_token="));
+    const h: Record<string,string> = { "Content-Type": "application/json" };
+    if (cookie) h.Authorization = `Bearer ${cookie.split("=")[1]}`;
+    try { await fetch(`/api/users/${tenantId}`, { method: "PATCH", headers: h, body: JSON.stringify({ resellerCanEdit: next }) }); }
+    catch { setCanEdit(!next); }
+    setToggling(false);
+  };
+
+  return (
+    <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+      <button onClick={toggle} disabled={toggling} style={{
+        width:32, height:18, borderRadius:9, border:`1px solid ${canEdit ? T.accent : T.borderMd}`,
+        background: canEdit ? T.accent : T.isDark ? "#1e293b" : "#e2e8f0", cursor:"pointer",
+        position:"relative" as const, padding:0, opacity: toggling ? .6 : 1, transition:"all .15s",
+      }}>
+        <span style={{ position:"absolute", top:2, left: canEdit ? 16 : 2, width:12, height:12, borderRadius:"50%", background: canEdit ? "white" : T.isDark ? "#64748b" : "#94a3b8", transition:"left .15s" }} />
+      </button>
+      <span style={{ fontSize:11, color:T.textSub, whiteSpace:"nowrap", userSelect:"none" }}>Allow reseller to edit</span>
+    </div>
+  );
+}
+
+function SubscriptionBar() {
+  const T = useT();
+  const { tenantId } = useTenant();
+  const [sub, setSub] = useState<any>(null);
+  const [paying, setPaying] = useState(false);
+
+  useEffect(() => {
+    const cookie = document.cookie.split("; ").find(r => r.startsWith("ds_auth_token="));
+    const h: Record<string,string> = cookie ? { Authorization: `Bearer ${cookie.split("=")[1]}` } : {};
+    fetch(`/api/payment/status?tenantId=${tenantId}`, { headers: h })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.subscription) setSub(d.subscription); })
+      .catch(() => {});
+  }, [tenantId]);
+
+  if (!sub) return null;
+
+  const daysLeft = (d: string) => Math.ceil((new Date(d).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  const remaining = sub.graceUntil ? daysLeft(sub.graceUntil) : (sub.validUntil ? daysLeft(sub.validUntil) : 999);
+  const isExpiring = remaining <= 30;
+  const dateStr = (iso: string) => { try { return new Date(iso).toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" }); } catch { return iso; } };
+
+  const handlePay = async () => {
+    setPaying(true);
+    try {
+      const cookie = document.cookie.split("; ").find(r => r.startsWith("ds_auth_token="));
+      const headers: Record<string,string> = { "Content-Type": "application/json" };
+      if (cookie) headers.Authorization = `Bearer ${cookie.split("=")[1]}`;
+      const res = await fetch("/api/payment/create", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ tenantId }),
+      });
+      const data = await res.json();
+      if (!data.ok) return;
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => {
+        const rzp = new (window as any).Razorpay({
+          key: data.key, amount: data.amount, currency: data.currency,
+          name: "Subscription Renewal", description: "Extend your site",
+          order_id: data.orderId,
+          handler: async (response: any) => {
+            await fetch("/api/payment/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ tenantId, razorpayPaymentId: response.razorpay_payment_id, razorpayOrderId: response.razorpay_order_id, razorpaySignature: response.razorpay_signature }),
+            });
+            window.location.reload();
+          },
+          theme: { color: "#79589f" },
+        });
+        rzp.open();
+      };
+      document.body.appendChild(script);
+    } catch {} finally { setPaying(false); }
+  };
+
+  return (
+    <div style={{ display:"flex", alignItems:"center", gap:8, padding:"4px 12px", borderRadius:6, background: isExpiring ? `${T.accent}12` : "transparent", border: isExpiring ? `1px solid ${T.accent}22` : "none", fontSize:12, color:T.textSub, whiteSpace:"nowrap" }}>
+      <span>Live till <strong style={{ color: isExpiring ? T.accent : T.text }}>{dateStr(sub.graceUntil || sub.validUntil)}</strong></span>
+      {isExpiring && (
+        <button onClick={handlePay} disabled={paying}
+          style={{ padding:"4px 10px", borderRadius:4, border:"none", background:T.accent, color:"#fff", fontSize:11, fontWeight:700, cursor:"pointer", fontFamily:"inherit", whiteSpace:"nowrap", opacity: paying ? .6 : 1 }}>
+          {paying ? "…" : "Pay to extend →"}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function AIChatButton({ T }: { T: any }) {
+  const [open, setOpen] = useState(false);
+  const [token, setToken] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const fetchToken = async () => {
+    setLoading(true);
+    const cookie = document.cookie.split("; ").find(r => r.startsWith("ds_auth_token="));
+    const h: Record<string,string> = cookie ? { Authorization: `Bearer ${cookie.split("=")[1]}` } : {};
+    try {
+      const r = await fetch("/api/ai/token", { method: "POST", headers: h });
+      const d = await r.json();
+      if (d.ok) setToken(d.token);
+    } catch {}
+    setLoading(false);
+  };
+
+  useEffect(() => { if (open) fetchToken(); }, [open]);
+
+  const copy = () => { navigator.clipboard.writeText(token); setCopied(true); setTimeout(() => setCopied(false), 2000); };
+
+  return (
+    <>
+      <button onClick={() => setOpen(true)} style={{ ...hdrBtn(T, false), color: "#10b981", borderColor: "#10b981" }}>
+        ✦ AI
+      </button>
+      {open && (
+        <div style={{ position:"fixed", inset:0, zIndex:2000, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(0,0,0,.7)", padding:24 }} onClick={() => setOpen(false)}>
+          <div onClick={e => e.stopPropagation()} style={{ background:T.surface, borderRadius:14, border:`1px solid ${T.border}`, padding:"28px", maxWidth:520, width:"100%", boxShadow:T.shadowMd }}>
+            <h2 style={{ margin:"0 0 8px", fontSize:16, fontWeight:800, color:T.text }}>Chat with AI (Gemini)</h2>
+            <p style={{ fontSize:12, color:T.textSub, marginBottom:20, lineHeight:1.6 }}>
+              A short-lived token has been generated for your account. Copy it and paste into the Gemini Gem.
+              The token expires in 1 hour and only grants access to <strong>your</strong> sites.
+            </p>
+            {loading ? (
+              <div style={{ padding:20, textAlign:"center", color:T.textMute }}>Generating token…</div>
+            ) : token ? (
+              <>
+                <div style={{ background:T.input, borderRadius:8, border:`1px solid ${T.borderMd}`, padding:12, marginBottom:16, wordBreak:"break-all", fontSize:11, color:T.text, fontFamily:"monospace", maxHeight:120, overflow:"auto" }}>
+                  {token}
+                </div>
+                <div style={{ display:"flex", gap:8 }}>
+                  <button onClick={copy} style={{ flex:1, padding:"10px 0", borderRadius:8, border:"none", background: copied ? T.green : T.accent, color:"#fff", fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"inherit" }}>
+                    {copied ? "✓ Copied" : "Copy Token"}
+                  </button>
+                  <button onClick={() => setOpen(false)} style={{ flex:1, padding:"10px 0", borderRadius:8, border:`1px solid ${T.borderMd}`, background:"transparent", color:T.textSub, fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>
+                    Close
+                  </button>
+                </div>
+                <div style={{ marginTop:16, padding:"12px 14px", borderRadius:8, background:`${T.accent}0A`, border:`1px solid ${T.accent}22`, fontSize:11, color:T.textSub, lineHeight:1.7 }}>
+                  <strong style={{ color:T.accent }}>How to use:</strong><br/>
+                  1. Copy the token above<br/>
+                  2. Open your Gemini Gem<br/>
+                  3. Paste this as: <code style={{ background:T.input, padding:"2px 6px", borderRadius:3, fontSize:11 }}>Authorization: Bearer &lt;token&gt;</code><br/>
+                  4. The Gem will use this token to call APIs on your behalf<br/>
+                  5. Tell the Gem what to do — it can read, edit, and save your site
+                </div>
+              </>
+            ) : (
+              <div style={{ padding:20, textAlign:"center", color:T.red, fontSize:12 }}>Failed to generate token. Ensure TOKEN_SECRET is set.</div>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 export function BlockEditor({
   tenantType, tenantId, pageSlug, pages, onPageChange, onOpenHistory,
   snapshotPage, snapshotLabel, snapshotTimestamp, onClearSnapshot, onRestoreSnapshot,
@@ -330,6 +514,7 @@ export function BlockEditor({
         headers: getAuthHeaders(),
       });
       if (r.status === 401 || r.status === 403) {
+        if (r.status === 403) { window.location.replace("/creator"); return; }
         clearStoredToken();
         window.location.replace("/login");
         return;
@@ -397,6 +582,7 @@ export function BlockEditor({
         body: JSON.stringify({ tenantType, tenantId, pageSlug: target==="page" ? pageSlug : undefined, data }),
       });
       if (r.status === 401 || r.status === 403) {
+        if (r.status === 403) { window.location.replace("/creator"); return; }
         clearStoredToken();
         window.location.replace("/login");
         return;
@@ -454,7 +640,7 @@ export function BlockEditor({
           gap:8,flexShrink:0,zIndex:10,
         }}>
           {/* Breadcrumb */}
-          <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0,overflow:"hidden"}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0,overflow:"hidden",flexShrink:0}}>
             <a href="/creator" style={{color:T.textMute,textDecoration:"none",fontSize:"15px",flexShrink:0,transition:"color .15s"}}
               onMouseEnter={e=>(e.currentTarget as HTMLAnchorElement).style.color=T.accent}
               onMouseLeave={e=>(e.currentTarget as HTMLAnchorElement).style.color=T.textMute}>
@@ -468,12 +654,18 @@ export function BlockEditor({
             <span style={{fontSize:"15px",color:T.accent,flexShrink:0,fontWeight:500}}>{pageSlug}</span>
           </div>
 
+          <div style={{flex:1,display:"flex",justifyContent:"center",minWidth:0}}>
+            <SubscriptionBar />
+          </div>
+
           {/* Actions row */}
           <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
             {/* Site Settings */}
             <button onClick={()=>setSiteOpen(true)} style={hdrBtn(T, true)}>
               Site Settings
             </button>
+
+            <AIChatButton T={T} />
 
             <Divider />
 
@@ -667,9 +859,12 @@ export function BlockEditor({
                 background:T.surface,
                 display:"flex", alignItems:"center", justifyContent:"space-between", gap:8,
               }}>
-                <span style={{fontSize:"14px",color:T.textMute,letterSpacing:".1px"}}>
-                  {saved==="page" ? "✓ Saved" : saving==="page" ? "Saving…" : `${blocks.length} block${blocks.length!==1?"s":""}`}
-                </span>
+                <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                  <span style={{fontSize:"14px",color:T.textMute,letterSpacing:".1px"}}>
+                    {saved==="page" ? "✓ Saved" : saving==="page" ? "Saving…" : `${blocks.length} block${blocks.length!==1?"s":""}`}
+                  </span>
+                  <ResellerEditToggle />
+                </div>
                 <button onClick={()=>save("page")} disabled={isBusy} style={{
                   padding:"7px 18px", borderRadius:4, border:"none",
                   background: saved==="page" ? T.green : T.accent,
@@ -993,7 +1188,7 @@ function ImagePickerModal({current,onSelect,onClose}:{
     fetch(`/api/content/media?tenantType=${tenantType}&tenantId=${tenantId}`, {
       headers: getAuthHeaders(),
     }).then(r=>{
-      if (r.status === 401 || r.status === 403) { clearStoredToken(); window.location.replace("/login"); return Promise.reject(); }
+      if (r.status === 401 || r.status === 403) { if (r.status === 403) window.location.replace("/creator"); else { clearStoredToken(); window.location.replace("/login"); } return Promise.reject(); }
       return r.json();
     }).then(d=>{ if(d?.ok) setMediaFiles(d.files); })
       .catch(()=>{}).finally(()=>setMediaLoading(false));
@@ -1011,7 +1206,7 @@ function ImagePickerModal({current,onSelect,onClose}:{
           `/api/content/media?tenantType=${tenantType}&tenantId=${tenantId}`,
           { method: "POST", headers: getAuthHeaders(), body: form },
         );
-        if (res.status === 401 || res.status === 403) { clearStoredToken(); window.location.replace("/login"); return; }
+        if (res.status === 401 || res.status === 403) { if (res.status === 403) window.location.replace("/creator"); else { clearStoredToken(); window.location.replace("/login"); } return; }
         const data = await res.json();
         if (!data.ok) { setUploadErr(data.error ?? "Upload failed"); continue; }
         // Refresh media list and immediately pick the newly uploaded file
@@ -1032,7 +1227,7 @@ function ImagePickerModal({current,onSelect,onClose}:{
       const res = await fetch(`/api/pexels?q=${encodeURIComponent(q)}&page=${pg}`, {
         headers: getAuthHeaders(),
       });
-      if (res.status === 401 || res.status === 403) { clearStoredToken(); window.location.replace("/login"); return; }
+      if (res.status === 401 || res.status === 403) { if (res.status === 403) { window.location.replace("/creator"); return; } clearStoredToken(); window.location.replace("/login"); return; }
       const data = await res.json();
       if (!data.ok) {
         if (data.error?.includes("not configured")) setPNoKey(true);
@@ -1409,9 +1604,9 @@ function BlockForm({block,onChange,index,mode,pages}:{block:JsonObject;onChange:
           <FSelect label="Layout Variant" value={block.variant??""} options={variantOpts} onChange={v=>u("variant",v)} />
         )}
         <FCSSField label="CSS Overrides" value={block.css??""} onChange={v=>u("css",v)} />
-      </div>
-    );
-  }
+    </div>
+  );
+}
 
   switch(tpl) {
     case "hero": return <><FRich label="Headline" value={block.headline??""} onChange={v=>u("headline",v)} fieldType="headline" /><FRich label="Subheadline" value={block.subheadline??""} onChange={v=>u("subheadline",v)} rows={2} fieldType="subheadline" /><FImage label="Hero Photo" value={block.photo??""} onChange={v=>u("photo",v)} /><FButtons btns={block.buttons??[]} onChange={v=>u("buttons",v)} /></>;

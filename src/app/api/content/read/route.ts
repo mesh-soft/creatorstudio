@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getContentAdapter, resolveTenantDir } from "@/platform/contentAdapter";
-import { requireAuth, requireGemAuth } from "@/lib/token";
+import { requireAuth, requireGemAuth, checkResellerAccess } from "@/lib/token";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -16,7 +16,8 @@ export async function GET(request: NextRequest) {
   }
 
   let auth = requireAuth(request, { tenantId });
-  if (!auth.ok) auth = requireGemAuth(request, "");
+  if (!auth.ok) auth = await checkResellerAccess(request, tenantId);
+  if (!auth.ok && auth.response.status === 401) auth = requireGemAuth(request, "");
   if (!auth.ok) return auth.response;
 
   const adapter    = await getContentAdapter();

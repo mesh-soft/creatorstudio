@@ -13,7 +13,7 @@ type PexelsPhoto = {
 
 export async function GET(req: NextRequest) {
   let auth = requireAuth(req);
-  if (!auth.ok) auth = requireGemAuth(req, "");
+  if (!auth.ok && auth.response.status === 401) auth = requireGemAuth(req, "");
   if (!auth.ok) return auth.response;
 
   const q       = req.nextUrl.searchParams.get("q")       ?? "medical healthcare doctor";

@@ -1,29 +1,30 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
-import { setStoredToken } from "@/lib/clientAuth";
+import Link from "next/link";
+import { setStoredToken, getActiveSession } from "@/lib/clientAuth";
+import { usePageTheme } from "@/components/theme/usePageTheme";
 
-const T = {
-  shell: "#0c0a14", surface: "#1a172b", input: "#0e0c1a",
-  border: "#2d2748", borderMd: "#3d3660", text: "#ede9f8",
-  textSub: "#9488bc", textMute: "#5a5080", accent: "#8b5cf6",
-  accentHov: "#7c3aed", red: "#f87171", green: "#10b981",
-  shadow: "0 8px 32px rgba(0,0,0,.7),0 0 0 1px rgba(100,80,255,.12)",
-};
+const FONT = "'Salesforce Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif";
 
 export default function LoginPage() {
-  const [tenantId, setTenantId] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPass, setShowPass] = useState(false);
+  const { T, isDark, toggle } = usePageTheme();
 
   useEffect(() => {
-    const host = window.location.hostname;
-    const sub = host.split(".")[0];
-    const SKIP = new Set(["localhost", "www", "studio", "app", "admin", "creator"]);
-    if (sub && !SKIP.has(sub) && !/^\d+$/.test(sub)) setTenantId(sub);
+    const session = getActiveSession();
+    if (!session) return;
+    const redirect = new URLSearchParams(window.location.search).get("redirect");
+    if (redirect) { window.location.replace(redirect); return; }
+    if (session.role === "admin" || session.role === "reseller") {
+      window.location.replace("/creator");
+    } else {
+      window.location.replace(`/creator/${session.tenantType}/${session.tenantId}`);
+    }
   }, []);
 
   async function handleSubmit(e: FormEvent) {
@@ -34,56 +35,46 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tenantId: tenantId.trim(), username: username.trim(), password }),
+        body: JSON.stringify({ username: username.trim(), password }),
       });
       const data = await res.json();
-      if (!data.ok) {
-        setError(data.error ?? "Login failed");
-        return;
-      }
+      if (!data.ok) { setError(data.error ?? "Login failed"); return; }
       setStoredToken(data.token);
       window.location.replace(data.redirect || "/creator");
-    } catch {
-      setError("Network error. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    } catch { setError("Network error"); }
+    finally { setLoading(false); }
   }
 
-  const inputStyle: React.CSSProperties = {
+  const inputS: React.CSSProperties = {
     width: "100%", padding: "10px 12px", borderRadius: 8,
     border: `1px solid ${T.borderMd}`, background: T.input,
     color: T.text, fontSize: 13, outline: "none",
     fontFamily: "inherit", boxSizing: "border-box", transition: "border-color .15s",
   };
 
-  const labelStyle: React.CSSProperties = {
+  const lbl: React.CSSProperties = {
     display: "block", fontSize: 12, fontWeight: 600,
     color: T.textSub, marginBottom: 6, letterSpacing: ".2px",
   };
 
   return (
-    <main style={{ minHeight: "100vh", background: T.shell, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',system-ui,sans-serif", color: T.text, padding: "24px" }}>
+    <main style={{ minHeight: "100vh", background: T.shell, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: FONT, color: T.text, padding: 24, transition: "background .2s" }}>
       <div style={{ width: "100%", maxWidth: 400 }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 14, background: `linear-gradient(135deg,${T.accent},#a78bfa)`, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 800, color: "#fff", marginBottom: 14, boxShadow: `0 4px 20px ${T.accent}44` }}>S</div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, letterSpacing: "-.5px" }}>Creator Studio</h1>
-          <p style={{ margin: "6px 0 0", fontSize: 13, color: T.textSub }}>Sign in to manage your site</p>
+          <div style={{ width: 48, height: 48, borderRadius: 14, background: `linear-gradient(135deg,${T.accent},${isDark ? "#a78bfa" : "#9360d4"})`, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 800, color: "#fff", marginBottom: 14, boxShadow: `0 4px 20px ${T.accent}44` }}>S</div>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, letterSpacing: "-.5px", color: T.text }}>Sign In</h1>
+          <p style={{ margin: "6px 0 0", fontSize: 13, color: T.textSub }}>Email, mobile, or tenant ID</p>
         </div>
-        <div style={{ background: T.surface, borderRadius: 14, border: `1px solid ${T.border}`, padding: "28px 28px 24px", boxShadow: T.shadow }}>
+        <div style={{ background: T.surface, borderRadius: 14, border: `1px solid ${T.border}`, padding: "28px 28px 24px", boxShadow: T.shadow, transition: "background .2s, border-color .2s" }}>
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             <div>
-              <label style={labelStyle}>Tenant ID</label>
-              <input type="text" autoComplete="username" placeholder="e.g. dr-smith" value={tenantId} onChange={e => setTenantId(e.target.value)} disabled={loading} style={inputStyle} onFocus={e => e.currentTarget.style.borderColor = T.accent} onBlur={e => e.currentTarget.style.borderColor = T.borderMd} />
+              <label style={lbl}>Username or Email</label>
+              <input type="text" autoComplete="username" placeholder="dr-amit-sharma / amit@example.com / +91..." value={username} onChange={e => setUsername(e.target.value)} required disabled={loading} style={inputS} onFocus={e => e.currentTarget.style.borderColor = T.accent} onBlur={e => e.currentTarget.style.borderColor = T.borderMd} />
             </div>
             <div>
-              <label style={labelStyle}>Username</label>
-              <input type="text" autoComplete="username" placeholder="admin" value={username} onChange={e => setUsername(e.target.value)} required disabled={loading} style={inputStyle} onFocus={e => e.currentTarget.style.borderColor = T.accent} onBlur={e => e.currentTarget.style.borderColor = T.borderMd} />
-            </div>
-            <div>
-              <label style={labelStyle}>Password</label>
+              <label style={lbl}>Password</label>
               <div style={{ position: "relative" }}>
-                <input type={showPass ? "text" : "password"} autoComplete="current-password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required disabled={loading} style={{ ...inputStyle, paddingRight: 40 }} onFocus={e => e.currentTarget.style.borderColor = T.accent} onBlur={e => e.currentTarget.style.borderColor = T.borderMd} />
+                <input type={showPass ? "text" : "password"} autoComplete="current-password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required disabled={loading} style={{ ...inputS, paddingRight: 40 }} onFocus={e => e.currentTarget.style.borderColor = T.accent} onBlur={e => e.currentTarget.style.borderColor = T.borderMd} />
                 <button type="button" onClick={() => setShowPass(v => !v)} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: T.textMute, cursor: "pointer", fontSize: 14, padding: 2, lineHeight: 1 }} tabIndex={-1}>{showPass ? "🙈" : "👁"}</button>
               </div>
             </div>
@@ -94,7 +85,20 @@ export default function LoginPage() {
             </button>
           </form>
         </div>
-        <p style={{ textAlign: "center", marginTop: 20, fontSize: 12, color: T.textMute }}>Creator Studio · Healthcare Sites Builder</p>
+        <p style={{ textAlign: "center", marginTop: 20, fontSize: 12, color: T.textMute }}>
+          Don&apos;t have an account? <Link href="/signup" style={{ color: T.accent, textDecoration: "none", fontWeight: 600 }}>Create a free site</Link>
+        </p>
+        <p style={{ textAlign: "center", marginTop: 8, fontSize: 11, color: T.textDim }}>
+          <Link href="/signup/reseller" style={{ color: T.accent, textDecoration: "none", fontWeight: 500 }}>Become a reseller →</Link>
+        </p>
+
+        {/* Theme toggle */}
+        <div style={{ textAlign: "center", marginTop: 16 }}>
+          <button onClick={toggle} title={isDark ? "Switch to light" : "Switch to dark"}
+            style={{ padding: "6px 14px", borderRadius: 6, border: `1px solid ${T.borderMd}`, background: "transparent", color: T.textMute, fontSize: 13, cursor: "pointer", fontFamily: "inherit", transition: "all .12s", display: "inline-flex", alignItems: "center", gap: 6 }}>
+            {isDark ? "☀ Light" : "🌙 Dark"}
+          </button>
+        </div>
       </div>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </main>

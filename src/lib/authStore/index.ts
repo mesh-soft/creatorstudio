@@ -16,6 +16,9 @@ export interface Credential {
 
 export interface UserDoc extends Credential {
   _id?: string;
+  displayName?: string;
+  email?: string;
+  mobile?: string;
   commissionPercent?: number;
   resellerId?: string;
   resellerCanEdit?: boolean;

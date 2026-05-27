@@ -34,7 +34,7 @@ export function CreatorStudioClient({
         `/api/content/snapshot?tenantType=${tenantType}&tenantSlug=${tenantId}&pageSlug=${selectedPageSlug}&timestamp=${encodeURIComponent(timestamp)}`,
         { headers: getAuthHeaders() },
       );
-      if (res.status === 401 || res.status === 403) { clearStoredToken(); window.location.replace("/login"); return; }
+      if (res.status === 401 || res.status === 403) { if (res.status === 403) window.location.replace("/creator"); else { clearStoredToken(); window.location.replace("/login"); } return; }
       const data = await res.json();
       if (data.ok && data.content) {
         setSnapshotPage(data.content);
@@ -60,7 +60,7 @@ export function CreatorStudioClient({
           timestamp,
         }),
       });
-      if (res.status === 401 || res.status === 403) { clearStoredToken(); window.location.replace("/login"); return; }
+      if (res.status === 401 || res.status === 403) { if (res.status === 403) window.location.replace("/creator"); else { clearStoredToken(); window.location.replace("/login"); } return; }
       const data = await res.json();
       if (data.ok) {
         // Clear snapshot view and close history panel — live page is now restored
@@ -135,7 +135,7 @@ function VersionHistoryPanel({
     fetch(`/api/content/snapshot?tenantType=${tenantType}&tenantSlug=${tenantId}&pageSlug=${pageSlug}`, {
       headers: getAuthHeaders(),
     }).then(r => {
-        if (r.status === 401 || r.status === 403) { clearStoredToken(); window.location.replace("/login"); return Promise.reject(); }
+        if (r.status === 401 || r.status === 403) { if (r.status === 403) window.location.replace("/creator"); else { clearStoredToken(); window.location.replace("/login"); } return Promise.reject(); }
         return r.json();
       })
       .then(data => {

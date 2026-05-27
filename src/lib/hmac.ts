@@ -1,6 +1,6 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 
-const REPLAY_WINDOW = 300;
+const REPLAY_WINDOW = 60;
 const FUTURE_SLACK  = 30;
 
 export function verifyGemSignature(

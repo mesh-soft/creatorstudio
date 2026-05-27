@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { requireAuth, requireGemAuth } from "@/lib/token";
+import { requireAuth, requireGemAuth, checkResellerOwnership } from "@/lib/token";
 import { MIN_PRICE } from "@/lib/authStore";
 
 export async function POST(req: NextRequest) {
@@ -10,12 +10,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  let auth = requireAuth(req, { adminOnly: true });
-  if (!auth.ok) auth = requireGemAuth(req, rawBody);
-  if (!auth.ok) return auth.response;
-
   const { tenantId } = body;
   if (!tenantId) return NextResponse.json({ error: "tenantId required" }, { status: 400 });
+
+  let auth = requireAuth(req, { adminOnly: true });
+  if (!auth.ok) auth = requireAuth(req, { tenantId });
+  if (!auth.ok) auth = await checkResellerOwnership(req, tenantId);
+  if (!auth.ok && auth.response.status === 401) auth = requireGemAuth(req, rawBody);
+  if (!auth.ok) return auth.response;
 
   const db = await getDb();
   const user = await db.collection("users").findOne({ _id: tenantId });
