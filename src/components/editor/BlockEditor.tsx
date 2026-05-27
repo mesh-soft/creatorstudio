@@ -9,21 +9,25 @@ import { type SuggestionFieldType } from "../../lib/catchphrases";
 import { getActiveSession, getAuthHeaders, clearStoredToken } from "../../lib/clientAuth";
 import { iconElement } from "../../lib/icons";
 
+// ── Block registry (side-effect: registers all 15 built-in blocks) ────────
+import "../../blocks/index";
+import { registry } from "../../blocks/registry";
+import type { FieldDefinition } from "../../blocks/shared/types";
+
 // ── Types ──────────────────────────────────────────────────────────────────
 type JsonObject  = { [key: string]: any };
 type TenantType  = "doctor" | "hospital";
 type Viewport    = "mobile" | "tablet" | "desktop";
 type SiteSection = "profile" | "business" | "presentation" | "header" | "footer" | "seo" | "analytics";
-type PickerTab   = "media" | "stock" | "unsplash";
+type PickerTab   = "media" | "stock" | "pexels";
 type Breakpoint  = "base" | "mobile" | "tablet";
 
 // ── Option lists ───────────────────────────────────────────────────────────
-const variantLabels: Record<string, string> = {
-  hero:"Hero", services:"Services", timings:"Timings", gallery:"Gallery",
-  faq:"FAQ", cta:"CTA", testimonials:"Testimonials", stats:"Stats",
-  text:"Text", header:"Header", footer:"Footer", awards:"Awards",
-  whatsapp:"WhatsApp", location:"Location", profile:"Profile",
-};
+// Block labels, variants, and default values are now derived from the registry.
+// registry is populated via the "../../blocks/index" import above.
+const variantLabels: Record<string, string> = Object.fromEntries(
+  registry.getAll().map(d => [d.id, d.label])
+);
 const themeOptions = [
   {v:"doctor-standard",l:"Standard Practice"},{v:"doctor-profile-heavy",l:"Profile Intensive"},
   {v:"doctor-service-heavy",l:"Service Focused"},{v:"hospital-standard",l:"Hospital Standard"},
@@ -112,44 +116,23 @@ const iconOptions: {v:string;l:string;e:string}[] = [
   {v:"user",            l:"Person",         e:"👤"},
   {v:"checkCircle",     l:"Check Circle",   e:"✅"},
 ];
-const blockTemplates: Record<string, JsonObject> = {
-  hero:{_template:"hero",enabled:true,headline:"",subheadline:"",photo:"",buttons:[],variant:"",backgroundImage:"",css:""},
-  profile:{_template:"profile",enabled:true,kicker:"",title:"",body:"",experienceYears:0,experienceLabel:"",registrationNumber:"",registrationLabel:"",variant:"",backgroundImage:"",css:""},
-  services:{_template:"services",enabled:true,kicker:"",title:"",items:[],variant:"",backgroundImage:"",css:""},
-  timings:{_template:"timings",enabled:true,kicker:"",title:"",items:[],variant:"",backgroundImage:"",css:""},
-  gallery:{_template:"gallery",enabled:true,kicker:"",title:"",items:[],variant:"",backgroundImage:"",css:""},
-  faq:{_template:"faq",enabled:true,kicker:"",title:"",items:[],variant:"",backgroundImage:"",css:""},
-  cta:{_template:"cta",enabled:true,title:"",body:"",buttons:[],variant:"",backgroundImage:"",css:""},
-  testimonials:{_template:"testimonials",enabled:true,kicker:"",title:"",items:[],variant:"",backgroundImage:"",css:""},
-  stats:{_template:"stats",enabled:true,items:[],variant:"",backgroundImage:"",css:""},
-  text:{_template:"text",enabled:true,heading:"",body:"",variant:"",backgroundImage:"",css:""},
-  header:{_template:"header",enabled:true,logo:"",navLinks:[],backgroundImage:"",css:""},
-  footer:{_template:"footer",enabled:true,copyright:"",socialLinks:[],backgroundImage:"",css:""},
-  awards:{_template:"awards",enabled:true,kicker:"",title:"",items:[],variant:"",backgroundImage:"",css:""},
-  whatsapp:{_template:"whatsapp",enabled:true,phone:"",message:"",label:""},
-  location:{_template:"location",enabled:true,kicker:"",title:"",mapUrl:"",height:400,variant:"",backgroundImage:"",css:""},
-};
-const blockTypes = Object.keys(blockTemplates);
+// Default values for each block type come from the registry (BlockDefinition.defaultValues).
+// This ensures new blocks added to the registry automatically appear here.
+const blockTemplates: Record<string, JsonObject> = Object.fromEntries(
+  registry.getAll().map(d => [d.id, d.defaultValues as JsonObject])
+);
+const blockTypes = registry.getAll().map(d => d.id);
 const SITE_SECTIONS: {key:SiteSection;label:string}[] = [
   {key:"profile",label:"Profile"},{key:"business",label:"Business"},
   {key:"presentation",label:"Presentation"},{key:"header",label:"Header"},{key:"footer",label:"Footer"},{key:"seo",label:"SEO"},{key:"analytics",label:"Analytics"},
 ];
 
-// Per-block variant presets shown in the Presentation tab dropdown
-const BLOCK_VARIANTS: Record<string, {v:string;l:string}[]> = {
-  hero:         [{v:"",l:"Default"},{v:"compact",l:"Compact"},{v:"editorial",l:"Editorial"},{v:"centered",l:"Centered"},{v:"split",l:"Split"}],
-  profile:      [{v:"",l:"Default"},{v:"editorial",l:"Editorial"},{v:"centered",l:"Centered"},{v:"compact",l:"Compact"},{v:"split",l:"Split"}],
-  services:     [{v:"",l:"Default"},{v:"grid",l:"Grid"},{v:"list",l:"List"},{v:"cards",l:"Cards"},{v:"compact",l:"Compact"}],
-  timings:      [{v:"",l:"Default"},{v:"compact",l:"Compact"},{v:"cards",l:"Cards"},{v:"split",l:"Split"}],
-  gallery:      [{v:"",l:"Default"},{v:"masonry",l:"Masonry"},{v:"carousel",l:"Carousel"},{v:"wide",l:"Wide"}],
-  faq:          [{v:"",l:"Default"},{v:"accordion",l:"Accordion"},{v:"minimal",l:"Minimal"}],
-  cta:          [{v:"",l:"Default"},{v:"minimal",l:"Minimal"},{v:"bold",l:"Bold"},{v:"centered",l:"Centered"}],
-  testimonials: [{v:"",l:"Default"},{v:"grid",l:"Grid"},{v:"carousel",l:"Carousel"},{v:"minimal",l:"Minimal"}],
-  stats:        [{v:"",l:"Default"},{v:"horizontal",l:"Horizontal"},{v:"compact",l:"Compact"}],
-  text:         [{v:"",l:"Default"},{v:"centered",l:"Centered"},{v:"narrow",l:"Narrow"},{v:"wide",l:"Wide"}],
-  awards:       [{v:"",l:"Default"},{v:"timeline",l:"Timeline"},{v:"cards",l:"Cards"},{v:"compact",l:"Compact"}],
-  location:     [{v:"",l:"Default"},{v:"full-width",l:"Full Width"},{v:"compact",l:"Compact"}],
-};
+// Per-block variant presets — derived from BlockDefinition.variants in the registry.
+const BLOCK_VARIANTS: Record<string, {v:string;l:string}[]> = Object.fromEntries(
+  registry.getAll()
+    .filter(d => d.variants && d.variants.length > 0)
+    .map(d => [d.id, d.variants!.map(v => ({ v: v.value, l: v.label }))])
+);
 
 // Searchable CSS property list for the CSS editor popup
 const COMMON_CSS_PROPS = [
@@ -978,7 +961,7 @@ function SiteSettingsDrawer({site,onChange,onSave,saving,saved,onClose,pages,lay
 }
 
 // ─── Image Picker Modal ─────────────────────────────────────────────────────
-type UnsplashPhoto = { id:string; url:string; thumb:string; small:string; description:string; credit:string; creditUrl:string; };
+type PexelsPhoto   = { id:string; url:string; thumb:string; small:string; description:string; credit:string; creditUrl:string; };
 
 function ImagePickerModal({current,onSelect,onClose}:{
   current:string;onSelect:(url:string)=>void;onClose:()=>void;
@@ -990,16 +973,21 @@ function ImagePickerModal({current,onSelect,onClose}:{
   const [mediaLoading, setMediaLoading] = useState(true);
   const [urlInput,     setUrlInput]     = useState(current);
 
-  // Unsplash state
-  const [uQuery,    setUQuery]    = useState("medical healthcare");
-  const [uPhotos,   setUPhotos]   = useState<UnsplashPhoto[]>([]);
-  const [uPage,     setUPage]     = useState(1);
-  const [uTotal,    setUTotal]    = useState(0);
-  const [uTotalPg,  setUTotalPg]  = useState(0);
-  const [uLoading,  setULoading]  = useState(false);
-  const [uNoKey,    setUNoKey]    = useState(false);
-  const [uError,    setUError]    = useState<string|null>(null);
-  const uDebounce = useRef<number|null>(null);
+  // Upload state
+  const fileInputRef               = useRef<HTMLInputElement>(null);
+  const [uploading,  setUploading] = useState(false);
+  const [uploadErr,  setUploadErr] = useState<string|null>(null);
+
+  // Pexels state
+  const [pQuery,    setPQuery]    = useState("medical healthcare");
+  const [pPhotos,   setPPhotos]   = useState<PexelsPhoto[]>([]);
+  const [pPage,     setPPage]     = useState(1);
+  const [pTotal,    setPTotal]    = useState(0);
+  const [pTotalPg,  setPTotalPg]  = useState(0);
+  const [pLoading,  setPLoading]  = useState(false);
+  const [pNoKey,    setPNoKey]    = useState(false);
+  const [pError,    setPError]    = useState<string|null>(null);
+  const pDebounce = useRef<number|null>(null);
 
   useEffect(() => {
     fetch(`/api/content/media?tenantType=${tenantType}&tenantId=${tenantId}`, {
@@ -1011,52 +999,79 @@ function ImagePickerModal({current,onSelect,onClose}:{
       .catch(()=>{}).finally(()=>setMediaLoading(false));
   }, [tenantType, tenantId]);
 
-  const fetchUnsplash = useCallback(async (q: string, pg: number, append = false) => {
-    setULoading(true); setUError(null);
+  // ── Upload handler ───────────────────────────────────────────────────────
+  const handleUpload = useCallback(async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setUploading(true); setUploadErr(null);
     try {
-      const res = await fetch(`/api/unsplash?q=${encodeURIComponent(q)}&page=${pg}`, {
+      for (const file of Array.from(files)) {
+        const form = new FormData();
+        form.append("file", file);
+        const res = await fetch(
+          `/api/content/media?tenantType=${tenantType}&tenantId=${tenantId}`,
+          { method: "POST", headers: getAuthHeaders(), body: form },
+        );
+        if (res.status === 401 || res.status === 403) { clearStoredToken(); window.location.replace("/login"); return; }
+        const data = await res.json();
+        if (!data.ok) { setUploadErr(data.error ?? "Upload failed"); continue; }
+        // Refresh media list and immediately pick the newly uploaded file
+        setMediaFiles(prev => {
+          const exists = prev.some(f => f.url === data.url);
+          return exists ? prev : [{ name: data.name, url: data.url }, ...prev];
+        });
+        pick(data.url);
+      }
+    } catch { setUploadErr("Network error — upload failed"); }
+    finally { setUploading(false); }
+  }, [tenantType, tenantId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Pexels ───────────────────────────────────────────────────────────────
+  const fetchPexels = useCallback(async (q: string, pg: number, append = false) => {
+    setPLoading(true); setPError(null);
+    try {
+      const res = await fetch(`/api/pexels?q=${encodeURIComponent(q)}&page=${pg}`, {
         headers: getAuthHeaders(),
       });
       if (res.status === 401 || res.status === 403) { clearStoredToken(); window.location.replace("/login"); return; }
       const data = await res.json();
       if (!data.ok) {
-        if (data.error?.includes("not configured")) setUNoKey(true);
-        else setUError(data.error ?? "Failed to load photos");
+        if (data.error?.includes("not configured")) setPNoKey(true);
+        else setPError(data.error ?? "Failed to load photos");
         return;
       }
-      setUNoKey(false);
-      setUPhotos(prev => append ? [...prev, ...data.photos] : data.photos);
-      setUTotal(data.total ?? 0);
-      setUTotalPg(data.totalPages ?? 0);
-      setUPage(pg);
-    } catch { setUError("Network error"); }
-    finally { setULoading(false); }
+      setPNoKey(false);
+      setPPhotos(prev => append ? [...prev, ...data.photos] : data.photos);
+      setPTotal(data.total ?? 0);
+      setPTotalPg(data.totalPages ?? 0);
+      setPPage(pg);
+    } catch { setPError("Network error"); }
+    finally { setPLoading(false); }
   }, []);
 
-  // Auto-search when Unsplash tab first opens
+  // Auto-search when Pexels tab first opens
   useEffect(() => {
-    if (tab === "unsplash" && uPhotos.length === 0 && !uLoading && !uNoKey) {
-      fetchUnsplash(uQuery, 1);
+    if (tab === "pexels" && pPhotos.length === 0 && !pLoading && !pNoKey) {
+      fetchPexels(pQuery, 1);
     }
   }, [tab]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Debounce re-search on query change
+  // Debounce re-search on query change (Pexels)
   useEffect(() => {
-    if (tab !== "unsplash") return;
-    if (uDebounce.current) clearTimeout(uDebounce.current);
-    uDebounce.current = window.setTimeout(() => {
-      setUPhotos([]);
-      fetchUnsplash(uQuery, 1);
+    if (tab !== "pexels") return;
+    if (pDebounce.current) clearTimeout(pDebounce.current);
+    pDebounce.current = window.setTimeout(() => {
+      setPPhotos([]);
+      fetchPexels(pQuery, 1);
     }, 400);
-    return () => { if(uDebounce.current) clearTimeout(uDebounce.current); };
-  }, [uQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => { if(pDebounce.current) clearTimeout(pDebounce.current); };
+  }, [pQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const pick = (url: string) => { onSelect(url); onClose(); };
 
   const TABS = [
-    { id:"media" as PickerTab, label:"My Media" },
-    { id:"stock" as PickerTab, label:"Stock" },
-    { id:"unsplash" as PickerTab, label:"🔍 Unsplash" },
+    { id:"media"  as PickerTab, label:"My Media" },
+    { id:"stock"  as PickerTab, label:"Stock" },
+    { id:"pexels" as PickerTab, label:"🔍 Pexels" },
   ];
 
   return (
@@ -1088,49 +1103,133 @@ function ImagePickerModal({current,onSelect,onClose}:{
           ))}
         </div>
 
-        {/* Unsplash search bar */}
-        {tab === "unsplash" && (
+        {/* Search bar — Pexels */}
+        {tab === "pexels" && (
           <div style={{padding:"10px 16px",borderBottom:`1px solid ${T.border}`,background:T.surface,flexShrink:0,display:"flex",gap:8}}>
             <div style={{position:"relative",flex:1}}>
               <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",color:T.textMute,fontSize:13,pointerEvents:"none"}}>⌕</span>
-              <input type="text" value={uQuery} onChange={e=>setUQuery(e.target.value)}
-                placeholder="Search Unsplash (e.g. doctor, hospital, healthcare)…"
-                style={{
-                  width:"100%",padding:"8px 10px 8px 28px",borderRadius:7,
-                  border:`1px solid ${T.borderMd}`,background:T.input,
-                  color:T.text,fontSize:13,outline:"none",fontFamily:"inherit",
-                  boxSizing:"border-box",
-                }}
+              <input type="text" value={pQuery} onChange={e=>setPQuery(e.target.value)}
+                placeholder="Search Pexels (e.g. doctor, hospital, healthcare)…"
+                style={{width:"100%",padding:"8px 10px 8px 28px",borderRadius:7,border:`1px solid ${T.borderMd}`,background:T.input,color:T.text,fontSize:13,outline:"none",fontFamily:"inherit",boxSizing:"border-box"}}
                 onFocus={e=>e.target.style.border=`1px solid ${T.borderFocus}`}
                 onBlur={e=>e.target.style.border=`1px solid ${T.borderMd}`}
               />
             </div>
-            {uTotal > 0 && <span style={{alignSelf:"center",fontSize:11,color:T.textMute,flexShrink:0}}>{uTotal.toLocaleString()} results</span>}
+            {pTotal > 0 && <span style={{alignSelf:"center",fontSize:11,color:T.textMute,flexShrink:0}}>{pTotal.toLocaleString()} results</span>}
           </div>
         )}
+
 
         {/* Grid */}
         <div style={{flex:1,overflowY:"auto",padding:14}}>
           {tab==="media" ? (
-            mediaLoading ? (
-              <LoadingSpinner T={T} label="Loading media…" />
-            ) : mediaFiles.length===0 ? (
-              <div style={{textAlign:"center",padding:"56px 20px"}}>
-                <div style={{fontSize:"36px",marginBottom:12,opacity:.5}}>📂</div>
-                <p style={{color:T.textSub,fontSize:"14px",margin:"0 0 6px",fontWeight:500}}>No images uploaded yet</p>
-                <p style={{color:T.textMute,fontSize:"15px",margin:0}}>
-                  Upload to: <code style={{background:T.surface,padding:"2px 6px",borderRadius:4,fontSize:"14px"}}>public/content/{tenantType}s/{tenantId}/</code>
-                </p>
+            <>
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                style={{display:"none"}}
+                onChange={e=>handleUpload(e.target.files)}
+              />
+              {/* Upload button row */}
+              <div
+                style={{marginBottom:12,display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}
+                onDragOver={e=>{e.preventDefault();(e.currentTarget as HTMLDivElement).style.background=`${T.accent}10`;}}
+                onDragLeave={e=>{(e.currentTarget as HTMLDivElement).style.background="";}}
+                onDrop={e=>{e.preventDefault();(e.currentTarget as HTMLDivElement).style.background="";handleUpload(e.dataTransfer.files);}}
+              >
+                <button
+                  onClick={()=>fileInputRef.current?.click()}
+                  disabled={uploading}
+                  style={{
+                    display:"flex",alignItems:"center",gap:6,
+                    padding:"7px 14px",borderRadius:5,border:`1px solid ${T.accent}`,
+                    background:`${T.accent}15`,color:T.accent,fontSize:"14px",fontWeight:600,
+                    cursor:uploading?"not-allowed":"pointer",fontFamily:"inherit",
+                    opacity:uploading?.6:1,transition:"all .12s",
+                  }}
+                  onMouseEnter={e=>{if(!uploading)(e.currentTarget as HTMLButtonElement).style.background=`${T.accent}25`;}}
+                  onMouseLeave={e=>{(e.currentTarget as HTMLButtonElement).style.background=`${T.accent}15`;}}
+                >
+                  {uploading ? "⏳ Uploading…" : "⬆ Upload image"}
+                </button>
+                <span style={{fontSize:"13px",color:T.textMute}}>or drag & drop here · jpg, png, webp, gif · max 10 MB</span>
+                {uploadErr && <span style={{fontSize:"13px",color:T.red,marginLeft:"auto"}}>{uploadErr}</span>}
               </div>
-            ) : (
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))",gap:8}}>
-                {mediaFiles.map(f=><ImageThumb key={f.url} url={f.url} label={f.name} selected={current===f.url} onClick={()=>pick(f.url)} />)}
-              </div>
-            )
+
+              {mediaLoading ? (
+                <LoadingSpinner T={T} label="Loading media…" />
+              ) : mediaFiles.length===0 ? (
+                <div style={{textAlign:"center",padding:"40px 20px",border:`1px dashed ${T.borderMd}`,borderRadius:8}}>
+                  <div style={{fontSize:"32px",marginBottom:10,opacity:.4}}>🖼️</div>
+                  <p style={{color:T.textSub,fontSize:"14px",margin:"0 0 4px",fontWeight:500}}>No images uploaded yet</p>
+                  <p style={{color:T.textMute,fontSize:"13px",margin:0}}>Use the button above, or drop files here</p>
+                </div>
+              ) : (
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))",gap:8}}>
+                  {mediaFiles.map(f=><ImageThumb key={f.url} url={f.url} label={f.name} selected={current===f.url} onClick={()=>pick(f.url)} />)}
+                </div>
+              )}
+            </>
           ) : tab==="stock" ? (
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))",gap:8}}>
               {STOCK_PHOTOS.map(p=><ImageThumb key={p.url} url={p.url} label={p.label} selected={current===p.url} onClick={()=>pick(p.url)} />)}
             </div>
+          ) : tab==="pexels" ? (
+            /* ── Pexels tab ── */
+            pNoKey ? (
+              <div style={{textAlign:"center",padding:"48px 24px",maxWidth:480,margin:"0 auto"}}>
+                <div style={{fontSize:32,marginBottom:12,opacity:.6}}>🔑</div>
+                <p style={{color:T.textSub,fontSize:"14px",fontWeight:500,margin:"0 0 8px"}}>Pexels API key not configured</p>
+                <p style={{color:T.textMute,fontSize:"15px",margin:"0 0 16px",lineHeight:1.6}}>
+                  Add your free Pexels API key to <code style={{background:T.surface,padding:"2px 6px",borderRadius:4,fontSize:"14px"}}>.env.local</code>:
+                </p>
+                <code style={{display:"block",background:T.surface,border:`1px solid ${T.borderMd}`,borderRadius:6,padding:"10px 14px",fontSize:"14px",color:T.accent,textAlign:"left",lineHeight:1.8,fontFamily:"'SF Mono',monospace"}}>
+                  PEXELS_API_KEY=your_api_key
+                </code>
+                <p style={{color:T.textMute,fontSize:"14px",marginTop:10}}>
+                  Get a free key at <a href="https://www.pexels.com/api/" target="_blank" rel="noreferrer" style={{color:T.accent}}>pexels.com/api</a> — no attribution required
+                </p>
+              </div>
+            ) : pError ? (
+              <div style={{textAlign:"center",padding:40,color:T.red,fontSize:13}}>{pError}</div>
+            ) : pLoading && pPhotos.length === 0 ? (
+              <LoadingSpinner T={T} label="Searching Pexels…" />
+            ) : pPhotos.length === 0 ? (
+              <div style={{textAlign:"center",padding:48,color:T.textMute,fontSize:13}}>No results for "{pQuery}"</div>
+            ) : (
+              <div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))",gap:8}}>
+                  {pPhotos.map(p=>(
+                    <button key={p.id} onClick={()=>pick(p.url)}
+                      title={p.description || p.credit}
+                      style={{padding:0,border:"none",background:"transparent",cursor:"pointer",borderRadius:7,overflow:"hidden",outline:current===p.url?`2.5px solid ${T.accent}`:"none",outlineOffset:2,display:"block",position:"relative"}}>
+                      <img src={p.thumb} alt={p.description || ""}
+                        style={{width:"100%",height:90,objectFit:"cover",display:"block",borderRadius:6}} loading="lazy" />
+                      <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"3px 5px",background:"rgba(0,0,0,.55)",fontSize:9,color:"rgba(255,255,255,.8)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                        📷 {p.credit}
+                      </div>
+                      {current===p.url && (
+                        <div style={{position:"absolute",top:5,right:5,width:18,height:18,borderRadius:"50%",background:T.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px",color:"white",fontWeight:700}}>✓</div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {pPage < pTotalPg && (
+                  <div style={{textAlign:"center",marginTop:16}}>
+                    <button onClick={()=>fetchPexels(pQuery,pPage+1,true)} disabled={pLoading}
+                      style={{padding:"7px 24px",borderRadius:4,border:`1px solid ${T.borderMd}`,background:"transparent",color:T.textSub,fontSize:11,fontWeight:600,cursor:pLoading?"default":"pointer",fontFamily:"inherit",opacity:pLoading?.65:1}}>
+                      {pLoading ? "Loading…" : `Load more (page ${pPage+1} of ${pTotalPg})`}
+                    </button>
+                  </div>
+                )}
+                <p style={{textAlign:"center",margin:"12px 0 0",fontSize:10,color:T.textDim}}>
+                  Photos from <a href="https://www.pexels.com" target="_blank" rel="noreferrer" style={{color:T.textMute}}>Pexels</a> · Free to use, no attribution required
+                </p>
+              </div>
+            )
           ) : (
             /* ── Unsplash tab ── */
             uNoKey ? (
@@ -1359,6 +1458,15 @@ function BlockCard({block,index,onChange,onRemove,onDragStart,onDragOver,onDragE
 function BlockForm({block,onChange,index,mode,pages}:{block:JsonObject;onChange:(v:JsonObject)=>void;index:number;mode:"content"|"presentation";pages?:string[]}) {
   const u = (k:string,v:any)=>onChange({...block,[k]:v});
   const tpl = block._template as string;
+
+  // ── Registry-driven editor component ──────────────────────────────────────
+  // If the block definition ships an explicit editorComponent, use it.
+  // Otherwise fall through to the built-in switch-case form below.
+  const def = registry.resolve(tpl);
+  if (def?.editorComponent) {
+    const EditorComp = def.editorComponent;
+    return <EditorComp block={block as any} onChange={onChange as any} mode={mode} pages={pages} />;
+  }
 
   if (mode==="presentation") {
     const variantOpts = BLOCK_VARIANTS[tpl] ?? [];
@@ -2662,7 +2770,7 @@ function FNavLinks({ label, value, onChange, pages, defaultType, hideType }: {
 }) {
   const T = useT();
   const dt = defaultType ?? "section";
-  const sections = Object.keys(blockTemplates).filter(k => !["header","footer"].includes(k));
+  const sections = registry.getAll().map(d => d.id).filter(k => !["header","footer"].includes(k));
   const dragIdx = useRef<number | null>(null);
   const [newIdx, setNewIdx] = useState<number | null>(null);
 

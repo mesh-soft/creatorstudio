@@ -293,3 +293,23 @@ export type StylePreset = {
     body: string;
   };
 };
+
+// ── Per-block type re-exports ─────────────────────────────────────────────
+// These are purely additive — no behavioral change.
+// Consumers can import per-block interfaces from this file or directly from
+// the block's own types.ts.
+export type { HeroBlock }         from "../blocks/hero/types";
+export type { ProfileBlock }      from "../blocks/profile/types";
+export type { ServicesBlock }     from "../blocks/services/types";
+export type { TimingsBlock }      from "../blocks/timings/types";
+export type { GalleryBlock }      from "../blocks/gallery/types";
+export type { FaqBlock }          from "../blocks/faq/types";
+export type { CtaBlock }          from "../blocks/cta/types";
+export type { TestimonialsBlock } from "../blocks/testimonials/types";
+export type { StatsBlock }        from "../blocks/stats/types";
+export type { TextBlock }         from "../blocks/text/types";
+export type { AwardsBlock }       from "../blocks/awards/types";
+export type { WhatsappBlock }     from "../blocks/whatsapp/types";
+export type { LocationBlock }     from "../blocks/location/types";
+export type { HeaderBlock }       from "../blocks/header/types";
+export type { FooterBlock }       from "../blocks/footer/types";
