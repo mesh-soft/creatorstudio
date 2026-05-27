@@ -10,6 +10,7 @@
 
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { verifyGemSignature } from "./hmac";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -166,4 +167,32 @@ export function requireAuth(req: NextRequest, options?: AuthOptions): AuthResult
   }
 
   return { ok: true, payload };
+}
+
+export function requireGemAuth(req: NextRequest, rawBody: string): AuthResult {
+  const secret = process.env.GEMINI_WEBHOOK_SECRET;
+  if (!secret)
+    return { ok: false, response: NextResponse.json({ error: "Gem auth not configured", details: [{ path: "", message: "GEMINI_WEBHOOK_SECRET env var not set" }] }, { status: 503 }) };
+
+  const valid = verifyGemSignature(
+    req.headers.get("x-gem-timestamp"),
+    req.headers.get("x-gem-signature"),
+    rawBody,
+  );
+
+  if (!valid)
+    return { ok: false, response: NextResponse.json({ error: "Invalid or expired Gem signature", details: [{ path: "", message: "HMAC signature mismatch or timestamp out of replay window" }] }, { status: 401 }) };
+
+  const now = Math.floor(Date.now() / 1000);
+  return {
+    ok: true,
+    payload: {
+      tenantId: "__gem__",
+      tenantType: "admin",
+      username: "gemini-gem",
+      role: "admin",
+      iat: now,
+      exp: now + 60,
+    },
+  };
 }

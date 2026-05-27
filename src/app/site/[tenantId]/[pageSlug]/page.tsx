@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getAllTenantPageParams, getTenantByPageSlug } from "@/platform/content";
 import { SiteRenderer } from "@/platform/SiteRenderer";
+import { isSiteExpired } from "@/lib/siteStatus";
+import { MaintenancePage } from "@/components/maintenance/MaintenancePage";
+import { ExpirationGuardPage } from "@/components/maintenance/ExpirationGuardPage";
 import { DevPreviewAutoRedirect } from "./DevPreviewAutoRedirect";
 
 type SitePageProps = {
@@ -49,12 +52,17 @@ export default async function SitePage({ params }: SitePageProps) {
     notFound();
   }
 
+  // Server-side safety: if already expired at build time, bake the maintenance page
+  if (isSiteExpired(tenant.subscription.validUntil, tenant.subscription.graceUntil)) {
+    return <MaintenancePage tenant={tenant} />;
+  }
+
   return (
-    <>
+    <ExpirationGuardPage tenant={tenant}>
       <Suspense fallback={null}>
         <DevPreviewAutoRedirect />
       </Suspense>
       <SiteRenderer tenant={tenant} />
-    </>
+    </ExpirationGuardPage>
   );
 }

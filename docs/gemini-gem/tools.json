@@ -1,0 +1,79 @@
+{
+  "function_declarations": [
+    {
+      "name": "list_tenants",
+      "description": "List all tenants (doctors and hospitals) currently in the platform.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "read_content",
+      "description": "Read the site configuration or a specific page for a tenant. Returns { site } or { site, page }.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "tenantType": { "type": "string", "enum": ["doctor", "hospital"], "description": "Type of tenant" },
+          "tenantId": { "type": "string", "description": "Tenant slug (e.g. dr-smith)" },
+          "pageSlug": { "type": "string", "description": "Optional. Page slug to read (e.g. home). Omit to read only site config." }
+        },
+        "required": ["tenantType", "tenantId"]
+      }
+    },
+    {
+      "name": "save_content",
+      "description": "Save (create or update) the site configuration or a page for a tenant. Always call read_content first to get current data, then modify and save.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "tenantType": { "type": "string", "enum": ["doctor", "hospital"], "description": "Type of tenant" },
+          "tenantId": { "type": "string", "description": "Tenant slug" },
+          "pageSlug": { "type": "string", "description": "Optional. Page slug to save (e.g. home). Omit to save site config." },
+          "data": { "type": "object", "description": "The full JSON object to write. For site config, include all settings. For page, include blocks and settings." }
+        },
+        "required": ["tenantType", "tenantId", "data"]
+      }
+    },
+    {
+      "name": "import_tenant",
+      "description": "Create a completely new tenant from AI-generated JSON. Accepts site.json and page JSON as strings. Returns previewUrl on success.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "site": { "type": "string", "description": "Full site.json as a JSON string. Must include tenantId, tenantType, status, subscription, domains, profile, business, presentation, header, seo." },
+          "pages": { "type": "string", "description": "Full page JSON as a JSON string. Can be a single page object or JSON array of pages. Must include blocks and settings arrays." }
+        },
+        "required": ["site", "pages"]
+      }
+    },
+    {
+      "name": "import_page",
+      "description": "Add or replace a single page on an existing tenant. Returns previewUrl on success.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "tenantId": { "type": "string", "description": "Existing tenant ID" },
+          "tenantType": { "type": "string", "enum": ["doctor", "hospital"], "description": "Type of tenant" },
+          "page": { "type": "string", "description": "Full page JSON as a JSON string. Must include blocks and settings arrays." },
+          "overwrite": { "type": "boolean", "description": "Whether to overwrite existing page with same slug. Default true." }
+        },
+        "required": ["tenantId", "tenantType", "page"]
+      }
+    },
+    {
+      "name": "search_photos",
+      "description": "Search for stock photos on Pexels. Use this to find images for doctor headshots, clinic interiors, hero backgrounds, etc.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "Search query (e.g. 'doctor portrait', 'hospital building', 'medical equipment')" },
+          "page": { "type": "integer", "description": "Page number starting from 1. Default 1." },
+          "per_page": { "type": "integer", "description": "Results per page. Default 20." }
+        },
+        "required": ["query"]
+      }
+    }
+  ]
+}

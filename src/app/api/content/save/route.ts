@@ -1,22 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getContentAdapter, resolveTenantDir } from "@/platform/contentAdapter";
-import { requireAuth } from "@/lib/token";
+import { requireAuth, requireGemAuth } from "@/lib/token";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const rawBody = await request.text();
+    let auth = requireAuth(request, { adminOnly: true });
+    if (!auth.ok) auth = requireGemAuth(request, rawBody);
+    if (!auth.ok) return auth.response;
+
+    const body = JSON.parse(rawBody);
     const { tenantType, tenantId, pageSlug, data } = body;
 
     if (!tenantType || !tenantId || !data) {
       return NextResponse.json(
-        { error: "tenantType, tenantId, and data required" },
+        { error: "tenantType, tenantId, and data required", details: [{ path: "", message: "Missing required fields" }] },
         { status: 400 },
       );
     }
-
-    // Token must belong to this tenant (or be an admin token)
-    const auth = requireAuth(request, { tenantId });
-    if (!auth.ok) return auth.response;
 
     const adapter   = await getContentAdapter();
     const tenantDir = resolveTenantDir(tenantType, tenantId);
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to save content", details: String(error) },
+      { error: "Failed to save content", details: [{ path: "", message: String(error) }] },
       { status: 500 },
     );
   }

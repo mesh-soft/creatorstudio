@@ -403,8 +403,8 @@ export default function ImportPage() {
       const res  = await fetch("/api/import/tenant", { method: "POST", headers: getAuthHeaders(), body: fd });
       const data = await res.json();
       if (!res.ok) {
-        const msg = data.validationErrors
-          ? `Validation: ${data.validationErrors.map((e: ValidationError) => `${e.path}: ${e.message}`).join("; ")}`
+        const msg = data.details
+          ? `Validation: ${data.details.map((e: ValidationError) => `${e.path}: ${e.message}`).join("; ")}`
           : data.error ?? "Import failed";
         throw new Error(msg);
       }
@@ -439,8 +439,8 @@ export default function ImportPage() {
       const res  = await fetch("/api/import/page", { method: "POST", headers: getAuthHeaders(), body: fd });
       const data = await res.json();
       if (!res.ok) {
-        const msg = data.validationErrors
-          ? `Validation: ${data.validationErrors.map((e: ValidationError) => `${e.path}: ${e.message}`).join("; ")}`
+        const msg = data.details
+          ? `Validation: ${data.details.map((e: ValidationError) => `${e.path}: ${e.message}`).join("; ")}`
           : data.error ?? "Failed";
         throw new Error(msg);
       }

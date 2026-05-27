@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getContentAdapter, resolveTenantDir } from "@/platform/contentAdapter";
-import { requireAuth } from "@/lib/token";
+import { requireAuth, requireGemAuth } from "@/lib/token";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -10,13 +10,13 @@ export async function GET(request: NextRequest) {
 
   if (!tenantType || !tenantId) {
     return NextResponse.json(
-      { error: "tenantType and tenantId required" },
+      { error: "tenantType and tenantId required", details: [{ path: "", message: "Missing query parameters" }] },
       { status: 400 },
     );
   }
 
-  // Token must belong to this tenant (or be an admin token)
-  const auth = requireAuth(request, { tenantId });
+  let auth = requireAuth(request, { tenantId });
+  if (!auth.ok) auth = requireGemAuth(request, "");
   if (!auth.ok) return auth.response;
 
   const adapter    = await getContentAdapter();
@@ -36,6 +36,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ site });
   } catch {
-    return NextResponse.json({ error: "Content not found" }, { status: 404 });
+    return NextResponse.json({ error: "Content not found", details: [{ path: "", message: "Tenant or page does not exist" }] }, { status: 404 });
   }
 }

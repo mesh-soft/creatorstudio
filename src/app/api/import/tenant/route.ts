@@ -1,25 +1,7 @@
-/**
- * POST /api/import/tenant  (multipart/form-data)
- *
- * Superadmin-only. Creates a new tenant from AI-generated JSON + optional images.
- *
- * Form fields:
- *   site    string  — site.json content (JSON)
- *   pages   string  — home.json content (JSON). Can be a single object or a JSON array.
- *   image   File    — image files (repeat field for multiple). Saved to
- *                     public/content/{type}s/{tenantId}/ before JSON is written.
- *
- * Validation:
- *   • site and page JSON are validated against the platform schema.
- *   • Any /content/... image path referenced in the JSON must be satisfied by
- *     either an uploaded file in this request OR an existing file on disk.
- *     The request is rejected (422) if any required image is missing.
- */
-
 import { NextRequest, NextResponse } from "next/server";
 import fs from "node:fs";
 import path from "node:path";
-import { requireAuth } from "@/lib/token";
+import { requireAuth, requireGemAuth } from "@/lib/token";
 import { getContentAdapter } from "@/platform/contentAdapter";
 import { wrapFlatSiteIntoSettings, isSiteSettingsDocument } from "@/platform/siteSettingsNormalize";
 import { validateSiteJson, validatePageJson, SLUG_RE } from "@/lib/importValidator";
@@ -29,22 +11,15 @@ const IMAGE_EXTS   = /\.(jpe?g|png|gif|webp|svg|avif)$/i;
 const MAX_IMG_BYTES = 10 * 1024 * 1024;
 const TYPE_DIR: Record<string, string> = { doctor: "doctors", hospital: "hospitals" };
 
-// Write a single image File to public/content/{typeDir}/{tenantId}/
 async function saveImage(file: File, typeDir: string, tenantId: string): Promise<string> {
-  const safeName = file.name
-    .normalize("NFC")
-    .replace(/[^\w.\- ]/g, "_")
-    .replace(/\s+/g, "_");
-
+  const safeName = file.name.normalize("NFC").replace(/[^\w.\- ]/g, "_").replace(/\s+/g, "_");
   const dir = path.join(process.cwd(), "public", "content", typeDir, tenantId);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-
   const buffer = Buffer.from(await file.arrayBuffer());
   fs.writeFileSync(path.join(dir, safeName), buffer);
   return `/content/${typeDir}/${tenantId}/${encodeURIComponent(safeName)}`;
 }
 
-// List files already on disk for a tenant (empty if tenant doesn't exist yet)
 function existingFilenames(typeDir: string, tenantId: string): string[] {
   const dir = path.join(process.cwd(), "public", "content", typeDir, tenantId);
   if (!fs.existsSync(dir)) return [];
@@ -52,15 +27,17 @@ function existingFilenames(typeDir: string, tenantId: string): string[] {
 }
 
 export async function POST(req: NextRequest) {
-  const auth = requireAuth(req, { adminOnly: true });
-  if (!auth.ok) return auth.response;
-
-  // ── Parse multipart form ───────────────────────────────────────────────
+  // ── Auth: HMAC path requires reading raw body before FormData ────────────
   let form: FormData;
-  try {
+  if (req.headers.has("x-gem-signature")) {
+    const rawBody = await req.text();
+    const auth = requireGemAuth(req, rawBody);
+    if (!auth.ok) return auth.response;
+    form = await new Request(req.url, { method: "POST", headers: req.headers, body: rawBody }).formData();
+  } else {
+    const auth = requireAuth(req, { adminOnly: true });
+    if (!auth.ok) return auth.response;
     form = await req.formData();
-  } catch {
-    return NextResponse.json({ error: "Expected multipart/form-data body" }, { status: 400 });
   }
 
   // ── Extract fields ─────────────────────────────────────────────────────
@@ -68,10 +45,10 @@ export async function POST(req: NextRequest) {
   const pagesRaw = form.get("pages") as string | null;
 
   if (!siteRaw?.trim()) {
-    return NextResponse.json({ error: "Form field `site` (JSON string) is required" }, { status: 400 });
+    return NextResponse.json({ error: "Form field `site` (JSON string) is required", details: [{ path: "site", message: "Missing" }] }, { status: 400 });
   }
   if (!pagesRaw?.trim()) {
-    return NextResponse.json({ error: "Form field `pages` (JSON string) is required" }, { status: 400 });
+    return NextResponse.json({ error: "Form field `pages` (JSON string) is required", details: [{ path: "pages", message: "Missing" }] }, { status: 400 });
   }
 
   // ── Parse JSON ─────────────────────────────────────────────────────────
@@ -82,7 +59,7 @@ export async function POST(req: NextRequest) {
     site = JSON.parse(siteRaw);
     if (!site || typeof site !== "object" || Array.isArray(site)) throw new Error("site must be a JSON object");
   } catch (err) {
-    return NextResponse.json({ error: `site JSON parse error: ${(err as Error).message}` }, { status: 400 });
+    return NextResponse.json({ error: "site JSON parse error", details: [{ path: "site", message: (err as Error).message }] }, { status: 400 });
   }
 
   try {
@@ -90,7 +67,7 @@ export async function POST(req: NextRequest) {
     pagesInput = Array.isArray(raw) ? raw : [raw];
     if (pagesInput.length === 0) throw new Error("pages must not be empty");
   } catch (err) {
-    return NextResponse.json({ error: `pages JSON parse error: ${(err as Error).message}` }, { status: 400 });
+    return NextResponse.json({ error: "pages JSON parse error", details: [{ path: "pages", message: (err as Error).message }] }, { status: 400 });
   }
 
   // ── Schema validation ──────────────────────────────────────────────────
@@ -103,15 +80,12 @@ export async function POST(req: NextRequest) {
   const allErrors = [
     ...siteValidation.errors.map(er => ({ ...er, source: "site.json" })),
     ...pageValidations.flatMap(({ index, result }) =>
-      result.errors.map(er => ({ ...er, source: `pages[${index}]`, path: er.path }))
+      result.errors.map(er => ({ ...er, source: `pages[${index}]` }))
     ),
   ];
 
   if (allErrors.length > 0) {
-    return NextResponse.json(
-      { error: "JSON validation failed", validationErrors: allErrors },
-      { status: 422 },
-    );
+    return NextResponse.json({ error: "JSON validation failed", details: allErrors }, { status: 422 });
   }
 
   // ── Collect uploaded image files ───────────────────────────────────────
@@ -133,7 +107,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (imageErrors.length > 0) {
-    return NextResponse.json({ error: "Invalid image files", imageErrors }, { status: 400 });
+    return NextResponse.json({ error: "Invalid image files", details: imageErrors.map(m => ({ path: "", message: m })) }, { status: 400 });
   }
 
   // ── Image audit ────────────────────────────────────────────────────────
@@ -146,17 +120,11 @@ export async function POST(req: NextRequest) {
   const audit      = auditImages(allJsonData, validImages, existing);
 
   if (audit.missing.length > 0) {
-    return NextResponse.json(
-      {
-        error: "Missing image files",
-        message: `The JSON references ${audit.missing.length} image(s) that were not uploaded and do not exist on disk. Upload them with the form or use external URLs.`,
-        missingImages: audit.missing.map(imgPath => ({
-          path: imgPath,
-          filename: filenameFromPath(imgPath),
-        })),
-      },
-      { status: 422 },
-    );
+    return NextResponse.json({
+      error: "Missing image files",
+      message: `The JSON references ${audit.missing.length} image(s) that were not uploaded and do not exist on disk. Upload them with the form or use external URLs.`,
+      details: audit.missing.map(imgPath => ({ path: imgPath, message: `Missing: ${filenameFromPath(imgPath)}` })),
+    }, { status: 422 });
   }
 
   // ── Write images ───────────────────────────────────────────────────────
@@ -183,14 +151,21 @@ export async function POST(req: NextRequest) {
     const urlSettings = settingsArr.find(
       (s: unknown) => s && typeof s === "object" && (s as Record<string, unknown>)._template === "urlSettings",
     ) as Record<string, unknown> | undefined;
-
     const slug = String(urlSettings?.slug ?? (page as Record<string, unknown>).slug ?? "home").trim();
-    if (!SLUG_RE.test(slug)) continue; // validator already caught this
+    if (!SLUG_RE.test(slug)) continue;
 
     const pagePath = `${baseDir}/${tenantId}/pages/${slug}.json`;
     await adapter.write(pagePath, JSON.stringify(page, null, 2));
     written.push(pagePath);
   }
+
+  const firstPageSlug = (() => {
+    const p = pagesInput[0];
+    if (!p) return "home";
+    const sa = Array.isArray(p.settings) ? p.settings : [];
+    const us = sa.find((s: unknown) => s && typeof s === "object" && (s as any)._template === "urlSettings") as any;
+    return us?.slug ?? (p as any).slug ?? "home";
+  })();
 
   return NextResponse.json({
     success: true,
@@ -198,5 +173,6 @@ export async function POST(req: NextRequest) {
     tenantType,
     paths: written,
     uploadedImages: uploadedUrls,
+    previewUrl: `/site/${tenantId}/${firstPageSlug}/preview`,
   });
 }

@@ -9,15 +9,24 @@ const STORAGE_KEY = "ds_auth_token";
 // ── Token storage ─────────────────────────────────────────────────────────────
 
 export function setStoredToken(token: string): void {
-  try { localStorage.setItem(STORAGE_KEY, token); } catch {}
+  try {
+    localStorage.setItem(STORAGE_KEY, token);
+    // Also set as cookie for middleware access (server-side auth check)
+    const payload = parseTokenPayload(token);
+    const maxAge = payload ? Math.max(0, payload.exp - Math.floor(Date.now() / 1000)) : 86400;
+    document.cookie = `${STORAGE_KEY}=${token}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  } catch {}
+}
+
+export function clearStoredToken(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    document.cookie = `${STORAGE_KEY}=; path=/; max-age=0`;
+  } catch {}
 }
 
 export function getStoredToken(): string | null {
   try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
-}
-
-export function clearStoredToken(): void {
-  try { localStorage.removeItem(STORAGE_KEY); } catch {}
 }
 
 // ── Decode payload (NO signature check — server does that) ────────────────────
