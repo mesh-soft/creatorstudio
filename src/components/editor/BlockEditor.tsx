@@ -911,7 +911,7 @@ function SiteSettingsDrawer({site,onChange,onSave,saving,saved,onClose,pages,lay
         position:"fixed", top:48, right:0, bottom:0,
         width: layout==="tabs" ? "min(624px,100vw)" : "min(504px,100vw)",
         minWidth: layout==="tabs" ? 456 : undefined,
-        background:T.bg, borderLeft:`1px solid ${T.borderMd}`,
+        background:T.surface, borderLeft:`1px solid ${T.borderMd}`,
         zIndex:500, display:"flex", flexDirection:"column",
         boxShadow:"-8px 0 32px rgba(0,0,0,.45)",
         fontFamily:"'Salesforce Sans','Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif",
@@ -946,8 +946,10 @@ function SiteSettingsDrawer({site,onChange,onSave,saving,saved,onClose,pages,lay
                 const active = s.key === activeTab;
                 return (
                   <button key={s.key} onClick={() => setActiveTab(s.key)} style={{
-                    padding:"9px 14px", border:"none", borderBottom: active ? `2px solid ${T.accent}` : "2px solid transparent",
-                    background:"transparent", color: active ? T.accent : T.textMute,
+                    padding:"9px 14px", border:"none",
+                    borderBottom: active ? `2px solid ${T.accent}` : "2px solid transparent",
+                    background:"transparent",
+                    color: active ? T.accent : T.textMute,
                     fontSize:"14px", fontWeight: active ? 600 : 400, letterSpacing: active ? ".2px" : "0",
                     cursor:"pointer", fontFamily:"inherit", whiteSpace:"nowrap", flexShrink:0,
                     transition:"color .12s, border-color .12s",
@@ -956,7 +958,7 @@ function SiteSettingsDrawer({site,onChange,onSave,saving,saved,onClose,pages,lay
               })}
             </div>
             {/* Active tab content */}
-            <div style={{flex:1,overflowY:"auto",padding:"16px 16px 40px",display:"flex",flexDirection:"column",gap:14}}>
+            <div style={{flex:1,overflowY:"auto",padding:"12px 14px 40px 17px",display:"flex",flexDirection:"column",gap:12,background:T.bg,borderLeft:`3px solid ${T.accent}`}}>
               <SiteSectionForm section={activeTab} getSetting={getSetting} updSetting={updSetting} pages={pages} />
             </div>
           </>
