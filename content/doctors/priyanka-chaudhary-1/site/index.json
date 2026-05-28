@@ -1,0 +1,88 @@
+{
+  "tenantId": "priyanka-chaudhary-1",
+  "tenantType": "doctor",
+  "status": "active",
+  "settings": [
+    {
+      "_template": "subscription",
+      "plan": "monthly",
+      "billingCycle": "monthly",
+      "validFrom": "2026-05-28T15:17:22.267Z",
+      "validUntil": "2026-06-02T15:17:22.267Z",
+      "graceUntil": "2026-06-12T15:17:22.267Z",
+      "paymentStatus": "pending"
+    },
+    {
+      "_template": "domains",
+      "primary": "localhost:3000",
+      "aliases": []
+    },
+    {
+      "_template": "profile",
+      "displayName": "Dr Priyanka Chaudhary",
+      "specialty": "Healthcare Professional",
+      "degrees": [
+        "MBBS",
+        "MD"
+      ],
+      "registrationNumber": "DMC-65474",
+      "experienceYears": 15,
+      "bio": "Dr Priyanka Chaudhary is a dedicated healthcare professional with 15+ years of experience.",
+      "photo": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=300&q=80"
+    },
+    {
+      "_template": "business",
+      "clinicName": "Dr Priyanka Chaudhary Clinic",
+      "phone": "7976507388",
+      "whatsapp": "7976507388",
+      "email": "pinky1213ry@gmail.com",
+      "address": "123 Main Road, Near City Hospital, Delhi",
+      "mapUrl": "https://maps.google.com"
+    },
+    {
+      "_template": "presentation",
+      "themeId": "doctor-service-heavy",
+      "variantPresetId": "doctor-editorial",
+      "styleId": "doctor-slate-precision",
+      "style": {
+        "colors": {
+          "primary": "#0f766e",
+          "secondary": "#2563eb",
+          "accent": "#f59e0b",
+          "background": "#ffffff",
+          "surface": "#f8fafc",
+          "text": "#111827"
+        },
+        "shape": {
+          "radius": "8px"
+        },
+        "typography": {
+          "heading": "Inter, Arial, sans-serif",
+          "body": "Inter, Arial, sans-serif"
+        }
+      }
+    },
+    {
+      "_template": "header",
+      "show": true,
+      "navLinks": [
+        "Services",
+        "About",
+        "Contact"
+      ]
+    },
+    {
+      "_template": "footer",
+      "show": true,
+      "copyright": "© 2026 Dr Priyanka Chaudhary. All rights reserved."
+    },
+    {
+      "_template": "seo",
+      "title": "Dr Priyanka Chaudhary — Healthcare Professional",
+      "description": "Book an appointment with Dr Priyanka Chaudhary at Dr Priyanka Chaudhary Clinic."
+    },
+    {
+      "_template": "analytics"
+    }
+  ]
+}
