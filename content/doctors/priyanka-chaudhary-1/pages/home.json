@@ -1,0 +1,111 @@
+{
+  "_template": "page",
+  "blocks": [
+    {
+      "_template": "hero",
+      "enabled": true,
+      "headline": "Welcome to Dr Priyanka Chaudhary Clinic",
+      "subheadline": "Expert healthcare with 15+ years of experience.",
+      "photo": "https://images.unsplash.com/photo-1587351021759-3e566b1afbb2?auto=format&fit=crop&w=900&q=80",
+      "buttons": [
+        {
+          "label": "Book Appointment",
+          "url": "#contact"
+        },
+        {
+          "label": "Call Now",
+          "url": "tel:7976507388"
+        }
+      ]
+    },
+    {
+      "_template": "services",
+      "enabled": true,
+      "kicker": "Our Services",
+      "title": "Comprehensive Medical Care",
+      "items": [
+        {
+          "title": "General Consultation",
+          "description": "Complete health checkup and diagnosis."
+        },
+        {
+          "title": "Follow-up Care",
+          "description": "Regular monitoring and medication management."
+        },
+        {
+          "title": "Preventive Care",
+          "description": "Stay ahead with regular screenings and health assessments."
+        }
+      ]
+    },
+    {
+      "_template": "cta",
+      "enabled": true,
+      "title": "Need Urgent Care?",
+      "body": "Schedule a priority appointment today. We're here to help you feel better, faster.",
+      "buttons": [
+        {
+          "label": "Book Now",
+          "url": "#contact",
+          "variant": "primary"
+        }
+      ]
+    },
+    {
+      "_template": "testimonials",
+      "enabled": true,
+      "kicker": "Patient Stories",
+      "title": "What Our Patients Say",
+      "items": [
+        {
+          "quote": "Dr. ${name} is incredibly thorough. I've never felt more cared for by a medical professional. The follow-up care is outstanding.",
+          "author": "Rohit S."
+        },
+        {
+          "quote": "I was able to get an appointment the same day. The clinic is clean, modern, and the staff is wonderful. Highly recommended!",
+          "author": "Priya M."
+        }
+      ]
+    },
+    {
+      "_template": "location",
+      "enabled": true,
+      "kicker": "Visit Us",
+      "title": "Our Clinic",
+      "mapUrl": "https://maps.google.com",
+      "height": 400
+    },
+    {
+      "_template": "whatsapp",
+      "enabled": true,
+      "phone": "7976507388",
+      "message": "Hi, I'd like to book an appointment at Dr Priyanka Chaudhary Clinic.",
+      "label": "Chat with us"
+    },
+    {
+      "_template": "footer",
+      "enabled": true,
+      "copyright": "© 2026 Dr Priyanka Chaudhary. All rights reserved."
+    }
+  ],
+  "settings": [
+    {
+      "_template": "urlSettings",
+      "slug": "home",
+      "path": "/",
+      "title": "Home",
+      "isHome": true
+    },
+    {
+      "_template": "presentation",
+      "themeId": "doctor-service-heavy",
+      "variantPresetId": "doctor-editorial",
+      "styleId": "doctor-slate-precision"
+    },
+    {
+      "_template": "seo",
+      "title": "Dr Priyanka Chaudhary — Home",
+      "description": "Welcome to Dr Priyanka Chaudhary's clinic."
+    }
+  ]
+}
