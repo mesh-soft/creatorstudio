@@ -45,9 +45,9 @@
     },
     {
       "_template": "presentation",
-      "themeId": "doctor-standard",
-      "variantPresetId": "doctor-classic",
-      "styleId": "doctor-teal-clean",
+      "themeId": "doctor-service-heavy",
+      "variantPresetId": "hospital-standard",
+      "styleId": "hospital-green-trust",
       "style": {
         "colors": {
           "primary": "#0f766e",
